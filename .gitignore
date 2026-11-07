@@ -1,0 +1,29 @@
+# 가상환경
+.venv/
+venv/
+env/
+
+# 환경변수·인증정보 (API 키, DB 비밀번호)
+.env
+.env.*
+!.env.example
+.streamlit/secrets.toml
+*.pem
+*.key
+
+# Python 캐시
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+.pytest_cache/
+
+# IDE·OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# 로그·임시 파일
+*.log
+*.tmp
