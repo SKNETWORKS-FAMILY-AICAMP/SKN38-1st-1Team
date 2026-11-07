@@ -1,114 +1,153 @@
-# 🚚 생활 물류·소형 화물 운송 중개 플랫폼 (서비스명 미정)
+# 🚚 생활 물류·소형 화물 운송 중개 플랫폼
 
-여성·1인 가구가 안심하고 이용할 수 있도록 소비자와 용달·화물차 기사를 연결하는 플랫폼입니다.
-SKN38 1st 1Team 프로젝트 (데이터 수집·전처리 → ERD 설계 → MySQL 구축 → Streamlit 구현)
 
-## 핵심 기능
+생활 속에서 발생하는 **소형 이사·단건 운송 수요와 개인 운송사업자를 연결하는 양면 플랫폼**입니다.
 
-| # | 기능 | 내용 |
-|---|------|------|
-| 1 | 운송 조건 입력 및 참고 운임 계산 | 출발지·도착지, 층수·엘리베이터, 물품 크기(S/M/L/XL)·수량, 희망 일시, 인력 옵션 → 거리·소요시간, 차량 추천, 예상 운임 |
-| 2 | 용달 기사·차량 조회 및 매칭 | 출발지 기준 기사 추천, 차량·평점·완료 건수·거리 표시, 지역별 화물차 현황 지도 |
-| 3 | 사전 확정 운임제 | 최종 운임 합의·저장, 일방적 추가요금 변경 제한, 조건 변경 시 양측 재동의 |
-| 4 | 투명 수수료 및 기사 정산 | 수수료율 공개, 확정 금액·수수료·기사 예상 정산액 표시 |
-| 5 | 여성·1인 가구 안심 운송 | 사업자 확인 배지, 확인 기사 우선 추천, 운송 상태 확인, 완료 후 평가 |
-| 6 | 예약 및 조회 | 로그인 없이 이름·전화번호로 예약, 예약번호 + 추가 확인으로 조회 |
-| 7 | FAQ | 요금 / 예약·취소 / 파손·분실 / 기사·안전 카테고리, 키워드 검색, 출처 링크 |
+소비자에게는 투명하고 편리한 운송 경험을, 기사에게는 효율적인 일감 확보와 업무 관리 환경을 제공합니다.
 
-## 기술 스택
+특히 여성·1인 가구가 안심하고 서비스를 이용할 수 있도록 **사전 확정 운임, 기사 정보 확인, 운송 상태 조회**를 핵심 기능으로 기획했습니다.
 
-Python · Pandas · MySQL · Streamlit · GitHub · 국토교통부 OpenAPI · 카카오 로컬 API(추후 검토)
+## 🎯 프로젝트 목표
 
-## 폴더 구조
+- **합리적인 운송:** 운송 조건에 따른 차량 추천과 예상 운임 제공
+- **투명한 거래:** 소비자·기사 간 최종 운임 사전 합의 및 추가요금 분쟁 예방
+- **안심 서비스:** 기사 정보 및 운송 진행 상태 확인
+- **효율적인 중개:** 기사 매칭과 수수료·정산 정보 제공
+- **공공데이터 활용:** 지역별 영업용 화물차 등록 현황 시각화
+
+## 🛠️ 핵심 기능
+
+| 기능 | 주요 내용 |
+|---|---|
+| 📦 운송 신청 및 운임 계산 | 출발·도착지, 층수, 엘리베이터, 물품 크기·수량, 인력 옵션 등을 반영한 차량 추천 및 예상 운임 |
+| 🚚 기사·차량 조회 및 매칭 | 출발지 기준 기사 추천, 차량 종류·평점·완료 건수 조회 |
+| 🤝 사전 확정 운임제 | 최종 운임과 작업 조건 사전 합의, 조건 변경 시 재동의 |
+| 💰 수수료 및 정산 | 플랫폼 수수료율, 운송 확정 금액, 기사 예상 정산액 공개 |
+| 🛡️ 안심 운송 | 사업자 확인 정보, 운송 상태 조회, 운송 완료 후 평가 |
+| 📋 예약 및 조회 | 로그인 없이 예약 신청, 예약번호 발급 및 추가 본인 확인 후 조회 |
+| ❓ FAQ | 요금·예약·취소·파손·분실·안전 관련 안내 및 검색 |
+| 🗺️ 화물차 현황 지도 | 국토교통부 공공데이터 기반 지역별 영업용 화물차 등록대수 시각화 |
+
+※ 위 내용은 구현 목표이며, 개발 상황에 따라 일부 기능이 변경될 수 있습니다.
+
+## 💻 기술 스택
+
+| 구분 | 기술 |
+|---|---|
+| Language | Python |
+| Data Processing | Pandas |
+| Database | MySQL |
+| Web Application | Streamlit |
+| Visualization | Plotly |
+| Public Data | 국토교통부 통계누리 OpenAPI |
+| External API | 카카오 로컬 API (도입 검토) |
+| Collaboration | Git, GitHub |
+
+## 🗂️ 프로젝트 폴더 구조
 
 ```text
 SKN38-1st-1Team/
-├── app.py                 # Streamlit 메인 페이지
-├── pages/                 # 기능별 페이지 (팀원별 담당)
-│   ├── 1_Delivery_Request.py
-│   ├── 2_Driver_Matching.py
-│   ├── 3_Booking_Lookup.py
-│   ├── 4_Truck_Map.py
-│   └── 5_FAQ.py
-├── services/              # 공통 비즈니스 로직 (운임 계산, 매칭, 운임 확정, 정산)
-├── data/
-│   ├── raw/               # 수집한 원본 공공데이터
-│   └── processed/         # Pandas 전처리 데이터
-├── scripts/               # OpenAPI 수집 및 전처리 코드
-├── sql/                   # MySQL 스키마·쿼리
-├── docs/                  # ERD, 데이터 출처, 기획 문서
-├── requirements.txt
-├── .env.example           # 환경변수 이름 예시 (실제 값 X)
+│
+├── app.py                    # Streamlit 메인 화면
+├── pages/                    # 기능별 화면
+│   ├── 1_Delivery_Request.py # 운송 신청 및 예상 운임
+│   ├── 2_Driver_Matching.py  # 기사·차량 조회 및 매칭
+│   ├── 3_Booking_Lookup.py   # 예약 조회 및 운송 상태
+│   ├── 4_Truck_Map.py        # 지역별 화물차 현황
+│   └── 5_FAQ.py              # FAQ
+│
+├── services/                 # 운임 계산·매칭·정산 로직
+├── data/                     # 수집 및 전처리 데이터
+├── scripts/                  # 데이터 수집·전처리 코드
+├── sql/                      # MySQL 관련 파일
+├── docs/                     # ERD 및 프로젝트 문서
+│
+├── requirements.txt          # Python 라이브러리 목록
+├── .env.example              # 환경변수 예시
+├── .gitignore                # Git 업로드 제외 설정
 └── README.md
 ```
 
-## 팀원별 담당
+## 📊 데이터 및 ERD
 
-| 파일 | 담당 |
-|------|------|
-| `app.py` | (미정) |
-| `pages/1_Delivery_Request.py` · `services/fare.py` | (미정) |
-| `pages/2_Driver_Matching.py` · `services/matching.py`, `agreement.py`, `settlement.py` | (미정) |
-| `pages/3_Booking_Lookup.py` | (미정) |
-| `pages/4_Truck_Map.py` · `scripts/` | (미정) |
-| `pages/5_FAQ.py` | (미정) |
+### 데이터 활용
 
-> main 브랜치 하나에서 작업하므로 **자기 담당 파일만 수정**하고, 작업 전 항상 `git pull`을 먼저 실행해 주세요.
+- **국토교통부 자동차등록현황보고:** 지역별 영업용 화물차 등록 통계
+- **운송 요금 기준:** 차종·거리·적재량·인력 옵션별 참고 운임
+- **서비스 운영 데이터:** 기사·차량 정보, 운송 요청, 예약 및 정산
+- **FAQ:** 서비스 이용 안내 및 관련 외부 자료
 
-## 실행 방법
+공공데이터는 Python/Pandas로 수집·전처리하고 MySQL에 저장하여 Streamlit에서 활용할 계획입니다.
 
-Python 3.13 기준 (3.10 이상 권장)
+공공데이터의 영업용 화물차 등록대수와 플랫폼 내 실제 이용 가능 기사 수는 구분하여 표시합니다.
 
-### 1. 저장소 Clone
+### ERD
+
+
+
+![ERD](docs/erd.png)
+
+
+## 🚀 실행 방법
+
+### 1. GitHub 저장소 Clone
 
 ```bash
 git clone https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN38-1st-1Team.git
 cd SKN38-1st-1Team
 ```
 
+또는 VS Code에서 `Clone Git Repository`를 이용합니다.
+
 ### 2. 가상환경 생성 및 활성화
 
-```bash
-# Windows (PowerShell)
+Windows PowerShell 기준:
+
+```powershell
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
-
-# macOS / Linux
-python3 -m venv .venv
-source .venv/bin/activate
 ```
 
-> PowerShell에서 실행 정책 오류가 나면: `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`
+### 3. 라이브러리 설치
 
-### 3. 패키지 설치
-
-```bash
-python -m pip install --upgrade pip
-pip install -r requirements.txt
+```powershell
+python -m pip install -r requirements.txt
 ```
 
 ### 4. 환경변수 설정
 
-`.env.example`을 복사해 `.env`를 만들고 값을 입력합니다. (`.env`는 GitHub에 올라가지 않습니다)
+`.env.example`을 복사해 `.env`를 만들고 필요한 API 키와 DB 연결 정보를 입력합니다.
 
-```bash
-# Windows
-copy .env.example .env
-# macOS / Linux
-cp .env.example .env
+```powershell
+Copy-Item .env.example .env
 ```
+
+`.env`는 GitHub에 업로드하지 않습니다.
 
 ### 5. Streamlit 실행
 
-```bash
+```powershell
 python -m streamlit run app.py
 ```
 
-브라우저에서 http://localhost:8501 이 열립니다.
+접속 주소: http://localhost:8501
 
-## 협업 규칙
+## 🤝 GitHub 협업
 
-- 작업 시작 전 `git pull`, 작업 후 담당 파일만 `git add` → `commit` → `push`
-- `.env`, `.venv/`, API 키, DB 비밀번호는 절대 커밋하지 않기
-- 새 패키지를 추가하면 `requirements.txt`에 반영하고 팀원에게 공유
-- 페이지에는 화면 코드만, 계산·조회 로직은 `services/`에 작성
+팀원 4명이 `main` 브랜치를 기준으로 기능별 파일을 분담하여 개발합니다.
+
+**작업 순서:** `Pull → 개발 → Commit → Pull → Push`
+
+- 작업 전 최신 코드 Pull
+- 담당 파일 위주로 수정
+- 공통 파일 수정 시 팀원에게 공유
+- API 키, DB 비밀번호, `.env`, `.venv` 업로드 금지
+- 충돌 발생 시 강제 Push 금지
+
+### 팀 GitHub
+
+https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN38-1st-1Team
+
+---
+
+**SK Networks Family AI Camp · SKN38 1st Project · 1Team**
