@@ -10,6 +10,8 @@
 | `scripts/run_update_registration.bat` | Windows 작업 스케줄러용 실행 파일 |
 | `sql/registration_queries.sql` | 지도 페이지용 조회 SQL |
 | `sql/registration_stats_unique.sql` | (권장) 중복 방지 UNIQUE 인덱스 |
+| `services/truck_stats.py` · `services/truck_map.py` | 화면용 조회·버블 지도 (5장) |
+| `data/processed/sido_bubble_points.csv` | 버블 지도 시도 대표 좌표 (6장) |
 
 ## 1. API 확인 결과 (2026-11-08 실제 호출)
 
@@ -122,45 +124,58 @@ schtasks /Create /TN "SKN38_UpdateRegistration" /SC MONTHLY /D 20 /ST 10:00 /TR 
 
 ⚠️ 로컬 MySQL을 쓰는 경우, 실행 시각에 **PC가 켜져 있고 MySQL 서비스가 실행 중**이어야 합니다. 꺼져 있으면 실패 로그만 남고, 다음 실행 때 다시 시도합니다.
 
-## 5. 지도 페이지(`pages/4_Truck_Map.py`)에서 사용하는 방법
+## 5. 화면에서 사용하는 방법 (현재 구현)
 
-`sql/registration_queries.sql`의 2번(시도별) 또는 3번(시군구별) 쿼리를 사용하세요.
+저장된 통계는 Streamlit 화면에서 아래 구조로 사용합니다.
+
+| 파일 | 역할 |
+|---|---|
+| `services/db.py` | `.env`의 `DB_*` 값으로 MySQL 연결 (`get_connection()`), 실패 시 `DBConnectionError` |
+| `services/truck_stats.py` | `sql/registration_queries.sql`의 쿼리 4개를 그대로 읽어 실행 (`load_truck_stats()`), 1시간 캐시 |
+| `services/truck_map.py` | 시도별 버블 지도 생성 (pydeck), 대표 좌표와 DB 시도명 매칭 검증 |
+| `pages/4_Truck_Map.py` | 지역별 화물차 현황 화면 (버블 지도 · 시도 선택 · 시군구 상세 · 출처) |
+| `pages/0_Home.py` | 홈 화면의 시도별 버블 지도 미리보기 |
+
+`load_truck_stats()`가 돌려주는 값:
+
+| 키 | 내용 |
+|---|---|
+| `base_month` | 최신 기준월 (예: 2026-09-01) |
+| `sido` | 시도별 등록대수 (`sido_name`, `truck_count`) — 16행 |
+| `sigungu` | 시군구별 등록대수 (`sido_name`, `sigungu_name`, `truck_count` …) — 263행 |
+| `source` | 출처 (`dataset_name`, `provider`, `portal_url`, `base_month`, `retrieved_at`) |
 
 ```python
-import os
+from services.db import DBConnectionError
+from services.truck_stats import load_truck_stats
 
-import pandas as pd
-import pymysql
-import streamlit as st
-from dotenv import load_dotenv
-
-load_dotenv()
-
-QUERY_SIDO = """
-SELECT r.sido_name, SUM(s.vehicle_count) AS truck_count, s.base_month
-FROM registration_stats s
-JOIN regions r ON r.region_id = s.region_id
-WHERE s.vehicle_kind = '화물' AND s.usage_type = '영업용'
-  AND s.base_month = (SELECT MAX(base_month) FROM registration_stats
-                      WHERE vehicle_kind = '화물' AND usage_type = '영업용')
-GROUP BY r.sido_name, s.base_month
-ORDER BY truck_count DESC
-"""
-
-@st.cache_data(ttl=3600)
-def load_truck_counts_by_sido() -> pd.DataFrame:
-    conn = pymysql.connect(
-        host=os.getenv("DB_HOST"), port=int(os.getenv("DB_PORT", 3306)),
-        user=os.getenv("DB_USER"), password=os.getenv("DB_PASSWORD"),
-        database=os.getenv("DB_NAME"), charset="utf8mb4",
-    )
-    try:
-        with conn.cursor(pymysql.cursors.DictCursor) as cur:
-            cur.execute(QUERY_SIDO)
-            return pd.DataFrame(cur.fetchall())
-    finally:
-        conn.close()
+try:
+    stats = load_truck_stats()
+    sido = stats["sido"]          # pandas DataFrame
+except DBConnectionError as e:
+    st.error(str(e))
 ```
 
-- 화면에는 **"영업용 화물차 등록대수(국토교통부, 기준월 YYYY-MM)"**와 **"플랫폼 이용 가능 기사 수(drivers)"**를 서로 다른 지표로 구분해 표시해야 합니다.
-- 출처 문구에는 4번 쿼리 결과(`dataset_name`, `provider`, `portal_url`, `base_month`)를 사용할 수 있습니다.
+- 월별 통계이므로 결과를 1시간 캐시합니다. 화면을 다시 그릴 때마다 DB에 접속하지 않습니다.
+- 새 기준월을 적재한 직후 화면에 바로 반영하려면 Streamlit 서버를 다시 시작합니다.
+
+### 표시 원칙
+
+- 화면에는 **"영업용 화물차 등록대수(국토교통부, 기준월)"**와 **"플랫폼 이용 가능 기사 수(drivers)"**를 서로 다른 지표로 구분해 표시합니다.
+- 월별 **등록** 통계이므로 실시간 운행 차량 수라고 표시하지 않습니다 (화면 안내 문구 `DATA_NOTE`).
+- DB에 없는 수치(예: 1톤 이하 등록대수·비율)는 만들어 표시하지 않습니다.
+
+## 6. 버블 지도 대표 좌표
+
+| 항목 | 내용 |
+|---|---|
+| 파일 | `data/processed/sido_bubble_points.csv` (시도 16행: `sido_name`, `lon`, `lat`, `sgis_sido_nm`, `edge_distance_km`) |
+| 출처 | 국가데이터처 SGIS 센서스용 행정구역경계(시도) `bnd_sido_00_2025_2Q` (2025-06-30 기준) |
+| 계산 방법 | 각 시도 본토(가장 큰 조각) 안에서 **경계에서 가장 먼 지점**(pole of inaccessibility, 허용오차 100m)을 구해 WGS84로 변환 |
+| 광주·전남 | 2026-07 통합을 반영해 광주광역시 + 전라남도 경계를 합친 뒤 '전남광주' 한 점으로 계산 (두 경계 겹침 0, 면적 합 일치 확인) |
+| 검증 | 원본 경계 기준으로 16개 점이 모두 **자기 시도 안**에 있고 다른 시도와 겹치지 않음을 확인 |
+
+- 버블은 시도 통계를 대표 위치에 표시한 것이며, 지역 전체 범위나 차량의 실제 위치가 아닙니다.
+- 버블 **면적**이 등록대수에 비례합니다 (반지름 ∝ √등록대수).
+- 원본 경계 파일(SHP, 269MB)은 GitHub 용량 제한 때문에 좌표 계산 후 삭제했습니다. 좌표를 다시 계산하려면 SGIS(https://sgis.mods.go.kr)에서 로그인 후 「센서스용 행정구역경계(시도)」를 신청해 받아야 합니다.
+- 시도 구성이 바뀌면(행정구역 개편 등) 좌표 파일과 DB 시도명이 맞지 않게 되며, 이때 화면은 지도 대신 막대그래프로 표시합니다.
