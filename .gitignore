@@ -27,3 +27,6 @@ desktop.ini
 # 로그·임시 파일
 *.log
 *.tmp
+
+# 대용량 원본 압축 파일 (GitHub 100MB 제한)
+data/raw/*.zip
