@@ -1,0 +1,32 @@
+# 짐니(JIMNI) 공통 디자인 — 색상·글꼴·크기·모서리는 이 파일 한곳에서 관리합니다.
+# (CSS로만 가능한 호버 효과 등은 services/ui.py)
+
+[theme]
+base = "light"
+primaryColor = "#2563EB"            # 메인 블루
+backgroundColor = "#FFFFFF"         # 배경 화이트
+secondaryBackgroundColor = "#F5F7FB" # 카드·입력창 배경
+textColor = "#282529"               # 기본 글자색 (완전 블랙 사용 안 함)
+linkColor = "#2563EB"
+borderColor = "#E3E8F2"
+blueColor = "#2563EB"
+violetColor = "#3A3368"             # 서브 퍼플
+yellowColor = "#FBB71D"             # 포인트 옐로우
+
+# Pretendard (본문 Medium 500)
+font = "Pretendard:https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.min.css, sans-serif"
+headingFont = "Pretendard:https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.min.css, sans-serif"
+baseFontSize = 16                   # 기본 본문 16px
+baseFontWeight = 500
+headingFontSizes = ["32px", "24px", "20px", "18px", "16px", "14px"]  # 타이틀 32 / 24 / 20
+headingFontWeights = [700, 700, 700, 600, 600, 600]
+metricValueFontSize = "24px"
+
+# 둥근 플랫 디자인
+baseRadius = "12px"
+buttonRadius = "12px"
+showWidgetBorder = true
+chartCategoricalColors = ["#2563EB", "#3A3368", "#FBB71D", "#111F3F"]
+
+[client]
+toolbarMode = "minimal"             # 헤더에서 개발용 메뉴(Deploy 등) 숨김

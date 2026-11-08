@@ -9,13 +9,15 @@ import streamlit as st
 
 from services import booking_lookup as bl
 from services.db import DBConnectionError, get_connection
+from services.ui import status_stepper
 
 AUTH_KEY = "lookup_auth"  # {"booking_id": int, "phone": str} — 확인에 성공한 조회 조건
 
 st.title("예약 조회")
 
+st.caption("예약번호와 예약할 때 입력한 연락처로 예약 내용과 운송 상태를 확인할 수 있어요.")
 with st.form("lookup_form"):
-    booking_no = st.text_input("예약번호", max_chars=18)
+    booking_no = st.text_input("예약번호", max_chars=18, placeholder="예약번호를 입력하세요")
     phone = st.text_input("예약자 연락처", max_chars=20, placeholder="예약할 때 입력한 연락처")
     submitted = st.form_submit_button("조회하기", type="primary")
 
@@ -46,71 +48,74 @@ if booking is None:
     st.session_state.pop(AUTH_KEY, None)
     st.stop()
 
-# ── 예약 상세 ─────────────────────────────────────────────────────────
-st.subheader("예약 정보")
-c1, c2, c3 = st.columns(3)
-c1.metric("예약번호", str(booking["booking_id"]))
-c2.metric("예약 일시", f"{booking['scheduled_at']:%Y-%m-%d %H:%M}" if booking["scheduled_at"] else "-")
-c3.metric("예상 운임", f"{booking['estimated_fare']:,}원" if booking["estimated_fare"] is not None else "-")
-st.write(f"**출발지** {booking['origin_address']}")
-st.write(f"**도착지** {booking['dest_address']}")
+# ── 예약 정보 ─────────────────────────────────────────────────────────
+def info_row(label: str, value: str) -> None:
+    a, b = st.columns([1, 3])
+    a.caption(label)
+    b.markdown(value)
 
-st.subheader("배정 기사 · 차량")
-if booking["driver_id"] is None:
-    st.info("아직 배정된 기사가 없습니다.")
-else:
-    verified = booking["verification_status"] == "VERIFIED"
-    st.write(f"**기사** {booking['driver_name']}" + (" · 사업자 확인 완료" if verified else ""))
-st.write(f"**차량 종류** {booking['vehicle_type'] or '정보 없음'}")
+
+with st.container(border=True):
+    st.subheader("예약 정보")
+    info_row("예약번호", f"**{booking['booking_id']}**")
+    info_row("출발지", booking["origin_address"])
+    info_row("도착지", booking["dest_address"])
+    info_row("예약 일시", f"{booking['scheduled_at']:%Y-%m-%d %H:%M}" if booking["scheduled_at"] else "-")
+    if booking["driver_id"] is None:
+        st.info("아직 배정된 기사가 없습니다.")
+    else:
+        verified = booking["verification_status"] == "VERIFIED"
+        info_row("기사님", booking["driver_name"] + (" · 사업자 확인 완료" if verified else ""))
+    info_row("차량 종류", booking["vehicle_type"] or "정보 없음")
+    info_row("예상 운임", f"**{booking['estimated_fare']:,}원**" if booking["estimated_fare"] is not None else "-")
 
 # ── 운송 상태 ─────────────────────────────────────────────────────────
-st.subheader("운송 상태")
 status = (booking["status"] or "").strip().upper()
-if not status:
-    st.warning("운송 상태 정보가 없습니다. 고객센터에 문의해 주세요.")
-elif status == "CANCELLED":
-    st.warning("취소된 예약입니다.")
-elif status not in bl.STATUS_FLOW:
-    st.warning(f"확인되지 않은 운송 상태입니다. ({status})")
-else:
-    step = bl.STATUS_FLOW.index(status)
-    cols = st.columns(len(bl.STATUS_FLOW))
-    for i, (col, code) in enumerate(zip(cols, bl.STATUS_FLOW)):
-        mark = "✅" if i < step else ("▶️" if i == step else "⬜")
-        col.write(f"{mark} {bl.STATUS_LABELS[code]}")
-    st.progress((step + 1) / len(bl.STATUS_FLOW), text=f"현재 상태: {bl.STATUS_LABELS[status]}")
-if booking["status_updated_at"]:
-    st.caption(f"상태 변경 시각: {booking['status_updated_at']:%Y-%m-%d %H:%M}")
-st.caption("실시간 기사 위치 추적은 제공하지 않습니다.")
+with st.container(border=True):
+    st.subheader("운송 상태")
+    if not status:
+        st.warning("운송 상태 정보가 없습니다. 고객센터에 문의해 주세요.")
+    elif status == "CANCELLED":
+        st.warning("취소된 예약입니다.")
+    elif status not in bl.STATUS_FLOW:
+        st.warning(f"확인되지 않은 운송 상태입니다. ({status})")
+    else:
+        step = bl.STATUS_FLOW.index(status)
+        status_stepper([bl.STATUS_LABELS[c] for c in bl.STATUS_FLOW], step)
+        st.caption(f"현재 상태: {bl.STATUS_LABELS[status]}")
+    if booking["status_updated_at"]:
+        st.caption(f"상태 변경 시각: {booking['status_updated_at']:%Y-%m-%d %H:%M}")
+    st.caption("실시간 기사 위치 추적은 제공하지 않습니다.")
 
 # ── 평가 ─────────────────────────────────────────────────────────────
-st.subheader("운송 평가")
-if status != "COMPLETED":
-    st.info("운송이 완료된 뒤 평가할 수 있습니다.")
-elif booking["rating"] is not None:
-    st.success(f"평가 완료: {booking['rating']}점")
-else:
-    with st.form("rating_form"):
-        rating = st.radio("평점", list(range(bl.RATING_MIN, bl.RATING_MAX + 1)), horizontal=True,
-                          index=None, format_func=lambda v: f"{v}점")
-        rated = st.form_submit_button("평가 저장")
-    if rated:
-        if rating is None:
-            st.error("평점을 선택해 주세요.")
-        else:
-            try:
-                with get_connection() as conn:
-                    result = bl.submit_rating(conn, auth["booking_id"], auth["phone"], int(rating))
-            except DBConnectionError as e:
-                st.error(str(e))
+with st.container(border=True):
+    st.subheader("이용 평가")
+    if status != "COMPLETED":
+        st.info("운송이 완료된 뒤 평가할 수 있습니다.")
+    elif booking["rating"] is not None:
+        st.success(f"평가 완료: {booking['rating']}점")
+    else:
+        with st.form("rating_form", border=False):
+            rating = st.radio("별점 평가", list(range(bl.RATING_MIN, bl.RATING_MAX + 1)), horizontal=True,
+                              index=None, format_func=lambda v: "★" * v + "☆" * (bl.RATING_MAX - v))
+            rated = st.form_submit_button("평가 제출하기", type="primary")
+        if rated:
+            if rating is None:
+                st.error("평점을 선택해 주세요.")
             else:
-                messages = {
-                    bl.SAVED: None,
-                    bl.ALREADY_RATED: "이미 평가한 예약입니다.",
-                    bl.NOT_COMPLETED: "운송이 완료된 예약만 평가할 수 있습니다.",
-                    bl.INVALID_RATING: "평점은 1~5점 사이로 선택해 주세요.",
-                    bl.NOT_FOUND: "예약 정보를 확인할 수 없습니다. 다시 조회해 주세요.",
-                }
-                if result == bl.SAVED:
-                    st.rerun()
-                st.error(messages[result])
+                try:
+                    with get_connection() as conn:
+                        result = bl.submit_rating(conn, auth["booking_id"], auth["phone"], int(rating))
+                except DBConnectionError as e:
+                    st.error(str(e))
+                else:
+                    messages = {
+                        bl.SAVED: None,
+                        bl.ALREADY_RATED: "이미 평가한 예약입니다.",
+                        bl.NOT_COMPLETED: "운송이 완료된 예약만 평가할 수 있습니다.",
+                        bl.INVALID_RATING: "평점은 1~5점 사이로 선택해 주세요.",
+                        bl.NOT_FOUND: "예약 정보를 확인할 수 없습니다. 다시 조회해 주세요.",
+                    }
+                    if result == bl.SAVED:
+                        st.rerun()
+                    st.error(messages[result])

@@ -22,8 +22,8 @@ POINTS_PATH = Path(__file__).resolve().parents[1] / "data" / "processed" / "sido
 POINTS_SOURCE = "버블 위치: 각 시도의 대표 지점(국가데이터처 SGIS 행정구역경계 기준 시도 내부 중심부). 지역 전체 범위나 차량 위치가 아닙니다."
 LAYER_ID = "sido_bubble"
 MAX_RADIUS_M = 42_000      # 등록대수 최대 지역의 버블 반지름(m)
-FILL = [15, 110, 86, 150]  # 반투명 → 겹쳐도 아래 버블이 보임
-LINE = [8, 70, 55]
+FILL = [37, 99, 235, 140]  # 메인 블루 #2563EB, 반투명 → 겹쳐도 아래 버블이 보임
+LINE = [17, 31, 63]        # 네이비 #111F3F
 
 
 @st.cache_data(show_spinner=False)

@@ -12,13 +12,15 @@ import streamlit as st
 
 from services import fare, matching
 from services.transport_request import HELPER_OPTIONS, ITEM_SIZES, REQUEST_KEY, SELECTED_DRIVER_KEY
+from services.ui import step_header
 
+step_header(3 if SELECTED_DRIVER_KEY in st.session_state else 2)
 st.title("매칭 결과")
 
 request = st.session_state.get(REQUEST_KEY)
 if not request:
     st.warning("운송 요청 정보가 없습니다. 홈에서 운송 조건을 먼저 입력해 주세요.")
-    if st.button("홈 · 요청하기로 이동"):
+    if st.button("운송 신청하러 가기"):
         st.switch_page("pages/1_Delivery_Request.py")
     st.stop()
 
@@ -34,31 +36,33 @@ estimate_fn = getattr(fare, "estimate", None)
 recommend_fn = getattr(matching, "recommend_drivers", None)
 PENDING = "기사 매칭 기능 준비 중"
 
-st.subheader("추천 차량 · 예상 거리 · 예상 운임")
-if estimate_fn is None:
-    st.info(PENDING)
-else:
-    est = estimate_fn(request)
-    c1, c2, c3, c4 = st.columns(4)
-    c1.metric("추천 차량", est.get("vehicle_type", "-"))
-    c2.metric("예상 거리", f"{est['distance_km']} km" if est.get("distance_km") is not None else "-")
-    c3.metric("예상 소요시간", f"{est['estimated_minutes']}분" if est.get("estimated_minutes") is not None else "-")
-    c4.metric("예상 운임", f"{est['estimated_fare']:,}원" if est.get("estimated_fare") is not None else "-")
+with st.container(border=True):
+    st.subheader("추천 차량 · 예상 거리 · 예상 운임")
+    if estimate_fn is None:
+        st.info(PENDING)
+    else:
+        est = estimate_fn(request)
+        c1, c2, c3, c4 = st.columns(4)
+        c1.metric("추천 차량", est.get("vehicle_type", "-"))
+        c2.metric("예상 거리", f"{est['distance_km']} km" if est.get("distance_km") is not None else "-")
+        c3.metric("예상 소요시간", f"{est['estimated_minutes']}분" if est.get("estimated_minutes") is not None else "-")
+        c4.metric("예상 운임", f"{est['estimated_fare']:,}원" if est.get("estimated_fare") is not None else "-")
 
-st.subheader("추천 기사")
-drivers = recommend_fn(request) if recommend_fn else []
-if recommend_fn is None:
-    st.info(PENDING)
-elif not drivers:
-    st.info("조건에 맞는 기사가 없습니다.")
-else:
-    for d in drivers:
-        cols = st.columns([4, 1])
-        cols[0].write(" · ".join(str(v) for k, v in d.items() if k != "driver_id"))
-        if cols[1].button("기사 선택", key=f"pick_{d['driver_id']}"):
-            st.session_state[SELECTED_DRIVER_KEY] = d
-    if SELECTED_DRIVER_KEY in st.session_state:
-        st.success(f"선택한 기사: {st.session_state[SELECTED_DRIVER_KEY].get('nickname', '')}")
+with st.container(border=True):
+    st.subheader("추천 기사")
+    drivers = recommend_fn(request) if recommend_fn else []
+    if recommend_fn is None:
+        st.info(PENDING)
+    elif not drivers:
+        st.info("조건에 맞는 기사가 없습니다.")
+    else:
+        for d in drivers:
+            cols = st.columns([4, 1])
+            cols[0].write(" · ".join(str(v) for k, v in d.items() if k != "driver_id"))
+            if cols[1].button("기사 선택", key=f"pick_{d['driver_id']}"):
+                st.session_state[SELECTED_DRIVER_KEY] = d
+        if SELECTED_DRIVER_KEY in st.session_state:
+            st.success(f"선택한 기사: {st.session_state[SELECTED_DRIVER_KEY].get('nickname', '')}")
 
 c1, c2 = st.columns(2)
 if c1.button("운송 조건 수정"):

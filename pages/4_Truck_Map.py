@@ -91,5 +91,5 @@ else:
 if map_ok:
     st.write(POINTS_SOURCE)
 
-if st.button("홈 · 요청하기로 이동"):
-    st.switch_page("pages/1_Delivery_Request.py")
+if st.button("홈으로"):
+    st.switch_page("pages/0_Home.py")
