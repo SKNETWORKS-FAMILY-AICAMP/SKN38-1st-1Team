@@ -1,27 +1,51 @@
-"""메인 페이지 — 실행: python -m streamlit run app.py"""
+"""짐니(JIMNI) — Streamlit 진입점 (실행: python -m streamlit run app.py)
+
+- 첫 접속: 소개 화면 → [짐니 시작하기] → 홈
+- 상단 메뉴: 홈 · 요청하기 / 예약 조회 / FAQ
+- 메뉴에 없는 화면(운송 신청, 매칭 결과, 예약하기, 요금표, 지역별 화물차 현황)은 버튼으로 이동 (visibility="hidden")
+- 로그인 없음 (비회원 이용)
+- 공통 디자인: .streamlit/config.toml(테마) + services/ui.py(호버 등 CSS)
+"""
 
 import streamlit as st
 
-st.set_page_config(page_title="생활 물류 중개 플랫폼", page_icon="🚚", layout="wide")
+from services.ui import apply_global_style, asset, logo_image, show_logo
 
-st.title("🚚 생활 물류·소형 화물 운송 중개 플랫폼")
-st.caption("서비스명 미정 · SKN38 1st 1Team")
+st.set_page_config(page_title="짐니 JIMNI", page_icon=asset("jimni1.png"), layout="wide")
+apply_global_style()
+show_logo()
 
-st.markdown(
-    """
-여성·1인 가구가 안심하고 이용할 수 있도록 **소비자와 용달·화물차 기사를 연결**하는 플랫폼입니다.
+HOME_PATH = "pages/0_Home.py"
 
-### 핵심 기능
-1. **운송 조건 입력 및 참고 운임 계산** — 출발지·도착지, 물품 크기, 희망 일시 입력 후 차량 추천과 예상 운임 확인
-2. **용달 기사·차량 조회 및 매칭** — 출발지 기준 가까운 기사 추천, 지역별 화물차 현황 지도
-3. **사전 확정 운임제** — 합의한 운임을 확정해 일방적인 추가요금 변경 방지
-4. **투명 수수료 및 기사 정산** — 플랫폼 수수료율과 기사 예상 정산액 공개
-5. **여성·1인 가구 안심 운송** — 사업자 확인 배지, 운송 상태 확인, 완료 후 평가
-6. **예약 및 조회** — 로그인 없이 예약하고 예약번호로 조회
-7. **FAQ** — 요금·예약·취소·파손·안전 관련 자주 묻는 질문
 
-왼쪽 사이드바에서 페이지를 선택하세요.
-"""
-)
+def landing():
+    with st.container(key="hero_landing"):
+        text, image = st.columns([3, 2], vertical_alignment="center")
+        with text:
+            st.image(logo_image("logo4.png"), width=200)
+            st.markdown("# 짐 옮기는 소원,<br>짐니가 들어드릴게요.", unsafe_allow_html=True)
+            st.write("복잡한 용달 예약도 짐니에게 맡겨보세요.  \n다마스부터 1톤 트럭까지, 내 짐에 딱 맞는 운송을 간편하게.")
+            st.caption("다마스 · 라보 · 1톤, 원하는 운송을 한 번에")
+            if st.button("짐니 시작하기", type="primary"):
+                st.session_state["started"] = True
+                st.switch_page(HOME_PATH)
+        with image:
+            st.image(asset("jimni1.png"), width=300)
 
-st.info("현재 초기 개발 단계입니다. 각 페이지는 순차적으로 구현될 예정입니다.")
+
+started = st.session_state.get("started", False)
+
+home = st.Page(HOME_PATH, title="홈 · 요청하기", icon=":material/home:", url_path="home", default=started)
+lookup = st.Page("pages/3_Booking_Lookup.py", title="예약 조회", icon=":material/event_note:", url_path="booking-lookup")
+faq = st.Page("pages/5_FAQ.py", title="FAQ", icon=":material/help:", url_path="faq")
+hidden_pages = [
+    st.Page(landing, title="짐니", url_path="start", default=not started, visibility="hidden"),
+    st.Page("pages/1_Delivery_Request.py", title="운송 신청", url_path="request", visibility="hidden"),
+    st.Page("pages/2_Driver_Matching.py", title="매칭 결과", url_path="matching", visibility="hidden"),
+    st.Page("pages/6_Booking.py", title="예약하기", url_path="booking", visibility="hidden"),
+    st.Page("pages/7_Fare_Table.py", title="요금표", url_path="fare-table", visibility="hidden"),
+    st.Page("pages/4_Truck_Map.py", title="지역별 화물차 현황", url_path="truck-map", visibility="hidden"),
+]
+
+nav = st.navigation([home, lookup, faq, *hidden_pages], position="top" if started else "hidden")
+nav.run()
