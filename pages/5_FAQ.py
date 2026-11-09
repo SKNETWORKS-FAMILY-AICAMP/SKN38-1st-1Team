@@ -2,7 +2,7 @@
 
 - 데이터: MySQL faqs → 비어 있거나 연결 실패 시 data/processed/jimni_faq.json (services/faq.py)
 - 크롤링한 타사 FAQ(sendy_FAQ)는 짐니 정책이 아니므로 이 화면에서 사용하지 않는다.
-- 화면 배치는 디자인 시안(검색 → 운임 요금표 → 자주 묻는 질문 카테고리)을 따른다.
+- 화면 배치: 운임 요금표 → 자주 묻는 질문(카테고리 → 키워드 검색 → 질문 목록)
 """
 
 import streamlit as st
@@ -12,7 +12,6 @@ from services.faq import ALL, answer_markdown, categories, category_label, filte
 from services.fare_rules_db import load_fare_rules
 
 st.title("FAQ")
-keyword = st.text_input("키워드 검색", placeholder="궁금한 내용을 검색하세요. (질문과 답변 모두 검색)")
 
 # ── 운임 요금표 (요금 카테고리는 맨 위 요금표로 안내) ────────────────────
 with st.container(border=True):
@@ -38,6 +37,7 @@ if note:
 
 category = st.pills("카테고리", categories(faqs), default=ALL, format_func=category_label,
                     label_visibility="collapsed") or ALL
+keyword = st.text_input("키워드 검색", placeholder="궁금한 내용을 검색하세요. (질문과 답변 모두 검색)")
 results = filter_faqs(faqs, category, keyword)
 
 if keyword.strip():

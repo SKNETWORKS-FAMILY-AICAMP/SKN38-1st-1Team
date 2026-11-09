@@ -15,7 +15,7 @@ with st.container(key="hero_home"):
     with text:
         st.html(
             '<span class="jm-hero-badge">다마스 · 라보 · 1톤 생활 용달</span>'
-            '<h1 class="jm-hero-title">짐 옮길 땐,<br><span class="hl">짐니.</span></h1>'
+            '<h1 class="jm-hero-title">짐 옮길 땐,<br><span class="hl">짐니!</span></h1>'
             '<p class="jm-hero-desc">출발지·도착지와 짐 크기만 입력하면<br>'
             "내 짐에 맞는 차량과 기사님을 찾아드려요.</p>"
         )
@@ -27,7 +27,7 @@ with st.container(key="hero_home"):
         st.html('<div class="jm-hero-chips"><span>카카오 주소 검색</span><span>실제 거리 기반 예상 운임</span>'
                 "<span>예약번호로 운송 상태 확인</span></div>")
     with image:
-        st.image(asset("sub.png"), width="stretch")
+        st.image(asset("main.png"), width="stretch")
 
 # ── 2. 이용 방법 ─────────────────────────────────────────────────────
 st.space("large")
