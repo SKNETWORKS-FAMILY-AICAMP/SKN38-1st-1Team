@@ -123,7 +123,7 @@ SKN38-1st-1Team/
 
 ### 📌 ERD 전체 구조
 
-![ERD - 생활 물류 운송 중개 플랫폼](docs/erd_1team_final.png)
+![ERD - 생활 물류 운송 중개 플랫폼](docs/erd_final_1team.png)
 
 ### 🎨 테이블 색상 구분
 
