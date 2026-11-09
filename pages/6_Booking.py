@@ -46,5 +46,9 @@ if confirmed and create_booking is not None:
     for msg in errors:
         st.error(msg)
     if not errors:
-        booking_id = create_booking(request, driver, {"name": name.strip(), "phone": phone, "note": note.strip()})
-        st.success(f"예약번호: {booking_id}")
+                try:
+                    booking_id = create_booking(request, driver, {"name": name.strip(), "phone": phone, "note": note.strip()})
+                except Exception as e:
+                    st.error(str(e))                      # 예: "방금 다른 예약이 잡힌 기사님입니다..."
+                else:
+                    st.success(f"예약번호: {booking_id}")

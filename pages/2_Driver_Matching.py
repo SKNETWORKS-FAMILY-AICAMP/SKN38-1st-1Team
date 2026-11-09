@@ -229,81 +229,65 @@ if estimate_result:
             st.warning("차량 규격 또는 운송 조건에 대한 추가 확인이 필요합니다.")
 
 
+
 # ============================================================
-# 6. 기사 추천 및 매칭
+# 6. 매칭된 기사님 (1명 카드 → 바로 예약하기)
 # ============================================================
 
-st.subheader("추천 기사")
+st.subheader("매칭된 기사님")
 
 recommend_fn = getattr(matching, "recommend_drivers", None)
+drivers = []
 
 if recommend_fn is None:
-
     st.info("기사 매칭 기능을 준비 중입니다.")
-
 else:
-
     try:
-        # 기사 매칭은 matching.py에서 담당
-        drivers = recommend_fn(request)
-
-        if not drivers:
-
-            st.info("조건에 맞는 기사가 없습니다.")
-
-        else:
-
-            for d in drivers:
-
-                cols = st.columns([4, 1])
-
-                cols[0].write(
-                    " · ".join(
-                        str(v)
-                        for k, v in d.items()
-                        if k != "driver_id"
-                    )
-                )
-
-                if cols[1].button(
-                    "기사 선택",
-                    key=f"pick_{d['driver_id']}"
-                ):
-                    st.session_state[SELECTED_DRIVER_KEY] = d
-
-                    st.rerun()
-
-            # 선택한 기사 표시
-            if SELECTED_DRIVER_KEY in st.session_state:
-
-                selected_driver = st.session_state[SELECTED_DRIVER_KEY]
-
-                st.success(
-                    f"선택한 기사: "
-                    f"{selected_driver.get('nickname', '')}"
-                )
-
+        drivers = recommend_fn(request, estimate_result)   # 운임 계산과 같은 추천 차량 기준으로 매칭
     except Exception as error:
-
         st.error(f"기사 매칭 중 오류가 발생했습니다: {error}")
 
+if recommend_fn is not None and not drivers:
+    st.info("조건에 맞는 기사님이 없습니다. 날짜나 출발지를 바꿔 다시 시도해 주세요.")
+
+if drivers:
+    # 같은 요청 안에서 "다른 기사님 보기"를 누를 때마다 다음 순위 기사로 넘어감
+    idx_key = f"driver_idx_{request['origin_address']}_{request['scheduled_at']}"
+    idx = st.session_state.get(idx_key, 0) % len(drivers)
+    d = drivers[idx]
+
+    with st.container(border=True):
+        c1, c2 = st.columns([1, 4], vertical_alignment="center")
+        c1.markdown(matching.avatar_html(d), unsafe_allow_html=True)       # 프로필 일러스트
+        c2.markdown(f"#### {d['nickname'].replace('*', chr(92) + '*')} 기사님")   # 마스킹 별표 그대로 표시
+        rating = f"★ {d['rating']:.1f}" if d["rating"] is not None else "신규 기사님"
+        c2.write(f"🚚 {d['vehicle_type']}  ·  📍 출발지에서 {d['distance_km']}km  ·  {rating}")
+        c2.caption(f"추천 {idx + 1} / {len(drivers)}  ·  시연용 가상 기사이며 사진은 일러스트입니다.")
+
+    b1, b2 = st.columns(2)
+    if len(drivers) > 1 and b1.button("다른 기사님 보기", use_container_width=True):
+        st.session_state[idx_key] = idx + 1
+        st.rerun()
+    if b2.button("이 기사님으로 예약하기", type="primary", use_container_width=True):
+        st.session_state[SELECTED_DRIVER_KEY] = d               # 예약하기 화면으로 기사 정보 전달
+        request["quote"] = {                                    # 화면에 보여준 견적을 예약 저장 때 그대로 사용
+            "vehicle_type": vehicle_type if estimate_result else None,
+            "distance_km": distance_km if estimate_result else None,
+            "estimated_minutes": estimated_minutes if estimate_result else None,
+            "estimated_fare": estimated_fare if estimate_result else None,
+        }
+        request["quote"] = {                                    # 화면에 보여준 견적을 예약 저장 때 그대로 사용
+            "vehicle_type": vehicle_type if estimate_result else None,
+            "distance_km": distance_km if estimate_result else None,
+            "estimated_minutes": estimated_minutes if estimate_result else None,
+            "estimated_fare": estimated_fare if estimate_result else None,
+        }
+        st.switch_page("pages/6_Booking.py")
+
 
 # ============================================================
-# 7. 하단 페이지 이동 버튼
+# 7. 하단 이동 버튼
 # ============================================================
 
-c1, c2 = st.columns(2)
-
-if c1.button("운송 조건 수정", use_container_width=True):
-
+if st.button("운송 조건 수정", use_container_width=True):
     st.switch_page("pages/1_Delivery_Request.py")
-
-
-if c2.button(
-    "다음 단계 · 예약하기",
-    type="primary",
-    use_container_width=True,
-    disabled=SELECTED_DRIVER_KEY not in st.session_state
-):
-
-    st.switch_page("pages/6_Booking.py")
