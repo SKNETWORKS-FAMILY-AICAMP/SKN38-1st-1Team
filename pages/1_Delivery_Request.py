@@ -7,6 +7,8 @@
 """
 
 from datetime import date, datetime, time, timedelta
+from html import escape
+
 import streamlit as st
 
 from services.kakao_local import (
@@ -54,46 +56,78 @@ if SEL_KEY not in st.session_state:
     st.session_state[DETAIL_KEY] = {side: saved.get(f"{side}_detail_address", "") for side in SIDES}
 
 
-def _select(side: str) -> None:
-    """검색 결과 라디오에서 고르면 바로 선택 확정."""
-    idx = st.session_state.get(f"addr_pick_{side}")
+PAGE_SIZE = 5   # 검색 결과 기본 표시 개수 (나머지는 '더 보기')
+PIN = ('<svg width="18" height="18" viewBox="0 0 24 24" fill="#2563EB" aria-hidden="true"><path d="M12 2a7 7 0 0 0-7 7'
+       'c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7Zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5Z"/></svg>')
+
+
+def _select(side: str, idx: int) -> None:
+    """검색 결과 카드를 누르면 바로 선택 확정 (결과 목록은 접힘)."""
     results = st.session_state.get(f"addr_results_{side}") or []
-    if idx is not None and 0 <= idx < len(results):
+    if 0 <= idx < len(results):
         st.session_state[SEL_KEY][side] = results[idx]
         st.session_state.pop(f"addr_results_{side}", None)
+        st.session_state.pop(f"addr_more_{side}", None)
 
 
 def _reset(side: str) -> None:
     st.session_state[SEL_KEY][side] = None
     st.session_state[DETAIL_KEY][side] = ""
     st.session_state.pop(f"addr_results_{side}", None)
+    st.session_state.pop(f"addr_more_{side}", None)
 
 
 def _keep_detail(side: str) -> None:
     st.session_state[DETAIL_KEY][side] = st.session_state.get(f"addr_detail_{side}", "").strip()
 
 
+def _address_lines(loc: dict) -> tuple[str, str, str]:
+    """(제목, 도로명 주소, 지번 주소) — 장소명이 없으면 도로명(없으면 지번)을 제목으로."""
+    road = loc.get("road_address") or ""
+    jibun = loc.get("jibun_address") or ""
+    title = loc.get("place_name") or road or jibun or loc["address"]
+    road_line = road if road and road != title else ""
+    jibun_line = jibun if jibun and jibun != title else ""
+    return title, road_line, jibun_line
+
+
+def _address_html(loc: dict) -> str:
+    title, road, jibun = (escape(t) for t in _address_lines(loc))
+    return (f'<p class="t">{title}</p>' + (f'<p class="r">{road}</p>' if road else "")
+            + (f'<p class="j">지번 {jibun}</p>' if jibun else ""))
+
+
 def address_picker(side: str, label: str) -> None:
-    """주소 검색 → 결과 선택 → (선택됨) 주소 표시 + 상세주소 입력."""
+    """출발지·도착지 공통: 검색 전(입력+검색) → 검색 후(결과 카드) → 선택 후(요약 카드+상세주소+재검색)."""
     selected = st.session_state[SEL_KEY].get(side)
-    with st.container(border=True):
-        st.markdown(f"**{label}**")
+    with st.container(key=f"jm_addr_box_{side}"):
+        st.html(f'<p class="jm-addr-label">{label}</p>')
         if selected:
-            name = f"{selected['place_name']} · " if selected.get("place_name") else ""
-            st.success(f"{name}{selected['address']}", icon=":material/location_on:")
-            if selected.get("road_address") and selected.get("jibun_address"):
-                st.caption(f"지번 {selected['jibun_address']}")
+            st.html(f'<div class="jm-addr-selected"><p class="k">{PIN}<span>선택된 {label}</span></p>'
+                    f"{_address_html(selected)}</div>")
             st.session_state.setdefault(f"addr_detail_{side}", st.session_state[DETAIL_KEY].get(side, ""))
-            st.text_input(f"{label} 상세주소 (선택)", key=f"addr_detail_{side}", max_chars=100,
-                          placeholder="동·호수, 층 등", on_change=_keep_detail, args=(side,))
-            st.button("다른 주소로 다시 검색", key=f"addr_reset_{side}", on_click=_reset, args=(side,))
+            # 상세주소: Enter 또는 [입력] 버튼으로 저장
+            d_col, s_col = st.columns([4, 1], vertical_alignment="bottom")
+            d_col.text_input(f"{label} 상세주소 (선택)", key=f"addr_detail_{side}", max_chars=100,
+                             placeholder="동·호수, 층 등", on_change=_keep_detail, args=(side,))
+            s_col.button("입력", key=f"addr_detail_save_{side}", on_click=_keep_detail, args=(side,),
+                         width="stretch")
+            saved_detail = st.session_state[DETAIL_KEY].get(side, "")
+            if saved_detail:
+                st.caption(f":material/check: 상세주소 저장됨: {saved_detail}")
+            st.button("다른 주소로 다시 검색", key=f"addr_reset_{side}", on_click=_reset, args=(side,),
+                      icon=":material/search:", type="tertiary")
             return
 
-        q_col, b_col = st.columns([4, 1], vertical_alignment="bottom")
-        query = q_col.text_input(f"{label} 주소 검색", key=f"addr_query_{side}",
-                                 placeholder="도로명·지번 주소 또는 건물명 (예: 세종대로 110, 서울시청)")
-        if b_col.button("주소 검색", key=f"addr_search_{side}", width="stretch"):
-            st.session_state.pop(f"addr_pick_{side}", None)
+        # 작은 폼으로 감싸 검색어 입력 후 Enter를 눌러도 [주소 검색]과 똑같이 검색된다
+        with st.form(f"addr_form_{side}", border=False, enter_to_submit=True):
+            q_col, b_col = st.columns([4, 1], vertical_alignment="bottom")
+            query = q_col.text_input(f"{label} 주소 검색", key=f"addr_query_{side}",
+                                     placeholder="도로명·지번 주소 또는 건물명 (예: 세종대로 110, 서울시청)")
+            searched = b_col.form_submit_button("주소 검색", key=f"addr_search_{side}", type="primary",
+                                                width="stretch")
+        if searched:
+            st.session_state.pop(f"addr_more_{side}", None)
             if len(" ".join(query.split())) < 2:
                 st.session_state[f"addr_results_{side}"] = []
                 st.warning("검색어를 2글자 이상 입력해 주세요.")
@@ -109,9 +143,19 @@ def address_picker(side: str, label: str) -> None:
 
         results = st.session_state.get(f"addr_results_{side}")
         if results:
-            st.radio(f"{label} 검색 결과 — 주소를 선택해 주세요", list(range(len(results))), index=None,
-                     format_func=lambda i: result_label(results[i]), key=f"addr_pick_{side}",
-                     on_change=_select, args=(side,))
+            shown = results if st.session_state.get(f"addr_more_{side}") else results[:PAGE_SIZE]
+            st.html(f'<p class="jm-addr-hint">{label} 검색 결과 {len(results)}건 — 주소를 눌러 선택해 주세요</p>')
+            for i, loc in enumerate(shown):
+                # 카드 전체를 덮는 투명 버튼(st.button)으로 클릭을 받는다 → 화면은 카드, 동작은 Streamlit 버튼
+                with st.container(key=f"jm_addr_card_{side}_{i}"):
+                    st.html(f'<div class="jm-addr-card">{_address_html(loc)}</div>')
+                    st.button(result_label(loc), key=f"addr_choose_{side}_{i}", on_click=_select, args=(side, i),
+                              width="stretch")
+            if len(results) > PAGE_SIZE and not st.session_state.get(f"addr_more_{side}"):
+                if st.button(f"검색 결과 더 보기 ({len(results) - PAGE_SIZE}건)", key=f"addr_more_btn_{side}",
+                             type="tertiary", icon=":material/expand_more:"):
+                    st.session_state[f"addr_more_{side}"] = True
+                    st.rerun()
         st.caption("검색 결과에서 주소를 선택해야 다음 단계로 진행할 수 있어요.")
 
 

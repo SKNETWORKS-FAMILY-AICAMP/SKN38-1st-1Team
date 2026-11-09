@@ -152,6 +152,47 @@ a[data-testid="stTopNavLink"][aria-current="page"] span {{ color: {BLUE}; font-w
 .jm-map-legend li {{ display: flex; align-items: center; gap: 8px; margin: 4px 0 0; }}
 .jm-map-legend i {{ width: 14px; height: 14px; border-radius: 50%; border: 1px solid rgba(37,99,235,.25); flex: none; }}
 
+/* ── 운송 신청: 출발지·도착지 주소 검색 (같은 디자인) ───────────────── */
+[class*="st-key-jm_addr_box"] {{ background: #FFFFFF; border: 1px solid {LINE}; border-radius: 18px; padding: 20px 22px;
+                                 gap: 8px; }}
+.jm-addr-label {{ font-size: 16px; font-weight: 700; color: {NAVY}; margin: 0; }}
+.jm-addr-hint {{ font-size: 13px; color: {MUTED}; margin: 2px 0 -4px; }}
+.jm-addr-card p, .jm-addr-selected p {{ margin: 0; }}
+.jm-addr-card .t, .jm-addr-selected .t {{ font-size: 16px; font-weight: 700; color: {NAVY}; line-height: 1.4; }}
+.jm-addr-card .r, .jm-addr-selected .r {{ font-size: 14px; color: {TEXT}; margin-top: 3px; line-height: 1.5; }}
+.jm-addr-card .j, .jm-addr-selected .j {{ font-size: 13px; color: {MUTED}; margin-top: 2px; line-height: 1.5; }}
+/* 검색 결과 카드는 목록이라 한 단계 작게 */
+.jm-addr-card .t {{ font-size: 14px; line-height: 1.35; }}
+.jm-addr-card .r {{ font-size: 13px; margin-top: 1px; line-height: 1.4; }}
+.jm-addr-card .j {{ font-size: 12px; margin-top: 0; line-height: 1.4; }}
+/* 검색 결과 카드: 카드 전체를 덮는 투명 버튼으로 클릭 */
+[class*="st-key-jm_addr_card"] {{ position: relative; gap: 0; }}
+.jm-addr-card {{ border: 1px solid {LINE}; border-radius: 12px; padding: 9px 14px; background: #FFFFFF; pointer-events: none;
+                 transition: border-color .12s ease, background-color .12s ease; word-break: keep-all; overflow-wrap: anywhere; }}
+[class*="st-key-jm_addr_card"]:hover .jm-addr-card {{ border-color: {BLUE}; background: #F5F8FF; }}
+[class*="st-key-jm_addr_card"]:has(button:focus-visible) .jm-addr-card,
+[class*="st-key-jm_addr_card"]:has(button:active) .jm-addr-card {{ border-color: {BLUE}; background: #EAF1FF; }}
+[class*="st-key-jm_addr_card"] [data-testid="stElementContainer"]:has(.stButton) {{
+    position: absolute; inset: 0; z-index: 10; margin: 0; }}
+[class*="st-key-jm_addr_card"] [data-testid="stElementContainer"]:not(:has(.stButton)) {{ pointer-events: none; }}
+[class*="st-key-jm_addr_card"] .stButton, [class*="st-key-jm_addr_card"] .stButton > div {{ height: 100%; }}
+[class*="st-key-jm_addr_card"] .stButton > button, [class*="st-key-jm_addr_card"] .stButton button {{
+    width: 100%; height: 100%; min-height: 0; opacity: 0; cursor: pointer; }}
+/* 상세주소: [입력] 버튼이 있으므로 'Press Enter' 안내는 숨김 (Enter도 그대로 동작) */
+[class*="st-key-jm_addr_box"] [data-testid="InputInstructions"] {{ display: none; }}
+/* [주소 검색] 버튼을 입력창과 같은 높이·같은 줄에 맞춤 */
+[class*="st-key-jm_addr_box"] .stFormSubmitButton > button {{ min-height: 40px; height: 40px; }}
+[class*="st-key-jm_addr_box"] [data-testid="stForm"] {{ padding: 0; }}
+/* '다른 주소로 다시 검색': 작은 보조 버튼 */
+[class*="st-key-addr_reset"] button {{ min-height: 32px; padding: 0 10px 0 6px; font-size: 13px; color: {MUTED}; }}
+[class*="st-key-addr_reset"] button p {{ font-size: 13px; }}
+[class*="st-key-addr_reset"] button:hover {{ color: {BLUE}; transform: none; box-shadow: none; background: #F3F7FF; }}
+/* 선택된 주소 요약 카드 */
+.jm-addr-selected {{ background: #F3F7FF; border: 1px solid #BFD3FB; border-radius: 14px; padding: 16px 18px;
+                     word-break: keep-all; overflow-wrap: anywhere; }}
+.jm-addr-selected .k {{ display: flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 700;
+                        color: {BLUE}; margin-bottom: 6px; }}
+
 /* ── 이용 방법 카드 ─────────────────────────────────────────────── */
 .jm-how {{ display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-top: 28px; }}
 .jm-how .card {{
