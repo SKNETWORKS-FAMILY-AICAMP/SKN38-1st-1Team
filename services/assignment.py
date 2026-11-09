@@ -43,11 +43,15 @@ def find_duplicate(request: dict, phone: str) -> int | None:
     return row["booking_id"] if row else None
 
 
-def confirm_booking(request: dict, quote: dict, customer: dict, preferred: dict | None = None) -> dict:
-    """예약 저장 + 기사 배정. 성공 시 {"booking_id", "driver", "tried"} (driver는 실제 저장된 기사)."""
+def confirm_booking(request: dict, quote: dict, customer: dict, preferred: dict | None = None,
+                    agreement: dict | None = None) -> dict:
+    """예약 저장 + 기사 배정. 성공 시 {"booking_id", "driver", "tried"} (driver는 실제 저장된 기사).
+
+    agreement: agreement.agreement_record() 결과 → create_booking이 bookings 동의 컬럼에 함께 저장
+    """
     if find_duplicate(request, customer["phone"]) is not None:
         raise AssignmentError("같은 연락처로 같은 일시·경로의 예약이 이미 있어요. 예약 조회에서 확인해 주세요.")
-    request = {**request, "quote": quote}                                  # create_booking은 request["quote"]를 사용
+    request = {**request, "quote": quote, "agreement": agreement}          # create_booking은 request["quote"]·["agreement"] 사용
     candidates = candidate_drivers(request, quote, preferred)
     if not candidates:
         raise AssignmentError("조건에 맞는 시연용 기사님이 없어 예약을 저장하지 않았어요. 날짜나 출발지를 바꿔 다시 시도해 주세요.")

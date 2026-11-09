@@ -158,7 +158,7 @@ if confirm:
         try:
             with st.spinner("예약을 저장하고 기사님을 배정하고 있어요..."):
                 saved = assignment.confirm_booking(request, quote, {"name": name.strip(), "phone": phone},
-                                                   preferred)
+                                                   preferred, agreement.agreement_record(st.session_state, request, quote))
                 with get_connection() as conn:   # 실제 저장된 예약을 다시 읽어 알림에 사용
                     row = bl.find_booking(conn, saved["booking_id"], bl.normalize_phone(phone))
         except assignment.AssignmentError as e:

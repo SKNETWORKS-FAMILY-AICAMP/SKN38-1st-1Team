@@ -10,8 +10,8 @@
 조건(주소·좌표·상세주소·일시·층수·엘리베이터·물품·인력)이 하나라도 바뀌면 해시가 달라져
 기존 견적과 동의는 자동으로 무효가 된다. (금액은 새로 만들지 않고 fare.estimate 결과만 사용)
 
-한계: bookings 테이블에 동의 시각·조건 스냅샷 컬럼이 없어 동의 증거는 세션에만 남는다.
-      DB에는 동의한 조건과 같은 값(주소·층수·물품·인력·일시·거리)과 합의 운임(estimated_fare)이 저장된다.
+DB 저장: 예약 확정 시 agreement_record()를 bookings.agreed_at · agreement_hash · agreed_terms에 저장
+      (sql/bookings_agreement_columns.sql). 합의 운임은 estimated_fare, 조건은 기존 컬럼에 그대로 저장된다.
 """
 
 from __future__ import annotations
@@ -112,3 +112,16 @@ def is_agreed(state, request: dict, quote: dict | None) -> bool:
     agreement = state.get(AGREEMENT_KEY)
     return bool(agreement) and quote_problem(request, quote) is None \
         and agreement["terms_hash"] == terms_hash(request, quote)
+
+
+def agreement_record(state, request: dict, quote: dict) -> dict | None:
+    """예약 저장용 동의 증거 (bookings.agreed_at · agreement_hash · agreed_terms). 동의가 유효하지 않으면 None."""
+    if not is_agreed(state, request, quote):
+        return None
+    agreement = state[AGREEMENT_KEY]
+    terms = {
+        "text": AGREEMENT_TEXT,
+        "conditions": {k: _canonical(v) for k, v in condition_snapshot(request).items()},
+        "quote": {k: quote.get(k) for k in QUOTE_FIELDS},
+    }
+    return {"agreed_at": agreement["agreed_at"], "agreement_hash": agreement["terms_hash"], "agreed_terms": terms}
