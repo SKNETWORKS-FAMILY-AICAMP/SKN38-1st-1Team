@@ -8,7 +8,7 @@
 import streamlit as st
 
 from services.db import DBConnectionError
-from services.fare_table import load_fare_rules
+from services.fare_rules_db import load_fare_rules
 
 CATEGORIES = ["전체", "예약·취소", "파손·분실", "기사·안전"]
 
