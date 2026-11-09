@@ -45,7 +45,7 @@ header[data-testid="stHeader"] {{
 [data-testid="stToolbar"] {{
     height: 76px; padding-left: max(24px, calc((100vw - 1180px) / 2)); padding-right: max(16px, calc((100vw - 1180px) / 2 - 8px));
 }}
-img[data-testid="stHeaderLogo"] {{ height: 40px !important; width: auto; max-width: 180px; }}
+img[data-testid="stHeaderLogo"] {{ height: 34px !important; width: auto; max-width: 240px; }}
 nav[data-testid="stTopNav"] {{ margin-left: auto; justify-content: flex-end; gap: 4px; }}
 a[data-testid="stTopNavLink"] {{
     height: 42px; padding: 0 18px; border-radius: 999px; transition: background-color .15s ease, color .15s ease;
@@ -193,6 +193,49 @@ a[data-testid="stTopNavLink"][aria-current="page"] span {{ color: {BLUE}; font-w
 .jm-addr-selected .k {{ display: flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 700;
                         color: {BLUE}; margin-bottom: 6px; }}
 
+/* ── 예약하기: 최종 운임·작업 조건 카드 ───────────────────────────── */
+.jm-terms {{ background: #FFFFFF; border: 1px solid {LINE}; border-radius: 18px; padding: 24px 26px; }}
+.jm-terms-title {{ font-size: 20px; font-weight: 800; color: {NAVY}; margin: 0; }}
+.jm-terms-sub {{ font-size: 14px; color: {MUTED}; margin: 4px 0 18px; }}
+.jm-terms dl.grid {{ display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 24px;
+                     margin: 0 !important; padding: 0 !important; }}
+.jm-terms dd, .jm-notice dd, .jm-notice dl {{ margin-left: 0 !important; }}
+.jm-terms dl.grid div {{ min-width: 0; }}
+.jm-terms dt {{ font-size: 13px; font-weight: 600; color: {MUTED}; margin: 0 0 2px; }}
+.jm-terms dd {{ font-size: 15px; color: {TEXT}; margin: 0; line-height: 1.5; word-break: keep-all; overflow-wrap: anywhere; }}
+.jm-terms dd small {{ display: block; font-size: 13px; color: {MUTED}; }}
+.jm-terms table.fare {{ width: 100%; border-collapse: collapse; margin-top: 20px; background: {SOFT}; border-radius: 14px;
+                        overflow: hidden; }}
+.jm-terms table.fare th, .jm-terms table.fare td {{ padding: 10px 16px; font-size: 14px; border: 0; }}
+.jm-terms table.fare th {{ text-align: left; font-weight: 500; color: {TEXT}; }}
+.jm-terms table.fare td {{ text-align: right; color: {TEXT}; white-space: nowrap; }}
+.jm-terms table.fare tr.total th, .jm-terms table.fare tr.total td {{ border-top: 1px solid {LINE}; font-size: 17px;
+                                                                    font-weight: 800; color: {NAVY}; padding: 14px 16px; }}
+.jm-terms table.fare tr.total td {{ color: {BLUE}; font-size: 20px; }}
+.jm-terms-note {{ font-size: 12px; color: {MUTED}; margin: 12px 0 0; }}
+[class*="st-key-jm_booking_form"] {{ background: #FFFFFF; border: 1px solid {LINE}; border-radius: 18px; padding: 20px 22px;
+                                     gap: 12px; }}
+[class*="st-key-jm_booking_form"] .stCheckbox {{ background: #F3F7FF; border: 1px solid #BFD3FB; border-radius: 12px;
+                                                 padding: 12px 14px; }}
+[class*="st-key-jm_booking_form"] .stCheckbox p {{ font-weight: 600; color: {NAVY}; }}
+
+/* ── 웹 알림 카드 (매칭 완료·기사 출발·운송 완료) ─────────────────────── */
+.jm-notice {{ display: flex; gap: 16px; align-items: flex-start; background: #F3F7FF; border: 1px solid #BFD3FB;
+              border-radius: 18px; padding: 20px 22px; }}
+.jm-notice .ic {{ font-size: 28px; line-height: 1; }}
+.jm-notice .body {{ min-width: 0; flex: 1; }}
+.jm-notice .t {{ font-size: 20px; font-weight: 800; color: {NAVY}; margin: 0; }}
+.jm-notice .d {{ font-size: 15px; color: {TEXT}; margin: 6px 0 0; line-height: 1.6; }}
+.jm-notice dl {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px 20px; margin: 16px 0 0;
+                 padding: 14px 16px; background: #FFFFFF; border-radius: 12px; }}
+.jm-notice dt {{ font-size: 12px; font-weight: 600; color: {MUTED}; margin: 0; padding: 0; }}
+.jm-notice dd {{ font-size: 15px; font-weight: 700; color: {NAVY}; margin: 2px 0 0; padding: 0; overflow-wrap: anywhere; }}
+@media (max-width: 640px) {{
+    .jm-terms {{ padding: 20px 18px; }}
+    .jm-terms dl.grid {{ grid-template-columns: 1fr; }}
+    .jm-notice {{ padding: 18px 16px; gap: 12px; }}
+}}
+
 /* ── 이용 방법 카드 ─────────────────────────────────────────────── */
 .jm-how {{ display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-top: 28px; }}
 .jm-how .card {{
@@ -201,7 +244,7 @@ a[data-testid="stTopNavLink"][aria-current="page"] span {{ color: {BLUE}; font-w
 }}
 .jm-how .card:hover {{ transform: translateY(-2px); box-shadow: 0 10px 24px rgba(17,31,63,.08); }}
 .jm-how .num {{ font-size: 13px; font-weight: 800; color: {BLUE}; }}
-.jm-how img {{ display: block; height: 76px; width: auto; margin: 14px 0 16px; }}
+.jm-how img {{ display: block; height: 104px; width: auto; margin: 12px 0 14px; }}
 .jm-how h4 {{ font-size: 18px; font-weight: 700; margin: 0 0 6px; color: {NAVY}; }}
 .jm-how p {{ font-size: 14px; line-height: 1.55; color: {MUTED}; margin: 0; }}
 
@@ -224,9 +267,13 @@ a[data-testid="stTopNavLink"][aria-current="page"] span {{ color: {BLUE}; font-w
 /* ── 운송 상태 단계 (예약 조회) ─────────────────────────────────── */
 .jm-status {{ display: flex; align-items: flex-start; margin: 8px 0 4px; }}
 .jm-status .s {{ flex: 1; text-align: center; position: relative; font-size: 13px; color: #9CA3AF; }}
+.jm-status img {{ display: block; height: 72px; width: auto; margin: 0 auto 8px; transition: transform .15s ease; }}
+.jm-status .s:not(.done):not(.now) img {{ filter: grayscale(1); opacity: .35; }}   /* 아직 오지 않은 단계는 흐리게 */
+.jm-status .s.now img {{ transform: scale(1.1); }}
 .jm-status .s::before {{ content: ""; position: absolute; top: 13px; left: -50%; width: 100%; height: 3px;
                          background: #E3E8F2; z-index: 0; }}
 .jm-status .s:first-child::before {{ display: none; }}
+.jm-status.has-img .s::before {{ top: 93px; }}   /* 그림(72px)+여백(8px) 아래 동그라미 가운데 */
 .jm-status .s i {{ display: block; width: 28px; height: 28px; margin: 0 auto 6px; border-radius: 50%;
                    background: #E3E8F2; position: relative; z-index: 1; font-style: normal; line-height: 28px;
                    color: #FFFFFF; font-size: 14px; }}
@@ -251,7 +298,7 @@ a[data-testid="stTopNavLink"][aria-current="page"] span {{ color: {BLUE}; font-w
     a[data-testid="stTopNavLink"] {{ padding: 0 10px; }}
     a[data-testid="stTopNavLink"] p {{ font-size: 14px; }}
     nav[data-testid="stTopNav"] {{ gap: 0; }}
-    img[data-testid="stHeaderLogo"] {{ height: 32px !important; max-width: 140px; }}
+    img[data-testid="stHeaderLogo"] {{ height: 28px !important; max-width: 190px; }}
     .jm-how {{ grid-template-columns: repeat(3, 1fr); }}
     .jm-hero-title {{ font-size: 44px; }}
 }}
@@ -259,7 +306,7 @@ a[data-testid="stTopNavLink"][aria-current="page"] span {{ color: {BLUE}; font-w
 @media (max-width: 640px) {{
     [data-testid="stMainBlockContainer"] {{ padding-top: 96px; padding-left: 16px; padding-right: 16px; }}
     [data-testid="stToolbar"] {{ padding-left: 16px; padding-right: 8px; }}
-    img[data-testid="stHeaderLogo"] {{ height: 32px !important; }}
+    img[data-testid="stHeaderLogo"] {{ height: 26px !important; max-width: 170px; }}
     [class*="st-key-hero"] {{ padding: 8px 0 8px; }}
     .jm-hero-title {{ font-size: 34px; }}
     .jm-hero-desc {{ font-size: 16px; margin: 16px 0 22px; }}
@@ -267,7 +314,9 @@ a[data-testid="stTopNavLink"][aria-current="page"] span {{ color: {BLUE}; font-w
     .jm-section-desc {{ font-size: 15px; }}
     .jm-how {{ grid-template-columns: repeat(2, 1fr); gap: 12px; }}
     .jm-how .card {{ padding: 18px 16px; }}
-    .jm-how img {{ height: 60px; }}
+    .jm-how img {{ height: 80px; }}
+    .jm-status img {{ height: 48px; }}
+    .jm-status.has-img .s::before {{ top: 69px; }}
     .jm-stats {{ grid-template-columns: 1fr; }}
     [class*="st-key-soft"] {{ padding: 22px 18px; }}
     .jm-home-stat .value {{ font-size: 32px; }}
@@ -299,7 +348,7 @@ def image_data_uri(name: str) -> str:
 
 
 def show_logo() -> None:
-    st.logo(logo_image("logo1.png"), size="large")
+    st.logo(logo_image("logo_main.png"), size="large")
 
 
 def asset(name: str) -> str:
@@ -351,14 +400,15 @@ def render_footer() -> None:
         st.caption("SK Networks Family AI Camp 38기 1팀 프로젝트 · 본 서비스는 학습용 시연 서비스로, 실제 운송 예약·결제는 이루어지지 않습니다.")
 
 
-def status_stepper(labels: list[str], current_index: int) -> None:
-    """운송 상태 단계 표시 (표시 전용, 값은 DB 상태 그대로)."""
+def status_stepper(labels: list[str], current_index: int, images: list[str] | None = None) -> None:
+    """운송 상태 단계 표시 (표시 전용, 값은 DB 상태 그대로). images: 단계별 지니 그림 파일명."""
     items = []
     for i, label in enumerate(labels):
         cls = "now" if i == current_index else ("done" if i < current_index else "")
         mark = "✓" if i <= current_index else ""
-        items.append(f'<div class="s {cls}"><i>{mark}</i>{label}</div>')
-    st.html(f'<div class="jm-status">{"".join(items)}</div>')
+        img = f'<img src="{image_data_uri(images[i])}" alt="">' if images else ""
+        items.append(f'<div class="s {cls}">{img}<i>{mark}</i>{label}</div>')
+    st.html(f'<div class="jm-status{" has-img" if images else ""}">{"".join(items)}</div>')
 
 
 def step_header(current: int, done_until: int | None = None) -> None:

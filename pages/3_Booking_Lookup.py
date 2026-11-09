@@ -2,15 +2,19 @@
 
 - DB에 저장된 실제 상태(bookings.status)를 보여주기만 하며 상태를 바꾸지 않는다.
 - 데이터 변경은 평점(bookings.rating) 저장 하나뿐이다.
+- 웹 알림: DB 상태값(BOOKED/DEPARTED/IN_TRANSIT/COMPLETED)에 맞는 알림만 표시 (services/notifications.py)
 - 실시간 기사 위치 추적 기능은 없다.
 """
 
 import streamlit as st
 
 from services import booking_lookup as bl
+from services import notifications
 from services.db import DBConnectionError, get_connection
 from services.ui import status_stepper
 
+# 운송 상태별 지니 그림 (예약 완료: 체크리스트 · 기사 출발: 달려가는 지니 · 운송 중: 짐 든 지니 · 운송 완료: 짐 내려놓은 지니)
+STATUS_GENIES = {"BOOKED": "jimni2.png", "DEPARTED": "jimni1.png", "IN_TRANSIT": "jimni4.png", "COMPLETED": "jimni5.png"}
 AUTH_KEY = "lookup_auth"  # {"booking_id": int, "phone": str} — 확인에 성공한 조회 조건
 
 st.title("예약 조회")
@@ -48,11 +52,27 @@ if booking is None:
     st.session_state.pop(AUTH_KEY, None)
     st.stop()
 
+# ── 상태 알림 (DB 상태 그대로, 상태를 바꾸거나 시간으로 만들어 내지 않음) ─────
+status = (booking["status"] or "").strip().upper()
+notice = notifications.status_notice(status) if booking["driver_id"] is not None else None
+if notice:
+    notifications.render_notice(notice)
+    notifications.toast_once(f"{booking['booking_id']}:{status}", notice)
+
+
 # ── 예약 정보 ─────────────────────────────────────────────────────────
 def info_row(label: str, value: str) -> None:
     a, b = st.columns([1, 3])
     a.caption(label)
     b.markdown(value)
+
+
+def vehicle_text(b: dict) -> str:
+    """배정 기사님 차량 (운임 기준 차량과 다르면 함께 표시: 더 큰 차량 기사님이 배정될 수 있음)."""
+    driver_v, fare_v = b.get("driver_vehicle_type"), b.get("vehicle_type")
+    if driver_v and fare_v and driver_v != fare_v:
+        return f"{driver_v} (운임 기준 {fare_v})"
+    return driver_v or fare_v or "정보 없음"
 
 
 with st.container(border=True):
@@ -65,12 +85,13 @@ with st.container(border=True):
         st.info("아직 배정된 기사가 없습니다.")
     else:
         verified = booking["verification_status"] == "VERIFIED"
-        info_row("기사님", booking["driver_name"] + (" · 사업자 확인 완료" if verified else ""))
-    info_row("차량 종류", booking["vehicle_type"] or "정보 없음")
-    info_row("예상 운임", f"**{booking['estimated_fare']:,}원**" if booking["estimated_fare"] is not None else "-")
+        name = booking["driver_name"].replace("*", "\\*")   # 마스킹 별표가 굵게 표시로 바뀌지 않게
+        info_row("기사님", f"{name} 기사님" + (" · 사업자 확인 완료" if verified else "")
+                 + "  \n:gray[시연용 가상 기사 (실제 기사 아님)]")
+    info_row("차량 종류", vehicle_text(booking))
+    info_row("운임", f"**{booking['estimated_fare']:,}원**" if booking["estimated_fare"] is not None else "-")
 
 # ── 운송 상태 ─────────────────────────────────────────────────────────
-status = (booking["status"] or "").strip().upper()
 with st.container(border=True):
     st.subheader("운송 상태")
     if not status:
@@ -81,7 +102,8 @@ with st.container(border=True):
         st.warning(f"확인되지 않은 운송 상태입니다. ({status})")
     else:
         step = bl.STATUS_FLOW.index(status)
-        status_stepper([bl.STATUS_LABELS[c] for c in bl.STATUS_FLOW], step)
+        status_stepper([bl.STATUS_LABELS[c] for c in bl.STATUS_FLOW], step,
+                       images=[STATUS_GENIES[c] for c in bl.STATUS_FLOW])
         st.caption(f"현재 상태: {bl.STATUS_LABELS[status]}")
     if booking["status_updated_at"]:
         st.caption(f"상태 변경 시각: {booking['status_updated_at']:%Y-%m-%d %H:%M}")

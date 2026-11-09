@@ -27,10 +27,10 @@ _LOOKUP_SQL = """
            b.scheduled_at, b.estimated_fare, b.status, b.status_updated_at,
            b.rating, b.created_at,
            d.driver_id, d.nickname AS driver_name, d.verification_status,
-           fr.vehicle_type
+           fr.vehicle_type, d.fare_rule_id AS driver_fare_rule_id
     FROM bookings b
     LEFT JOIN drivers d ON d.driver_id = b.driver_id
-    LEFT JOIN fare_rules fr ON fr.fare_rule_id = b.fare_rule_id
+    LEFT JOIN fare_rules fr ON fr.fare_rule_id = b.fare_rule_id      -- 운임 기준 차량
     WHERE b.booking_id = %s
 """
 
@@ -60,6 +60,10 @@ def find_booking(conn, booking_id: int, phone: str) -> dict | None:
     with conn.cursor() as cur:
         cur.execute(_LOOKUP_SQL, (booking_id,))
         row = cur.fetchone()
+        if row:  # 배정 기사님 차량 (fare_rules를 한 쿼리에서 두 번 참조하지 않도록 따로 조회)
+            cur.execute("SELECT vehicle_type FROM fare_rules WHERE fare_rule_id = %s", (row.pop("driver_fare_rule_id"),))
+            found = cur.fetchone()
+            row["driver_vehicle_type"] = found["vehicle_type"] if found else None
     conn.rollback()  # 읽기 전용 트랜잭션 종료
     if not row or not _phone_matches(row["customer_phone"], phone):
         return None
