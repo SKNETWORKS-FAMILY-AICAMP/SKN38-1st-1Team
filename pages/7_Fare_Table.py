@@ -1,12 +1,12 @@
 """요금표 — 홈과 FAQ의 [요금표 보기]가 모두 이 화면으로 연결된다.
 
-표시 데이터: MySQL fare_rules (services/fare_table.py). 임의 요금을 만들지 않는다.
+표시 데이터: MySQL fare_rules (services/fare_rules_db.py). 임의 요금을 만들지 않는다.
 """
 
 import streamlit as st
 
 from services.db import DBConnectionError
-from services.fare_table import load_fare_rules
+from services.fare_rules_db import load_fare_rules
 
 st.title("요금표")
 st.caption("다마스 · 라보 · 1톤 차량별 운임 기준")
