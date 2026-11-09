@@ -11,10 +11,9 @@ from datetime import date
 
 from services.booking_lookup import normalize_phone
 from services.db import get_connection
-from services.matching import geocode_detail
 
 DONE_STATUS = ("CANCELLED", "COMPLETED")          # 끝난 예약은 기사 일정에서 제외
-# 카카오 시도 표기 → DB(regions) 표기 (팀 적재 스크립트는 약칭 사용, 광주·전남은 2026-07 통합)
+# 주소의 시도 표기 → DB(regions) 표기 (팀 적재 스크립트는 약칭 사용, 광주·전남은 2026-07 통합)
 SIDO_TO_DB = {
     "서울특별시": "서울", "부산광역시": "부산", "대구광역시": "대구", "인천광역시": "인천", "대전광역시": "대전",
     "울산광역시": "울산", "세종특별자치시": "세종", "경기도": "경기", "강원특별자치도": "강원", "강원도": "강원",
@@ -28,14 +27,23 @@ class BookingError(RuntimeError):
     """예약할 수 없음 (기사 일정 겹침, 운임 정보 없음 등) — 화면에 메시지 그대로 표시"""
 
 
-# ── 1. 주소 → region_id (시군구 → 시도 → 전국 순서로 찾기)
+# ── 1. 주소 → region_id (주소 글자에서 시도·시군구를 읽음 → 시군구 → 시도 → 전국 순서로 찾기)
+def _split_region(address: str) -> tuple[str, str, str]:
+    """'서울 용산구 한강대로 405' → ('서울', '용산구', '서울') / '경기 수원시 영통구 ...' → ('경기', '수원시 영통구', '경기')"""
+    t = (address or "").split()
+    if not t:
+        return "", "", ""
+    sido = SIDO_TO_DB.get(t[0], t[0])
+    if len(t) > 2 and t[1].endswith("시") and t[2].endswith("구"):      # 일반구가 있는 시
+        return sido, f"{t[1]} {t[2]}", t[0]
+    return sido, (t[1] if len(t) > 1 else ""), t[0]
+
+
 def _region_id(cur, address: str) -> int:
-    d = geocode_detail(address) or {}
-    sido = SIDO_TO_DB.get(d.get("sido", ""), d.get("sido", ""))
-    sigungu = d.get("sigungu", "")
+    sido, sigungu, raw_sido = _split_region(address)
     for sql, params in (
         ("SELECT region_id FROM regions WHERE sido_name=%s AND sigungu_name=%s", (sido, sigungu)),
-        ("SELECT region_id FROM regions WHERE sido_name=%s AND sigungu_name=%s", (sido, d.get("sido", ""))),  # 세종특별자치시
+        ("SELECT region_id FROM regions WHERE sido_name=%s AND sigungu_name=%s", (sido, raw_sido)),  # 세종특별자치시
         ("SELECT region_id FROM regions WHERE sido_name=%s AND sigungu_name IS NULL", (sido,)),
         ("SELECT region_id FROM regions WHERE sido_name='전국'", ()),
     ):
@@ -82,7 +90,6 @@ def create_booking(request: dict, driver: dict, customer: dict) -> int:
             if not rule:
                 raise BookingError("차량 요금 규칙을 찾을 수 없습니다.")
 
-            origin, dest = geocode_detail(request["origin_address"]) or {}, geocode_detail(request["dest_address"]) or {}
             booking_id = _next_booking_id(cur)
 
             # 3-3. bookings 1행 저장
@@ -90,9 +97,9 @@ def create_booking(request: dict, driver: dict, customer: dict) -> int:
                 "booking_id": booking_id,
                 "customer_name": customer["name"],
                 "customer_phone": normalize_phone(customer["phone"]),     # 숫자만 저장 (조회 화면과 같은 규칙)
-                "origin_address": request["origin_address"], "origin_lat": origin.get("lat"), "origin_lng": origin.get("lng"),
+                "origin_address": request["origin_address"], "origin_lat": request.get("pickup_lat"), "origin_lng": request.get("pickup_lng"),
                 "origin_floor": request["origin_floor"], "origin_has_elevator": request["origin_has_elevator"],
-                "dest_address": request["dest_address"], "dest_lat": dest.get("lat"), "dest_lng": dest.get("lng"),
+                "dest_address": request["dest_address"], "dest_lat": request.get("dropoff_lat"), "dest_lng": request.get("dropoff_lng"),
                 "dest_floor": request["dest_floor"], "dest_has_elevator": request["dest_has_elevator"],
                 "item_s_count": request.get("item_s_count", 0), "item_m_count": request.get("item_m_count", 0),
                 "item_l_count": request.get("item_l_count", 0), "item_xl_count": request.get("item_xl_count", 0),

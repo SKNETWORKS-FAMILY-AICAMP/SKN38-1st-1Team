@@ -2,19 +2,13 @@
 
 - 조회만 함 (DB 저장 X): 견적만 보고 나가는 사용자도 있으므로, 저장은 예약 확정(6_Booking) 때만
 - 반환 예: [{"driver_id": 1, "nickname": "김**", "vehicle_type": "라보", "rating": 4.5, "distance_km": 1.2}, ...]
-라이브러리: math(거리 계산), requests(카카오 주소→좌표), functools.lru_cache(같은 주소 재호출 방지)
+라이브러리: math(거리 계산)
 """
 import math
-import os
-from functools import lru_cache
-
-import requests
-from dotenv import load_dotenv
 
 from services.db import get_connection
-from services.transport_request import VEHICLE_TYPES  # 작은 차 → 큰 차 순서 (예: 다마스, 라보, 1톤)
-
-load_dotenv()  # .env의 카카오 키 읽기 (Streamlit은 .env를 자동으로 안 읽음)
+from services.kakao_local import search_address       # 팀 카카오 주소 검색
+from services.transport_request import VEHICLE_TYPES  # 작은 차 → 큰 차 순서 (다마스, 라보, 1톤)
 
 # ── 설정: 팀 DB 테이블·컬럼 이름에 맞게 수정 ─────────────────────────
 DRIVER_TABLE = "drivers"        # 기사: driver_id, nickname, base_lat, base_lng, is_active, fare_rule_id
@@ -36,31 +30,10 @@ def required_vehicle(request: dict, estimate: dict | None = None) -> str:
     return VEHICLE_TYPES[min(idx, len(VEHICLE_TYPES) - 1)]
 
 
-# ── 2. 출발지 좌표 (카카오 로컬 API) ──────────────────────────────────
-KEY_NAMES = ("KAKAO_REST_KEY", "KAKAO_REST_API_KEY", "KAKAO_API_KEY")  # 팀 .env 키 이름 후보
-
-
-@lru_cache(maxsize=256)
-def geocode_detail(address: str) -> dict | None:
-    """주소 → {lat, lng, sido, sigungu} (예약 저장 시 지역 번호 찾기에도 사용), 주소 없으면 None"""
-    key = next((os.getenv(k) for k in KEY_NAMES if os.getenv(k)), None)
-    if not key:
-        raise RuntimeError(f".env에 카카오 REST API 키가 없습니다 ({' / '.join(KEY_NAMES)} 중 하나)")
-    url = "https://dapi.kakao.com/v2/local/search/address.json"
-    res = requests.get(url, headers={"Authorization": f"KakaoAK {key}"}, params={"query": address}, timeout=5).json()
-    if "documents" not in res:                                         # 키 오류·카카오맵 비활성 등
-        raise RuntimeError(f"카카오 API 오류: {res.get('message', res)}")
-    if not res["documents"]:
-        return None
-    doc = res["documents"][0]
-    addr = doc.get("road_address") or doc.get("address") or {}
-    return {"lat": float(doc["y"]), "lng": float(doc["x"]),
-            "sido": addr.get("region_1depth_name", ""), "sigungu": addr.get("region_2depth_name", "")}
-
-
-def geocode(address: str) -> tuple[float, float] | None:              # 주소 → (위도, 경도)
-    d = geocode_detail(address)
-    return (d["lat"], d["lng"]) if d else None
+# ── 2. 좌표: 1페이지가 넘겨준 좌표 사용, 없을 때만 팀 카카오 검색(kakao_local) 사용
+def geocode(address: str) -> tuple[float, float] | None:          # 주소 → (위도, 경도)
+    results = search_address(address)
+    return (results[0]["lat"], results[0]["lng"]) if results else None
 
 
 def haversine_km(lat1, lng1, lat2, lng2) -> float:                 # 두 좌표 직선거리(km)
@@ -97,7 +70,10 @@ def _fetch_candidates(lat, lng, vehicle_types, scheduled_at) -> list[dict]:
 
 # ── 4. 추천 (페이지에서 호출하는 함수) ───────────────────────────────
 def recommend_drivers(request: dict, estimate: dict | None = None) -> list[dict]:
-    origin = geocode(request["origin_address"])
+    if request.get("pickup_lat") is not None:                       # 1페이지에서 이미 찾은 좌표
+        origin = (request["pickup_lat"], request["pickup_lng"])
+    else:
+        origin = geocode(request["origin_address"])
     if origin is None:
         raise ValueError("출발지 주소를 찾을 수 없습니다. 도로명 주소로 다시 입력해 주세요.")
 
