@@ -95,10 +95,12 @@ def build_deck(
     if labels:
         layers.append(pdk.Layer(
             "TextLayer", data, id="labels", pickable=False, get_position=["lon", "lat"], get_text="sido_name",
-            get_size=12, get_color=[20, 20, 20], character_set="'auto'", font_weight=700,
+            get_size=13, get_color=[17, 31, 63], character_set="'auto'", font_weight=700,
+            font_family="'Pretendard, sans-serif'", font_settings={"sdf": True}, outline_width=3,
+            outline_color=[255, 255, 255, 235],  # 흰 테두리로 배경 지도 위에서도 지역명이 잘 보이게
         ))
     tooltip = {"html": f"<b>{{sido_name}}</b><br/>영업용 화물차 등록대수 {{count_label}}<br/>{month_label} 기준"}
-    view = pdk.ViewState(latitude=35.95, longitude=127.75, zoom=zoom, min_zoom=4.5, max_zoom=10)
+    view = pdk.ViewState(latitude=35.65, longitude=127.75, zoom=zoom, min_zoom=5.3, max_zoom=10)  # 한국 중심, 주변국 노출 최소화
     return pdk.Deck(layers=layers, initial_view_state=view, tooltip=tooltip, map_style=None)
 
 

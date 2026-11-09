@@ -9,6 +9,7 @@ import streamlit as st
 from services.db import DBConnectionError
 from services.truck_map import POINTS_SOURCE, build_deck, is_consistent, load_points, match_points, picked_sido
 from services.truck_stats import DATA_NOTE, format_month, load_truck_stats
+from services.ui import stat_cards
 
 SELECT_KEY = "truck_map_sido"
 LAST_PICK_KEY = "truck_map_last_pick"
@@ -29,58 +30,64 @@ if sido.empty:
 month = format_month(stats["base_month"])
 st.caption(f"{month} 기준 · {DATA_NOTE}")
 
-c1, c2, c3 = st.columns(3)
-c1.metric("전국 영업용 화물차 등록대수", f"{int(sido['truck_count'].sum()):,}대")
-c2.metric("시도", f"{len(sido)}곳")
-c3.metric("시군구", f"{len(sigungu)}곳")
+top = sido.sort_values("truck_count", ascending=False).iloc[0]  # DB 값 중 최다 지역 (새 통계를 만들지 않음)
+stat_cards([
+    ("전국 영업용 화물차 등록대수", f"{int(sido['truck_count'].sum()):,}대", f"{month} 기준"),
+    ("등록대수가 가장 많은 지역", f"{top['sido_name']}", f"{int(top['truck_count']):,}대"),
+    ("집계 지역", f"시도 {len(sido)}곳", f"시군구 {len(sigungu)}곳"),
+])
+st.space("medium")
 
-st.subheader("전국 · 시도별")
 points = load_points()
 check = match_points(points, sido) if points is not None else None
 map_ok = is_consistent(check)
 
-if map_ok:
-    event = st.pydeck_chart(
-        build_deck(points, sido, month, selected=st.session_state.get(SELECT_KEY)),
-        on_select="rerun", selection_mode="single-object", key="truck_map_deck", height=640,
-    )
-    pick = picked_sido(event)
-    if pick and pick != st.session_state.get(LAST_PICK_KEY):  # 새로 클릭한 경우에만 선택 반영
-        st.session_state[LAST_PICK_KEY] = pick
-        st.session_state[SELECT_KEY] = pick
-        st.rerun()  # 지도 강조 표시도 새 선택으로 다시 그림
-    st.caption("버블 면적이 클수록 등록대수가 많습니다. 버블을 클릭하면 아래 시군구 상세가 바뀝니다. "
-               "지도는 확대·축소·이동할 수 있습니다.")
-    st.caption(POINTS_SOURCE)
-    with st.expander("그래프로 보기"):
-        st.bar_chart(sido.set_index("sido_name")["truck_count"], horizontal=True, x_label="등록대수(대)", y_label="")
-else:
-    if points is None:
-        st.info("시도 대표 좌표 파일이 없어 지도 대신 그래프로 표시합니다.")
-    else:
-        st.warning(
-            "대표 좌표와 DB 시도명이 일치하지 않아 지도 대신 그래프로 표시합니다. "
-            f"좌표에만 있음: {check['unmatched_points']} · 통계에만 있음: {check['unmatched_db']}"
+map_col, detail_col = st.columns([3, 2], gap="large")
+with map_col:  # 지도를 먼저 실행해야 클릭한 시도가 오른쪽 선택 상자에 반영된다
+    st.subheader("전국 · 시도별")
+    if map_ok:
+        event = st.pydeck_chart(
+            build_deck(points, sido, month, selected=st.session_state.get(SELECT_KEY), zoom=6.0),
+            on_select="rerun", selection_mode="single-object", key="truck_map_deck", height=600,
         )
-    st.bar_chart(sido.set_index("sido_name")["truck_count"], horizontal=True, x_label="등록대수(대)", y_label="")
+        pick = picked_sido(event)
+        if pick and pick != st.session_state.get(LAST_PICK_KEY):  # 새로 클릭한 경우에만 선택 반영
+            st.session_state[LAST_PICK_KEY] = pick
+            st.session_state[SELECT_KEY] = pick
+            st.rerun()  # 지도 강조 표시도 새 선택으로 다시 그림
+        st.caption("버블 면적이 클수록 등록대수가 많습니다. 버블을 클릭하면 오른쪽 시군구 상세가 바뀝니다. "
+                   "지도는 확대·축소·이동할 수 있습니다.")
+        with st.expander("그래프로 보기"):
+            st.bar_chart(sido.set_index("sido_name")["truck_count"], horizontal=True, x_label="등록대수(대)", y_label="")
+    else:
+        if points is None:
+            st.info("시도 대표 좌표 파일이 없어 지도 대신 그래프로 표시합니다.")
+        else:
+            st.warning(
+                "대표 좌표와 DB 시도명이 일치하지 않아 지도 대신 그래프로 표시합니다. "
+                f"좌표에만 있음: {check['unmatched_points']} · 통계에만 있음: {check['unmatched_db']}"
+            )
+        st.bar_chart(sido.set_index("sido_name")["truck_count"], horizontal=True, x_label="등록대수(대)", y_label="")
 
-st.subheader("지역 선택 · 시군구별 상세")
-choice = st.selectbox("시도", sido["sido_name"].tolist(), key=SELECT_KEY)
-detail = (
-    sigungu[sigungu["sido_name"] == choice][["sigungu_name", "truck_count"]]
-    .sort_values("truck_count", ascending=False)
-    .reset_index(drop=True)
-)
-total = int(sido.loc[sido["sido_name"] == choice, "truck_count"].iloc[0])
-d1, d2 = st.columns(2)
-d1.metric(f"{choice} 영업용 화물차 등록대수", f"{total:,}대")
-d2.metric("전국 대비", f"{total / sido['truck_count'].sum():.1%}")
-st.dataframe(
-    detail.rename(columns={"sigungu_name": "시군구", "truck_count": "등록대수(대)"}),
-    hide_index=True,
-)
-st.caption("일부 시군구는 공식 통계 표기 그대로입니다. (예: 경북 군위군, 경기 부천시·화성시 잔여분)")
+with detail_col:
+    st.subheader("지역 선택 · 시군구별 상세")
+    choice = st.selectbox("시도", sido["sido_name"].tolist(), key=SELECT_KEY)
+    detail = (
+        sigungu[sigungu["sido_name"] == choice][["sigungu_name", "truck_count"]]
+        .sort_values("truck_count", ascending=False)
+        .reset_index(drop=True)
+    )
+    total = int(sido.loc[sido["sido_name"] == choice, "truck_count"].iloc[0])
+    d1, d2 = st.columns(2)
+    d1.metric(f"{choice} 영업용 화물차 등록대수", f"{total:,}대")
+    d2.metric("전국 대비", f"{total / sido['truck_count'].sum():.1%}")
+    st.dataframe(
+        detail.rename(columns={"sigungu_name": "시군구", "truck_count": "등록대수(대)"}),
+        hide_index=True, height=360,
+    )
+    st.caption("일부 시군구는 공식 통계 표기 그대로입니다. (예: 경북 군위군, 경기 부천시·화성시 잔여분)")
 
+st.space("medium")
 st.subheader("출처")
 if source:
     st.write(f"{source['provider']} · {source['dataset_name']}")
