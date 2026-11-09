@@ -119,6 +119,39 @@ a[data-testid="stTopNavLink"][aria-current="page"] span {{ color: {BLUE}; font-w
 .jm-home-stat .value span {{ font-size: 22px; font-weight: 700; margin-left: 2px; }}
 .jm-home-stat .note {{ font-size: 13px; color: {MUTED}; margin: 0; }}
 
+/* ── 화물차 현황: 데이터 안내 · 출처 카드 ─────────────────────── */
+.jm-note {{ background: {SOFT}; border-radius: 20px; padding: 24px 26px; height: 100%; box-sizing: border-box; }}
+.jm-note h4, .jm-source h4 {{ font-size: 17px; font-weight: 700; color: {NAVY}; margin: 0 0 10px; }}
+.jm-note p {{ font-size: 15px; line-height: 1.7; color: {TEXT}; margin: 0; }}
+.jm-note ul {{ margin: 14px 0 0; padding: 0; list-style: none; }}
+.jm-note li {{ font-size: 13px; color: {MUTED}; line-height: 1.6; padding-left: 14px; position: relative; }}
+.jm-note li::before {{ content: ""; position: absolute; left: 2px; top: 9px; width: 5px; height: 5px;
+                       border-radius: 50%; background: {BLUE}; opacity: .5; }}
+.jm-source {{ border: 1px solid {LINE}; border-radius: 20px; padding: 24px 26px; height: 100%; box-sizing: border-box; }}
+.jm-source dl {{ display: grid; grid-template-columns: 64px 1fr; gap: 10px 16px; margin: 0 !important; padding: 0 !important; font-size: 14px; }}
+.jm-source dt {{ margin: 0; padding: 0; color: {MUTED}; font-weight: 600; }}
+.jm-source dd {{ margin: 0; padding: 0; color: {TEXT}; word-break: keep-all; }}
+.jm-source a {{ color: {BLUE}; font-weight: 600; text-decoration: none; }}
+.jm-source a:hover {{ text-decoration: underline; }}
+.jm-source .foot {{ font-size: 12px; color: {MUTED}; margin: 16px 0 0; line-height: 1.6; }}
+
+/* ── 화물차 현황 지도: 둥근 카드 + 오른쪽 아래 범례 ───────────────────── */
+[class*="st-key-map_wrap"] {{ position: relative; gap: 0; }}
+[class*="st-key-map_wrap"] [data-testid="stDeckGlJsonChart"] {{
+    border-radius: 20px; overflow: hidden; border: 1px solid {LINE}; box-shadow: 0 10px 30px rgba(37, 99, 235, .08);
+}}
+/* 배경 지도만 연한 블루 톤으로 (버블·글자는 영향 없음) */
+[class*="st-key-map_wrap"] .mapboxgl-canvas {{ filter: grayscale(1) sepia(.35) hue-rotate(192deg) saturate(3) brightness(1.02); }}
+[class*="st-key-map_wrap"] [data-testid="stElementContainer"]:has(.jm-map-legend) {{
+    position: absolute; bottom: 34px; right: 14px; z-index: 5; width: auto; pointer-events: none;
+}}
+.jm-map-legend {{ background: rgba(255,255,255,.94); border: 1px solid {LINE}; border-radius: 14px; padding: 12px 14px;
+                  box-shadow: 0 6px 18px rgba(17,31,63,.08); font-size: 12px; color: {TEXT}; }}
+.jm-map-legend b {{ display: block; font-size: 13px; color: {NAVY}; margin-bottom: 6px; }}
+.jm-map-legend ul {{ list-style: none; margin: 0; padding: 0; }}
+.jm-map-legend li {{ display: flex; align-items: center; gap: 8px; margin: 4px 0 0; }}
+.jm-map-legend i {{ width: 14px; height: 14px; border-radius: 50%; border: 1px solid rgba(37,99,235,.25); flex: none; }}
+
 /* ── 이용 방법 카드 ─────────────────────────────────────────────── */
 .jm-how {{ display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-top: 28px; }}
 .jm-how .card {{
@@ -197,6 +230,8 @@ a[data-testid="stTopNavLink"][aria-current="page"] span {{ color: {BLUE}; font-w
     .jm-stats {{ grid-template-columns: 1fr; }}
     [class*="st-key-soft"] {{ padding: 22px 18px; }}
     .jm-home-stat .value {{ font-size: 32px; }}
+    .jm-map-legend {{ padding: 8px 10px; font-size: 11px; }}
+    .jm-map-legend b {{ font-size: 12px; margin-bottom: 2px; }}
     [class*="st-key-footer"] {{ padding: 28px 0 20px; margin-top: 64px; }}
     h1 {{ font-size: 26px !important; }}
 }}
