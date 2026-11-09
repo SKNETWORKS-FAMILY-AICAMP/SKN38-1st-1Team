@@ -1,4 +1,4 @@
-"""지역별 화물차 현황 — MySQL registration_stats 기반 시도·시군구 영업용 화물차 등록대수
+"""화물차 현황 (상단 메뉴) — MySQL registration_stats 기반 시도·시군구 영업용 화물차 등록대수
 
 지도: 시도별 등록대수를 대표 위치(data/processed/sido_bubble_points.csv)에 버블로 표시 (면적 ∝ 등록대수).
       좌표 파일이 없거나 지역명 매칭이 어긋나면 지도 대신 막대그래프로 표시한다.
@@ -14,7 +14,7 @@ from services.ui import stat_cards
 SELECT_KEY = "truck_map_sido"
 LAST_PICK_KEY = "truck_map_last_pick"
 
-st.title("지역별 화물차 현황")
+st.title("화물차 현황")
 
 try:
     stats = load_truck_stats()
@@ -28,7 +28,7 @@ if sido.empty:
     st.stop()
 
 month = format_month(stats["base_month"])
-st.caption(f"{month} 기준 · {DATA_NOTE}")
+st.caption(f"국토교통부 자동차등록현황 · {month} 기준 시도·시군구별 영업용 화물차 등록대수")
 
 top = sido.sort_values("truck_count", ascending=False).iloc[0]  # DB 값 중 최다 지역 (새 통계를 만들지 않음)
 stat_cards([
@@ -88,6 +88,14 @@ with detail_col:
     st.caption("일부 시군구는 공식 통계 표기 그대로입니다. (예: 경북 군위군, 경기 부천시·화성시 잔여분)")
 
 st.space("medium")
+st.subheader("데이터 해석 안내")
+st.info(DATA_NOTE)
+st.markdown(
+    "- 버블은 각 시도의 대표 위치에 표시하며, 화물차의 실제 위치가 아닙니다.\n"
+    "- 버블 면적은 등록대수에 비례합니다. 면적이 클수록 등록대수가 많습니다.\n"
+    "- 등록대수는 국토교통부 월별 통계 집계값이며, 짐니에서 지금 예약 가능한 차량·기사 수와는 다릅니다."
+)
+
 st.subheader("출처")
 if source:
     st.write(f"{source['provider']} · {source['dataset_name']}")

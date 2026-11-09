@@ -112,14 +112,12 @@ a[data-testid="stTopNavLink"][aria-current="page"] span {{ color: {BLUE}; font-w
 /* ── 연한 배경 섹션 — st.container(key="soft...") ─────────────── */
 [class*="st-key-soft"] {{ background: {SOFT}; border-radius: 24px; padding: 32px 32px; }}
 
-/* ── 하단 신청 유도 영역 — st.container(key="cta...") ──────────── */
-[class*="st-key-cta"] {{ background: {BLUE}; border-radius: 24px; padding: 40px 44px; }}
-[class*="st-key-cta"] p, [class*="st-key-cta"] h2 {{ color: #FFFFFF; }}
-[class*="st-key-cta"] .stButton > button[kind="primary"] {{
-    background: {YELLOW}; border-color: {YELLOW}; color: {NAVY}; min-height: 56px; font-size: 17px;
-}}
-[class*="st-key-cta"] .stButton > button[kind="primary"]:hover {{ background: #F5A800; border-color: #F5A800; }}
-[class*="st-key-cta"] img {{ max-height: 200px; width: auto; margin: 0 auto; display: block; }}
+/* ── 홈 공공데이터 소개 숫자 카드 ─────────────────────────────── */
+.jm-home-stat {{ background: #FFFFFF; border: 1px solid {LINE}; border-radius: 20px; padding: 22px 24px; }}
+.jm-home-stat .label {{ font-size: 14px; font-weight: 600; color: {MUTED}; margin: 0; }}
+.jm-home-stat .value {{ font-size: 40px; font-weight: 800; color: {NAVY}; letter-spacing: -0.03em; margin: 6px 0 4px; }}
+.jm-home-stat .value span {{ font-size: 22px; font-weight: 700; margin-left: 2px; }}
+.jm-home-stat .note {{ font-size: 13px; color: {MUTED}; margin: 0; }}
 
 /* ── 이용 방법 카드 ─────────────────────────────────────────────── */
 .jm-how {{ display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-top: 28px; }}
@@ -176,6 +174,10 @@ a[data-testid="stTopNavLink"][aria-current="page"] span {{ color: {BLUE}; font-w
 
 /* ── 태블릿 ────────────────────────────────────────────────────── */
 @media (max-width: 1024px) {{
+    a[data-testid="stTopNavLink"] {{ padding: 0 10px; }}
+    a[data-testid="stTopNavLink"] p {{ font-size: 14px; }}
+    nav[data-testid="stTopNav"] {{ gap: 0; }}
+    img[data-testid="stHeaderLogo"] {{ height: 32px !important; max-width: 140px; }}
     .jm-how {{ grid-template-columns: repeat(3, 1fr); }}
     .jm-hero-title {{ font-size: 44px; }}
 }}
@@ -194,7 +196,7 @@ a[data-testid="stTopNavLink"][aria-current="page"] span {{ color: {BLUE}; font-w
     .jm-how img {{ height: 60px; }}
     .jm-stats {{ grid-template-columns: 1fr; }}
     [class*="st-key-soft"] {{ padding: 22px 18px; }}
-    [class*="st-key-cta"] {{ padding: 28px 22px; }}
+    .jm-home-stat .value {{ font-size: 32px; }}
     [class*="st-key-footer"] {{ padding: 28px 0 20px; margin-top: 64px; }}
     h1 {{ font-size: 26px !important; }}
 }}
@@ -263,12 +265,12 @@ def render_footer() -> None:
             st.html('<p class="jm-foot-title">서비스</p>')
             st.page_link("pages/0_Home.py", label="홈")
             st.page_link("pages/1_Delivery_Request.py", label="운송 신청")
+            st.page_link("pages/4_Truck_Map.py", label="화물차 현황")
             st.page_link("pages/3_Booking_Lookup.py", label="예약 조회")
             st.page_link("pages/5_FAQ.py", label="FAQ")
         with links2:
             st.html('<p class="jm-foot-title">정보</p>')
             st.page_link("pages/7_Fare_Table.py", label="요금표")
-            st.page_link("pages/4_Truck_Map.py", label="지역별 화물차 현황")
         st.html("<hr>")
         st.caption("SK Networks Family AI Camp 38기 1팀 프로젝트 · 본 서비스는 학습용 시연 서비스로, 실제 운송 예약·결제는 이루어지지 않습니다.")
 
