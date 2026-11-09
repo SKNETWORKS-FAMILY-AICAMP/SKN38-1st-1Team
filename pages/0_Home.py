@@ -7,7 +7,7 @@ import streamlit as st
 
 from services.db import DBConnectionError
 from services.truck_stats import format_month, load_truck_stats
-from services.ui import asset, how_it_works, section_title
+from services.ui import how_it_works, image_data_uri, section_title, trimmed_image
 
 # ── 1. 히어로 · 운송 신청 ────────────────────────────────────────────
 with st.container(key="hero_home"):
@@ -16,8 +16,9 @@ with st.container(key="hero_home"):
         st.html(
             '<span class="jm-hero-badge">다마스 · 라보 · 1톤 생활 용달</span>'
             '<h1 class="jm-hero-title">짐 옮길 땐,<br><span class="hl">짐니!</span></h1>'
-            '<p class="jm-hero-desc">출발지·도착지와 짐 크기만 입력하면<br>'
+            '<div class="jm-hero-desc-row"><p class="jm-hero-desc">출발지·도착지와 짐 크기만 입력하면<br>'
             "내 짐에 맞는 차량과 기사님을 찾아드려요.</p>"
+            f'<img src="{image_data_uri("sub2.png.jpg")}" alt=""></div>'
         )
         b1, b2, _ = st.columns([5, 5, 2])
         if b1.button("운송 신청하기", type="primary", width="stretch"):
@@ -27,7 +28,7 @@ with st.container(key="hero_home"):
         st.html('<div class="jm-hero-chips"><span>카카오 주소 검색</span><span>실제 거리 기반 예상 운임</span>'
                 "<span>예약번호로 운송 상태 확인</span></div>")
     with image:
-        st.image(asset("main.png"), width="stretch")
+        st.image(trimmed_image("jimni_main.jpg"), width="stretch")   # 바깥 흰 여백만 잘라서 표시
 
 # ── 2. 이용 방법 ─────────────────────────────────────────────────────
 st.space("large")

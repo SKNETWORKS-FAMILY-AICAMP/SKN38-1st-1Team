@@ -103,6 +103,9 @@ a[data-testid="stTopNavLink"][aria-current="page"] span {{ color: {BLUE}; font-w
 }}
 .jm-hero-title .hl {{ color: {BLUE}; background: linear-gradient(transparent 62%, rgba(251,183,29,.45) 62%); }}
 .jm-hero-desc {{ font-size: 19px; line-height: 1.65; color: {MUTED}; margin: 22px 0 30px; }}
+.jm-hero-desc-row {{ display: flex; align-items: center; gap: 18px; margin: 22px 0 30px; }}
+.jm-hero-desc-row .jm-hero-desc {{ margin: 0; }}
+.jm-hero-desc-row img {{ height: 3.3em; width: auto; flex: none; font-size: 19px; }}   /* 돋보기 (sub2): 설명 2줄 높이 */
 .jm-hero-chips {{ display: flex; flex-wrap: wrap; gap: 8px; margin-top: 22px; }}
 .jm-hero-chips span {{
     font-size: 13px; color: {MUTED}; background: {SOFT}; border: 1px solid {LINE}; padding: 6px 12px; border-radius: 999px;
@@ -310,6 +313,8 @@ a[data-testid="stTopNavLink"][aria-current="page"] span {{ color: {BLUE}; font-w
     [class*="st-key-hero"] {{ padding: 8px 0 8px; }}
     .jm-hero-title {{ font-size: 34px; }}
     .jm-hero-desc {{ font-size: 16px; margin: 16px 0 22px; }}
+    .jm-hero-desc-row {{ margin: 16px 0 22px; gap: 10px; }}
+    .jm-hero-desc-row img {{ font-size: 16px; }}
     .jm-section-title {{ font-size: 26px; }}
     .jm-section-desc {{ font-size: 15px; }}
     .jm-how {{ grid-template-columns: repeat(2, 1fr); gap: 12px; }}
@@ -343,8 +348,21 @@ def logo_image(name: str) -> Image.Image:
 
 @st.cache_data(show_spinner=False)
 def image_data_uri(name: str) -> str:
-    """HTML 카드에 넣을 이미지 (원본 파일 그대로 base64)."""
-    return "data:image/png;base64," + base64.b64encode((ASSETS / name).read_bytes()).decode()
+    """HTML 카드에 넣을 이미지 (원본 파일 그대로 base64, png·jpg)."""
+    mime = "image/jpeg" if name.lower().endswith((".jpg", ".jpeg")) else "image/png"
+    return f"data:{mime};base64," + base64.b64encode((ASSETS / name).read_bytes()).decode()
+
+
+@st.cache_resource(show_spinner=False)
+def trimmed_image(name: str, pad: int = 12) -> Image.Image:
+    """흰 배경 이미지의 바깥 흰 여백을 잘라 낸다 (원본 파일은 수정하지 않음)."""
+    im = Image.open(ASSETS / name).convert("RGB")
+    mask = im.convert("L").point(lambda v: 255 if v < 245 else 0)   # 거의 흰색이 아닌 부분
+    box = mask.getbbox()
+    if not box:
+        return im
+    l, t, r, b = box
+    return im.crop((max(l - pad, 0), max(t - pad, 0), min(r + pad, im.width), min(b + pad, im.height)))
 
 
 def show_logo() -> None:
@@ -384,7 +402,7 @@ def render_footer() -> None:
     with st.container(key="footer"):
         brand, links1, links2 = st.columns([2, 1, 1], gap="large")
         with brand:
-            st.image(logo_image("logo4.png"), width=150)
+            st.image(logo_image("logo_white.png"), width=190)   # 남색 푸터용 흰색 로고 (가로형)
             st.write("다마스·라보·1톤 용달을 내 짐에 맞게 연결하는  \n생활 화물 운송 중개 플랫폼")
         with links1:
             st.html('<p class="jm-foot-title">서비스</p>')
