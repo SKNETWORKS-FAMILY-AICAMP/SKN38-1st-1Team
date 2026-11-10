@@ -12,7 +12,7 @@
 
 import streamlit as st
 
-from services import fare, matching
+from services import fare, matching, settlement
 from services.transport_request import (
     HELPER_OPTIONS,
     ITEM_SIZES,
@@ -161,6 +161,8 @@ if estimate_result:
 
     with st.container(border=True):
 
+        money = settlement.calc_settlement(estimated_fare) if estimated_fare is not None else None  # 수수료 계산
+
         c1, c2, c3, c4 = st.columns(4)
 
         c1.metric(
@@ -181,21 +183,16 @@ if estimate_result:
 
         c4.metric(
             "예상 운임",
-            f"{estimated_fare:,}원"
-            if estimated_fare is not None else "-"
+            f"{money['customer_total']:,}원"                     # 서비스 이용료 포함
+            if money else "-"
         )
 
-        # 차량 및 거리 계산 상세 정보
-        if vehicle_result:
+        if money:
             st.caption(
-                f"차량 추천 사유: {vehicle_result.get('reason', '-')}"
+                f"운임 {money['fare']:,}원 + 서비스 이용료 {money['service_fee']:,}원"
+                f" ({settlement.SERVICE_FEE_PCT}%) 포함"
             )
-
-        if distance_result:
-            st.caption(
-                f"거리 계산 출처: {distance_result.get('source', '-')}"
-            )
-
+            
         # 운임 세부 내역
         if fare_result.get("fare_breakdown"):
             with st.expander("운임 상세 내역 확인"):
@@ -224,6 +221,15 @@ if estimate_result:
                     f"{destination_fee:,}원"
                     if destination_fee is not None else "도착지 계단 작업: 별도 협의"
                 )
+
+                if money:
+                    st.write(
+                        f"서비스 이용료 ({settlement.SERVICE_FEE_PCT}%): {money['service_fee']:,}원"
+                    )
+
+                    st.write(
+                        f"**결제 예상 금액: {money['customer_total']:,}원**"
+                    )
 
         if estimate_result.get("manual_check"):
             st.warning("차량 규격 또는 운송 조건에 대한 추가 확인이 필요합니다.")
@@ -270,12 +276,6 @@ if drivers:
         st.rerun()
     if b2.button("이 기사님으로 예약하기", type="primary", use_container_width=True):
         st.session_state[SELECTED_DRIVER_KEY] = d               # 예약하기 화면으로 기사 정보 전달
-        request["quote"] = {                                    # 화면에 보여준 견적을 예약 저장 때 그대로 사용
-            "vehicle_type": vehicle_type if estimate_result else None,
-            "distance_km": distance_km if estimate_result else None,
-            "estimated_minutes": estimated_minutes if estimate_result else None,
-            "estimated_fare": estimated_fare if estimate_result else None,
-        }
         request["quote"] = {                                    # 화면에 보여준 견적을 예약 저장 때 그대로 사용
             "vehicle_type": vehicle_type if estimate_result else None,
             "distance_km": distance_km if estimate_result else None,

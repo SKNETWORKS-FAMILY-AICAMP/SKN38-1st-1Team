@@ -21,7 +21,6 @@ CREATE TABLE `bookings` (
 	`estimated_minutes`	INT	NULL	COMMENT '소요시간',
 	`scheduled_at`	DATETIME	NOT NULL	COMMENT '운송일시',
 	`estimated_fare`	INT	NOT NULL	COMMENT '예상요금',
-	`commission_rate`	DECIMAL(5, 2)	NULL	COMMENT '플랫폼 수수료율(%)',
 	`origin_region_id`	INT	NOT NULL,
 	`dest_region_id`	INT	NOT NULL,
 	`fare_rule_id`	INT	NOT NULL,
@@ -63,7 +62,7 @@ CREATE TABLE `regions` (
 	`region_level`	VARCHAR(10)	NOT NULL	COMMENT '지역단계',
 	`sido_name`	VARCHAR(20)	NOT NULL	COMMENT '시도',
 	`sigungu_name`	VARCHAR(50)	NULL	COMMENT '시군구',
-	`adm_code`	VARCHAR(10)	NULL	COMMENT '행정코드',
+	`adm_code`	VARCHAR(1ㅌ0)	NULL	COMMENT '행정코드',
 	`created_at`	DATETIME	NOT NULL	DEFAULT CURRENT_TIMESTAMP	COMMENT '등록일시',
 	`parent_region_id`	INT	NULL
 );
