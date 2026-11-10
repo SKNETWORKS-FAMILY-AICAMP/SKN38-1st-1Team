@@ -217,104 +217,43 @@ Pandas로 전처리한 데이터를 MySQL에 저장합니다.
 
 DB 테이블 생성 SQL은 [`sql/schema.sql`](sql/schema.sql)에 있습니다.
 
-## 🚀 실행 방법
 
-### 1. GitHub 저장소 Clone
 
-```bash
-git clone https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN38-1st-1Team.git
-cd SKN38-1st-1Team
-```
 
-또는 VS Code에서 `Clone Git Repository`를 이용합니다.
-
-### 2. 가상환경 생성 및 활성화
-
-Windows PowerShell 기준:
-
-```powershell
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-```
-
-### 3. 라이브러리 설치
-
-```powershell
-python -m pip install -r requirements.txt
-```
-
-### 4. 환경변수 설정
-
-`.env.example`을 복사해 `.env`를 만들고 필요한 API 키와 DB 연결 정보를 입력합니다.
-
-```powershell
-Copy-Item .env.example .env
-```
-
-| 변수 | 용도 |
-|---|---|
-| `MOLIT_API_KEY`, `MOLIT_API_URL` | 국토교통부 통계누리 OpenAPI |
-| `KAKAO_REST_API_KEY` | 주소·장소 검색, 거리 계산 (서버에서만 사용) |
-| `KAKAO_JAVASCRIPT_KEY` | 운송 신청 화면 위치 지도 (사이트 도메인 등록 필요) |
-| `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME` | MySQL 연결 |
-
-`.env`는 GitHub에 업로드하지 않습니다.
-
-### 5. 데이터베이스 준비
-
-```powershell
-# 1) 테이블 생성: sql/schema.sql 실행 (MySQL Workbench 등)
-# 2) 영업용 화물차 등록 통계 적재
-python scripts/update_registration_db.py
-# 3) 시연용 차종·가상 기사 데이터 준비
-python -m scripts.seed_drivers
-```
-
-### 6. Streamlit 실행
-
-```powershell
-python -m streamlit run app.py
-```
-
-접속 주소: http://localhost:8501
-
-## 👥 팀원 소개
+<h2>👥 팀원 소개</h2>
 
 <p align="center">
   <b>SK Networks Family AI Camp 38기 · 1팀</b>
 </p>
 
-<table>
+<table align="center">
   <tr>
-    <td align="center" width="25%">
-      <img src="assets/jimni2.png" alt="팀원 1 캐릭터" width="110" height="110"><br>
-      <b>[이름]</b><br>
-      <sub>[역할]</sub><br>
-      <sub>[담당 기능]</sub>
+    <td align="center" width="140">
+      <img src="assets/jimni2.png" width="110" height="110"><br>
+      <b>김예준</b><br>
+      <sub>역할</sub><br>
+      <sub>담당 기능</sub>
     </td>
-    <td align="center" width="25%">
-      <img src="assets/jimni6.png" alt="팀원 2 캐릭터" width="110" height="110"><br>
-      <b>[이름]</b><br>
-      <sub>[역할]</sub><br>
-      <sub>[담당 기능]</sub>
+    <td align="center" width="140">
+      <img src="assets/jimni6.png" width="110" height="110"><br>
+      <b>이지우</b><br>
+      <sub>역할</sub><br>
+      <sub>담당 기능</sub>
     </td>
-    <td align="center" width="25%">
-      <img src="assets/jimni4.png" alt="팀원 3 캐릭터" width="110" height="110"><br>
-      <b>[이름]</b><br>
-      <sub>[역할]</sub><br>
-      <sub>[담당 기능]</sub>
+    <td align="center" width="140">
+      <img src="assets/jimni4.png" width="110" height="110"><br>
+      <b>정흥기</b><br>
+      <sub>역할</sub><br>
+      <sub>담당 기능</sub>
     </td>
-    <td align="center" width="25%">
-      <img src="assets/jimni3.png" alt="팀원 4 캐릭터" width="110" height="110"><br>
-      <b>[이름]</b><br>
-      <sub>[역할]</sub><br>
-      <sub>[담당 기능]</sub>
+    <td align="center" width="140">
+      <img src="assets/jimni3.png" width="110" height="110"><br>
+      <b>최웅</b><br>
+      <sub>역할</sub><br>
+      <sub>담당 기능</sub>
     </td>
   </tr>
 </table>
 
----
 
-<p align="center">
-  <b>SK Networks Family AI Camp · SKN38 1st Project · 1Team</b>
-</p>
+---
