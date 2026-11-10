@@ -195,10 +195,16 @@ SKN38-1st-1Team/
 │   ├── 4_Truck_Map.py
 │   ├── 5_FAQ.py
 │   ├── 6_Booking.py
-│   └── 7_Fare_Table.py
+│   ├── 7_Fare_Table.py
+│   └── 8_Driver_Login.py
 ├── services/              # 비즈니스 로직
+│   ├── __init__.py
+│   ├── db.py
+│   ├── transport_request.py
 │   ├── fare.py
 │   ├── fare_table.py
+│   ├── fare_rules_db.py
+│   ├── settlement.py
 │   ├── matching.py
 │   ├── booking.py
 │   ├── agreement.py
@@ -208,6 +214,8 @@ SKN38-1st-1Team/
 │   ├── kakao_local.py
 │   ├── truck_stats.py
 │   ├── truck_map.py
+│   ├── driver_map.py
+│   ├── driver_sim.py
 │   ├── faq.py
 │   └── ui.py
 ├── scripts/               # 데이터 수집 및 DB 적재
