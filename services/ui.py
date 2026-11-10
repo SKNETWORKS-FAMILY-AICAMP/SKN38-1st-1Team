@@ -122,6 +122,61 @@ a[data-testid="stTopNavLink"][aria-current="page"] span {{ color: {BLUE}; font-w
 .jm-home-stat .value span {{ font-size: 22px; font-weight: 700; margin-left: 2px; }}
 .jm-home-stat .note {{ font-size: 13px; color: {MUTED}; margin: 0; }}
 
+/* ── 지역별 현황: 현황 전환 탭(세그먼트) · 화면 제목 ─────────────────── */
+[class*="st-key-jm_view_tabs"] [role="radiogroup"] {{ background: {SOFT}; border: 1px solid {LINE}; border-radius: 14px;
+    padding: 4px; display: flex; gap: 4px; width: 100%; max-width: 440px; box-sizing: border-box; }}
+[class*="st-key-jm_view_tabs"] [role="radiogroup"] button {{ flex: 1 1 0; min-width: 0; }}
+[class*="st-key-jm_view_tabs"] button {{ border: 0 !important; border-radius: 10px !important; min-height: 44px; padding: 0 22px;
+    background: transparent; color: {TEXT}; font-weight: 600; box-shadow: none; }}
+[class*="st-key-jm_view_tabs"] button p {{ font-size: 15px; font-weight: 600; }}
+[class*="st-key-jm_view_tabs"] button:hover {{ background: #EAF1FF; color: {BLUE}; }}
+[class*="st-key-jm_view_tabs"] button[aria-checked="true"] {{ background: {BLUE} !important; color: #FFFFFF !important; }}
+[class*="st-key-jm_view_tabs"] button[aria-checked="true"] p {{ color: #FFFFFF !important; }}
+.jm-type-row {{ display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 2px 0 8px; }}
+.jm-type-row div {{ background: {SOFT}; border: 1px solid {LINE}; border-radius: 12px; padding: 8px 12px; }}
+.jm-type-row span {{ display: block; font-size: 12px; color: {MUTED}; }}
+.jm-type-row b {{ font-size: 17px; color: {NAVY}; }}
+/* 가상 기사 위치 지도: 왼쪽 위 요약 · 기사 카드 · 지도 보기 탭 */
+[class*="st-key-map_wrap"] [data-testid="stElementContainer"]:has(.jm-map-summary) {{
+    position: absolute; top: 14px; left: 14px; z-index: 5; width: auto; pointer-events: none; }}
+.jm-map-summary {{ background: rgba(255,255,255,.95); border: 1px solid {LINE}; border-radius: 14px; padding: 10px 14px;
+    box-shadow: 0 6px 18px rgba(17,31,63,.08); font-size: 13px; color: {TEXT}; line-height: 1.6; }}
+.jm-map-summary b {{ color: {NAVY}; font-size: 14px; }}
+.jm-map-summary em {{ font-style: normal; font-weight: 800; color: {BLUE}; }}
+.jm-driver-card {{ background: #F3F7FF; border: 1px solid #BFD3FB; border-radius: 14px; padding: 14px 16px; margin: 4px 0; }}
+.jm-driver-card .tag {{ display: inline-block; font-size: 11px; font-weight: 700; color: #8A5A00; background: #FFF4D6;
+    border: 1px solid #F5D78A; border-radius: 999px; padding: 2px 8px; }}
+.jm-driver-card .t {{ font-size: 17px; font-weight: 800; color: {NAVY}; margin: 6px 0 8px; }}
+.jm-driver-card dl {{ display: grid; grid-template-columns: 68px 1fr; gap: 4px 10px; margin: 0 !important; padding: 0 !important;
+    font-size: 13px; }}
+.jm-driver-card dt {{ color: {MUTED}; font-weight: 600; margin: 0; }}
+.jm-driver-card dd {{ color: {TEXT}; margin: 0 !important; }}
+.jm-driver-card .n {{ font-size: 12px; color: {MUTED}; margin: 8px 0 0; }}
+[class*="st-key-jm_mode_tabs"] [role="radiogroup"] {{ background: #FFFFFF; border: 1px solid {LINE}; border-radius: 12px; padding: 3px;
+    display: flex; gap: 3px; width: 100%; max-width: 380px; box-sizing: border-box; }}
+[class*="st-key-jm_mode_tabs"] button {{ flex: 1 1 0; min-width: 0; border: 0 !important; border-radius: 9px !important;
+    min-height: 38px; background: transparent; box-shadow: none; }}
+[class*="st-key-jm_mode_tabs"] button p {{ font-size: 14px; font-weight: 600; }}
+[class*="st-key-jm_mode_tabs"] button[aria-checked="true"] {{ background: #E0F2FE !important; }}
+[class*="st-key-jm_mode_tabs"] button[aria-checked="true"] p {{ color: #0369A1 !important; }}
+@media (max-width: 640px) {{
+    [class*="st-key-jm_mode_tabs"] [role="radiogroup"] {{ max-width: none; }}
+    [class*="st-key-jm_mode_tabs"] button p {{ font-size: 13px; }}
+    .jm-map-summary {{ font-size: 12px; padding: 8px 10px; }}
+}}
+.jm-view-head {{ margin: 6px 0 8px; }}
+.jm-view-head h2 {{ font-size: 26px; font-weight: 800; color: {NAVY}; margin: 8px 0 4px; padding: 0; }}
+.jm-view-head p {{ font-size: 15px; color: {TEXT}; margin: 0; line-height: 1.6; }}
+.jm-view-head p.warn {{ color: {MUTED}; font-size: 14px; margin-top: 2px; }}
+.jm-sim-badge {{ display: inline-block; font-size: 12px; font-weight: 700; color: #8A5A00; background: #FFF4D6;
+    border: 1px solid #F5D78A; border-radius: 999px; padding: 4px 10px; }}
+@media (max-width: 640px) {{
+    [class*="st-key-jm_view_tabs"] [role="radiogroup"] {{ max-width: none; }}
+    [class*="st-key-jm_view_tabs"] button {{ padding: 0 6px; }}
+    [class*="st-key-jm_view_tabs"] button p {{ font-size: 13px; }}
+    .jm-view-head h2 {{ font-size: 22px; }}
+}}
+
 /* ── 화물차 현황: 데이터 안내 · 출처 카드 ─────────────────────── */
 .jm-note {{ background: {SOFT}; border-radius: 20px; padding: 24px 26px; height: 100%; box-sizing: border-box; }}
 .jm-note h4, .jm-source h4 {{ font-size: 17px; font-weight: 700; color: {NAVY}; margin: 0 0 10px; }}
@@ -424,7 +479,7 @@ def render_footer() -> None:
             st.html('<p class="jm-foot-title">서비스</p>')
             st.page_link("pages/0_Home.py", label="홈")
             st.page_link("pages/1_Delivery_Request.py", label="운송 신청")
-            st.page_link("pages/4_Truck_Map.py", label="화물차 현황")
+            st.page_link("pages/4_Truck_Map.py", label="지역별 현황")
             st.page_link("pages/3_Booking_Lookup.py", label="예약 조회")
             st.page_link("pages/5_FAQ.py", label="FAQ")
         with links2:
