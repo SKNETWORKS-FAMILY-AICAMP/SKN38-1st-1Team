@@ -141,6 +141,11 @@
   <img src="docs/erd_final_1team.png" alt="짐니 데이터베이스 ERD" width="1000" />
 </p>
 
+<p align="center">
+  <a href="docs/erd_original.png">초기설계 ERD</a> ·
+  <a href="sql/schema.sql">테이블 생성 SQL</a>
+</p>
+
 ### Database Tables
 
 | 테이블 | 역할 |
