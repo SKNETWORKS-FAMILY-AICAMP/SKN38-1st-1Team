@@ -31,6 +31,7 @@ from services.transport_request import (
     validate_request,
 )
 from services.fare_table import ITEM_GRADES
+from services.fare_view import title_with_fare_button
 from services.ui import step_header
 
 SIDES = {"pickup": "출발지", "dropoff": "도착지"}
@@ -39,7 +40,7 @@ DETAIL_KEY = "address_detail"   # {"pickup": 상세주소, "dropoff": ...}
 
 # [기능 1] 상단 단계 표시 및 타이틀 설정
 step_header(1)
-st.title("운송 정보 입력")
+title_with_fare_button("운송 정보 입력", "request")   # 입력 중인 내용을 두고 요금표 창으로 확인
 
 # 세션에 저장된 기존 데이터 로드 (없을 경우 기본값 세팅)
 saved = st.session_state.get(REQUEST_KEY, {})

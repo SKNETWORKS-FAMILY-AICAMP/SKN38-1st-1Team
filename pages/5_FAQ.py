@@ -2,22 +2,16 @@
 
 - 데이터: MySQL faqs → 비어 있거나 연결 실패 시 data/processed/jimni_faq.json (services/faq.py)
 - 크롤링한 타사 FAQ(sendy_FAQ)는 짐니 정책이 아니므로 이 화면에서 사용하지 않는다.
-- 화면 배치: 운임 요금표 → 자주 묻는 질문(카테고리 → 키워드 검색 → 질문 목록)
+- 화면 배치: 제목 옆 [요금표 보기] 버튼 → 자주 묻는 질문(카테고리 → 키워드 검색 → 질문 목록)
 """
 
 import streamlit as st
 
 from services.faq import ALL, answer_markdown, categories, category_label, filter_faqs, load_faqs
+from services.fare_view import title_with_fare_button
 
-st.title("FAQ")
-
-# ── 운임 요금표 (상세 표는 [요금표 보기] → 요금표 페이지) ────────────────────
-with st.container(border=True):
-    head, link = st.columns([3, 1], vertical_alignment="center")
-    head.subheader("운임 요금표")
-    if link.button("요금표 보기", width="stretch"):
-        st.switch_page("pages/7_Fare_Table.py")
-    st.caption("거리별 기본 운임 · 작업 추가 요금 · 계단 요금 · 수수료는 [요금표 보기]에서 확인하세요.")
+# 제목 바로 옆 [요금표 보기] → 요금표 창 (거리별 운임 · 계단 · 짐 크기 · 인력 · 수수료)
+title_with_fare_button("FAQ", "faq")
 
 # ── 자주 묻는 질문 ────────────────────────────────────────────────────
 st.subheader("자주 묻는 질문")
