@@ -3,7 +3,7 @@
 - 출발지·도착지는 카카오 주소 검색 결과에서 선택해야만 유효 (services/kakao_local.py)
 - 입력값은 services.transport_request.REQUEST_KEY로 session_state에 저장 → 매칭 결과 화면에서 사용
   (pickup_*/dropoff_* 좌표 + 기존 origin_address/dest_address 키)
-- 거리·운임·차량 추천·기사 매칭은 각 담당 기능에서 계산 (이 화면에서 계산하지 않음)
+- 거리·운임·차량 추천·기사 매칭은 매칭 결과 화면에서 계산 (이 화면에서 계산하지 않음)
 """
 
 from base64 import b64encode
@@ -190,7 +190,7 @@ def address_picker(side: str, label: str) -> None:
         st.caption("검색 결과에서 주소를 선택해야 다음 단계로 진행할 수 있어요.")
 
 
-left = st.container()  # 단계 표시와 같은 전체 폭 사용 (예전 3:1 칸 나눔은 오른쪽이 비어 왼쪽으로 쏠려 보였음)
+left = st.container()  # 단계 표시와 같은 전체 폭 사용
 
 with left:
     st.caption(f"운송 차량: {' · '.join(VEHICLE_TYPES)} (입력한 짐에 맞춰 추천 예정)")

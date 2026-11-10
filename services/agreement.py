@@ -1,7 +1,7 @@
 """사전 확정 운임 — 예약 전 최종 운임·작업 조건 확인과 소비자 동의 상태 관리
 
 흐름
-    1) 매칭 결과 화면(2_Driver_Matching)에서 예준님 운임 계산(fare.estimate) 결과로 build_quote() → request["quote"]
+    1) 매칭 결과 화면(2_Driver_Matching)에서 운임 계산(fare.estimate) 결과로 build_quote() → request["quote"]
        견적에는 '견적을 낼 때의 운송 조건 해시(conditions_hash)'를 함께 저장한다.
     2) 예약하기 화면(6_Booking)에서 quote_problem()으로 견적이 지금 조건과 맞는지·확정 운임인지 확인
     3) 동의 체크 → record_agreement() (조건+운임 전체의 terms_hash와 동의 시각을 세션에 저장)

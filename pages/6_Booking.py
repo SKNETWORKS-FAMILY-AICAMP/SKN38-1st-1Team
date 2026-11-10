@@ -1,8 +1,8 @@
-"""예약하기 — 최종 운임·작업 조건 확인 → 사전 동의 → 예약 확정(저장 + 시연용 기사 자동 배정) → 매칭 완료 알림
+"""예약하기 — 최종 운임·작업 조건 확인 → 사전 동의 → 예약 확정(저장 + 기사 자동 배정) → 매칭 완료 알림
 
-- 금액·차량·거리: 매칭 결과 화면에서 저장한 견적(request["quote"], 예준님 fare.estimate 결과) 그대로 사용
+- 금액·차량·거리: 매칭 결과 화면에서 저장한 견적(request["quote"], fare.estimate 결과) 그대로 사용
 - 동의: services/agreement.py (조건·운임이 바뀌면 동의 자동 해제, 확정 직전에 다시 검증)
-- 저장·배정: services/assignment.py → 예준님 matching.recommend_drivers + booking.create_booking 재사용
+- 저장·배정: services/assignment.py → matching.recommend_drivers + booking.create_booking 재사용
 - 매칭 완료 알림은 DB에 저장된 예약을 다시 읽어 온 경우에만 표시
 - 예약 저장·기사 배정은 이 화면의 [예약 확정하기]에서만 실행 (3단계 [이 기사님으로 예약하기]는 이 화면으로 이동만 함)
 - 확정 직후 5단계 완료 화면 + 매칭 완료 팝업(st.dialog, 한 번만). 다시 확정을 눌러도 중복 저장하지 않음

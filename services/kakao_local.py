@@ -1,7 +1,7 @@
 """카카오 주소 검색 · 위치 지도 (운송 신청 화면용)
 
 담당 범위: 주소 검색 → 사용자가 결과 선택 → 위도·경도 확보 → 지도에 마커 표시
-          거리·경로·소요시간·운임 계산은 services/fare.py (예준님) 담당이며 여기서 하지 않는다.
+          거리·경로·소요시간·운임 계산은 services/fare.py에서 하며 여기서 하지 않는다.
 
 API (카카오 개발자 문서 기준)
     - 주소 검색   GET https://dapi.kakao.com/v2/local/search/address.json  (REST API 키)
