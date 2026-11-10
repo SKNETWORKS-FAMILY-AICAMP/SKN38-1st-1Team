@@ -3,8 +3,8 @@
 연결 위치 (담당자가 아래 함수를 만들면 이 화면에 자동으로 표시됨)
     services/fare.py      estimate(request: dict) -> dict
         예: {"vehicle_type": "라보", "distance_km": 12.3, "estimated_minutes": 35, "estimated_fare": 65000}
-    services/matching.py  recommend_drivers(request: dict) -> list[dict]
-        예: [{"driver_id": 1, "nickname": ..., "vehicle_type": ..., "rating": ..., "distance_km": ...}, ...]
+    services/matching.py  recommend_drivers(request: dict, estimate, sort_by) -> list[dict]
+        예: [{"driver_id": 1, "nickname": ..., "vehicle_type": ..., "rating": ..., "rating_count": ..., "distance_km": ...}, ...]
 선택한 기사는 st.session_state[SELECTED_DRIVER_KEY]에 저장되어 예약하기 화면으로 전달된다.
 """
 
@@ -87,6 +87,7 @@ with st.expander("입력한 운송 조건", expanded=True):
 st.subheader("추천 차량 · 예상 거리 · 예상 운임")
 
 estimate_result = None
+service_type = None                     # 운임 계산 전에 오류가 나도 아래 예약하기에서 이름 오류가 나지 않게
 
 try:
     # 1. 물품 수량 변환
@@ -227,10 +228,28 @@ if estimate_result:
 
 
 # ============================================================
-# 6. 추천 기사님 (1명 카드 → 예약하기, 실제 배정은 예약 확정 시 services/assignment.py)
+# 6. 추천 기사님 (5명 목록 → 예약하기, 실제 배정은 예약 확정 시 services/assignment.py)
 # ============================================================
 
 st.subheader("추천 기사님")
+
+# 예약하기 버튼: 마우스를 올리면 더 진한 파랑 + 살짝 떠오름
+st.html("""<style>
+[class*="st-key-pick_"] button { transition: background-color .15s, transform .15s; }
+[class*="st-key-pick_"] button:hover:enabled { background-color: #1d4ed8; border-color: #1d4ed8; transform: translateY(-1px); }
+</style>""")
+
+PICK_KEY = "picked_driver"                                   # 이번에 누른 기사 (한 명만)
+
+
+def _pick(driver: dict) -> None:
+    st.session_state.setdefault(PICK_KEY, driver)            # 처음 누른 기사만 반영 (연속 클릭 무시)
+
+
+sort_by = st.segmented_control(                              # 정렬: 가까운 순 / 별점 높은 순
+    "정렬", list(matching.SORT_OPTIONS), default="distance",
+    format_func=matching.SORT_OPTIONS.get, label_visibility="collapsed",
+) or "distance"
 
 recommend_fn = getattr(matching, "recommend_drivers", None)
 drivers = []
@@ -239,38 +258,32 @@ if recommend_fn is None:
     st.info("기사 매칭 기능을 준비 중입니다.")
 else:
     try:
-        drivers = recommend_fn(request, estimate_result)   # 운임 계산과 같은 추천 차량 기준으로 매칭
+        drivers = recommend_fn(request, estimate_result, sort_by=sort_by)   # 운임 계산과 같은 추천 차량 기준
     except Exception as error:
         st.error(f"기사 매칭 중 오류가 발생했습니다: {error}")
 
 if recommend_fn is not None and not drivers:
     st.info("조건에 맞는 기사님이 없습니다. 날짜나 출발지를 바꿔 다시 시도해 주세요.")
 
-if drivers:
-    # 같은 요청 안에서 "다른 기사님 보기"를 누를 때마다 다음 순위 기사로 넘어감
-    idx_key = f"driver_idx_{request['origin_address']}_{request['scheduled_at']}"
-    idx = st.session_state.get(idx_key, 0) % len(drivers)
-    d = drivers[idx]
+picked = st.session_state.get(PICK_KEY)
 
+for rank, d in enumerate(drivers, start=1):
     with st.container(border=True):
-        c1, c2 = st.columns([1, 4], vertical_alignment="center")
-        c1.markdown(matching.avatar_html(d), unsafe_allow_html=True)       # 프로필 일러스트
-        c2.markdown(f"#### {d['nickname'].replace('*', chr(92) + '*')} 기사님")   # 마스킹 별표 그대로 표시
-        rating = f"★ {d['rating']:.1f}" if d["rating"] is not None else "신규 기사님"
-        c2.write(f"🚚 {d['vehicle_type']}  ·  📍 출발지에서 {d['distance_km']}km  ·  {rating}")
-        c2.caption(f"추천 {idx + 1} / {len(drivers)}")
+        c1, c2, c3 = st.columns([1, 5, 2], vertical_alignment="center")
+        c1.markdown(matching.avatar_html(d, size=64), unsafe_allow_html=True)          # 프로필 일러스트
+        c2.markdown(f"**{rank}. {d['nickname'].replace('*', chr(92) + '*')} 기사님**")  # 마스킹 별표 그대로 표시
+        rating = f"★ {d['rating']:.1f} ({d['rating_count']}건)" if d["rating"] is not None else "신규 기사님"
+        c2.caption(f"🚚 {d['vehicle_type']}  ·  📍 출발지에서 {d['distance_km']}km  ·  {rating}")
+        c3.button("예약하기", key=f"pick_{d['driver_id']}", type="primary", use_container_width=True,
+                  disabled=picked is not None, on_click=_pick, args=(d,))           # 한 명 누르면 모두 잠금
 
-    b1, b2 = st.columns(2)
-    if len(drivers) > 1 and b1.button("다른 기사님 보기", use_container_width=True):
-        st.session_state[idx_key] = idx + 1
-        st.rerun()
-    if b2.button("이 기사님으로 예약하기", type="primary", use_container_width=True):
-        st.session_state[SELECTED_DRIVER_KEY] = d               # 예약하기 화면으로 기사 정보 전달 (선호 기사)
-        st.session_state.pop("booking_result", None)            # 새 예약 진행: 이전 완료 화면 대신 4단계 예약하기부터
-        # 화면에 보여준 견적(운임 내역 + 견적 당시 조건 해시)을 사전 확정 운임 동의·예약 저장에 그대로 사용
-        request["quote"] = agreement.build_quote(request, estimate_result, service_type)
-        st.switch_page("pages/6_Booking.py")
-        st.switch_page("pages/6_Booking.py")
+if picked:                                                   # 누른 기사 1명만 예약하기 화면으로
+    st.session_state.pop(PICK_KEY)                           # 다시 돌아왔을 때 버튼이 잠겨 있지 않게
+    st.session_state[SELECTED_DRIVER_KEY] = picked           # 예약하기 화면으로 기사 정보 전달 (선호 기사)
+    st.session_state.pop("booking_result", None)             # 새 예약 진행: 이전 완료 화면 대신 4단계 예약하기부터
+    # 화면에 보여준 견적(운임 내역 + 견적 당시 조건 해시)을 사전 확정 운임 동의·예약 저장에 그대로 사용
+    request["quote"] = agreement.build_quote(request, estimate_result, service_type)
+    st.switch_page("pages/6_Booking.py")
 
 
 # ============================================================
