@@ -12,7 +12,7 @@ from html import escape
 
 import streamlit as st
 
-from services import agreement, assignment, notifications
+from services import agreement, assignment, notifications, settlement
 from services import booking_lookup as bl
 from services.db import DBConnectionError, get_connection
 from services.transport_request import HELPER_OPTIONS, ITEM_SIZES, REQUEST_KEY, SELECTED_DRIVER_KEY
@@ -95,7 +95,7 @@ if result and result["conditions_hash"] == agreement.conditions_hash(request):
         ("배정 기사님", f"{b['driver_name']} 기사님" if b.get("driver_name") else "-"),
         ("차량 종류", vehicle_text(b)),
         ("운송 일시", f"{b['scheduled_at']:%Y년 %m월 %d일 %H:%M}"),
-        ("합의 운임", won(b["estimated_fare"])),
+        ("합의 운임 (결제 금액)", won(b["estimated_fare"])),   # bookings.estimated_fare = 운임 + 이용료
     ])
     c1, c2, _ = st.columns([2, 1, 2])
     if c1.button("예약 조회에서 확인하기", type="primary", width="stretch", icon=":material/event_note:"):
@@ -133,6 +133,7 @@ fare_rows = [
     (f"추가 인력 ({SERVICE_NAMES.get(quote.get('service_type'), '-')})", quote.get("service_fee")),
     ("출발지 계단 작업", quote.get("origin_stair_fee")),
     ("도착지 계단 작업", quote.get("destination_stair_fee")),
+    (f"서비스 이용료 ({settlement.SERVICE_FEE_PCT}%)", quote.get("usage_fee")),
 ]
 st.html(
     '<div class="jm-terms"><p class="jm-terms-title">최종 운임 · 작업 조건 확인</p>'
@@ -146,8 +147,8 @@ st.html(
     f"<div><dt>운송 거리</dt><dd>{escape(distance)}</dd></div>"
     "</dl><table class=\"fare\">"
     + "".join(f"<tr><th>{label}</th><td>{won(v)}</td></tr>" for label, v in fare_rows)
-    + f"<tr class=\"total\"><th>최종 합의 운임</th><td>{won(quote['estimated_fare'])}</td></tr></table>"
-    "<p class=\"jm-terms-note\">운임은 짐니 운임표(차량·거리 구간, 인력, 계단 작업) 기준으로 계산했어요. "
+    + f"<tr class=\"total\"><th>최종 합의 운임 (결제 금액)</th><td>{won(quote['payable_total'])}</td></tr></table>"
+    "<p class=\"jm-terms-note\">운임은 짐니 운임표(차량·거리 구간, 인력, 계단 작업) 기준으로 계산했고, 서비스 이용료(5%)를 더한 금액을 결제해요. "
     "합의한 조건과 다른 추가 작업은 현장에서 요구할 수 없어요.</p></div>"
 )
 
