@@ -1,6 +1,6 @@
 """홈 — 서비스 소개, [운송 신청하기]·[요금표 보기], 이용 방법, 공공데이터(화물차 등록 현황) 간단 소개
 
-운송 신청 폼은 pages/1_Delivery_Request.py, 버블 지도·시군구 상세는 pages/4_Truck_Map.py (상단 메뉴 '화물차 현황')
+운송 신청 폼은 pages/1_Delivery_Request.py, 버블 지도·시군구 상세는 pages/4_Truck_Map.py (상단 메뉴 '지역별 현황')
 """
 
 import streamlit as st
@@ -35,7 +35,7 @@ st.space("large")
 section_title("이용 방법", "다섯 단계면 운송 예약이 끝나요", "로그인 없이, 필요한 정보만 입력하면 됩니다.")
 how_it_works()
 
-# ── 3. 공공데이터 간단 소개 (지도·시군구 상세는 '화물차 현황' 페이지) ─────
+# ── 3. 공공데이터 간단 소개 (지도·시군구 상세는 '지역별 현황' 페이지) ─────
 st.space("large")
 with st.container(key="soft_home_data"):
     info, figure = st.columns([3, 2], gap="large", vertical_alignment="center")
@@ -57,5 +57,6 @@ with st.container(key="soft_home_data"):
                 )
         except DBConnectionError as e:
             st.error(str(e))
-        if st.button("화물차 현황 자세히 보기", type="primary", width="stretch"):
+        if st.button("지역별 현황 보기", type="primary", width="stretch"):
+            st.session_state["region_view"] = "배차 가능 기사 현황"   # 지역별 현황의 기본 화면으로 이동
             st.switch_page("pages/4_Truck_Map.py")

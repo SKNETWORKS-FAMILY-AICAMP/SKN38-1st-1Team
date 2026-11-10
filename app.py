@@ -1,6 +1,6 @@
 """짐니(JIMNI) — Streamlit 진입점 (실행: python -m streamlit run app.py)
 
-- 첫 접속부터 홈 화면 + 상단 메뉴 (홈 / 운송 신청 / 화물차 현황 / 예약 조회 / FAQ), 로고를 누르면 홈으로 이동
+- 첫 접속부터 홈 화면 + 상단 메뉴 (홈 / 운송 신청 / 지역별 현황 / 예약 조회 / FAQ), 로고를 누르면 홈으로 이동
 - 메뉴에 없는 화면(매칭 결과, 예약하기, 요금표)은 버튼·푸터 링크로 이동 (visibility="hidden")
 - 로그인 없음 (비회원 이용)
 - 공통 디자인: .streamlit/config.toml(테마) + services/ui.py(헤더·버튼·카드 CSS, 공통 푸터)
@@ -18,7 +18,7 @@ home = st.Page("pages/0_Home.py", title="홈", icon=":material/home:", default=T
 menu_pages = [
     home,
     st.Page("pages/1_Delivery_Request.py", title="운송 신청", icon=":material/local_shipping:", url_path="request"),
-    st.Page("pages/4_Truck_Map.py", title="화물차 현황", icon=":material/map:", url_path="truck-map"),
+    st.Page("pages/4_Truck_Map.py", title="지역별 현황", icon=":material/map:", url_path="truck-map"),
     st.Page("pages/3_Booking_Lookup.py", title="예약 조회", icon=":material/event_note:", url_path="booking-lookup"),
     st.Page("pages/8_Driver_Login.py", title="파트너센터", icon=":material/badge:", url_path="driver-login"),
     st.Page("pages/5_FAQ.py", title="FAQ", icon=":material/help:", url_path="faq"),

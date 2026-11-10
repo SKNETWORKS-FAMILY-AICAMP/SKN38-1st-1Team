@@ -24,12 +24,21 @@ LAYER_ID = "sido_bubble"
 MAX_RADIUS_M = 52_000      # 등록대수 최대 지역의 버블 반지름(m)
 MAP_STYLE = "https://basemaps.cartocdn.com/gl/voyager-nolabels-gl-style/style.json"  # 연한 하늘색 바다·밝은 육지, 지명 글자 없음
 
-# 등록대수 구간별 버블 색 (브랜드 블루 #2563EB 계열, 많을수록 진하게) — 범례와 같은 기준
-TIERS = [  # (하한, 범례 문구, 채우기 RGBA, 글자색)
-    (0, "10,000대 미만", [37, 99, 235, 45], [17, 31, 63]),
-    (10_000, "10,000 ~ 30,000대", [37, 99, 235, 95], [17, 31, 63]),
-    (30_000, "30,000대 이상", [37, 99, 235, 185], [255, 255, 255]),
+# 수치 구간별 버블 색 (브랜드 블루 #2563EB 계열, 많을수록 진하게) — 범례와 같은 기준
+# 두 화면(가상 기사 현황 · 화물차 등록 현황)이 같은 3단계 색을 쓰고, 구간 경계(bounds)와 단위만 바뀐다
+TIERS = [  # (채우기 RGBA, 글자색) — 연한 → 진한
+    ([37, 99, 235, 45], [17, 31, 63]),
+    ([37, 99, 235, 95], [17, 31, 63]),
+    ([37, 99, 235, 185], [255, 255, 255]),
 ]
+DEFAULT_BOUNDS = (10_000, 30_000)    # 화물차 등록대수 기준 (대)
+# 가상 기사 현황용 변형: 하늘빛 블루 + 얇은 블루 테두리로 화물차 등록 현황 지도와 구분 (검정 테두리 없음)
+DRIVER_TIERS = [
+    ([56, 189, 248, 50], [12, 74, 110]),
+    ([14, 165, 233, 100], [12, 74, 110]),
+    ([2, 132, 199, 190], [255, 255, 255]),
+]
+DRIVER_LINE = [2, 132, 199, 170]
 HOVER = [29, 78, 216, 150]          # 마우스를 올린 버블 (버블은 테두리 없이 색으로만 구분)
 SELECTED_FILL = [29, 78, 216, 235]  # 선택한 버블: 진한 블루 #1D4ED8
 
@@ -81,18 +90,24 @@ def is_consistent(check: dict | None) -> bool:
     return bool(check) and not (check["unmatched_points"] or check["unmatched_db"] or check["duplicated_points"])
 
 
-def tier_of(count: int) -> tuple:
-    """등록대수가 속한 색 구간."""
-    return [t for t in TIERS if count >= t[0]][-1]
+def tier_of(count: int, bounds: tuple = DEFAULT_BOUNDS, variant: str = "default") -> tuple:
+    """수치가 속한 색 구간 (채우기, 글자색)."""
+    return (DRIVER_TIERS if variant == "drivers" else TIERS)[sum(count >= b for b in bounds)]
 
 
-def legend_html() -> str:
+def tier_labels(unit: str, bounds: tuple = DEFAULT_BOUNDS) -> list[str]:
+    low, high = bounds
+    return [f"{low:,}{unit} 미만", f"{low:,} ~ {high:,}{unit}", f"{high:,}{unit} 이상"]
+
+
+def legend_html(title: str = "영업용 화물차 등록대수", unit: str = "대", bounds: tuple = DEFAULT_BOUNDS,
+                variant: str = "default") -> str:
     """지도 오른쪽 아래에 겹쳐 표시하는 범례 (TIERS와 같은 기준)."""
     rows = "".join(
         f'<li><i style="background:rgba({c[0]},{c[1]},{c[2]},{c[3] / 255:.2f})"></i>{label}</li>'
-        for _, label, c, _ in TIERS
+        for (c, _), label in zip(DRIVER_TIERS if variant == "drivers" else TIERS, tier_labels(unit, bounds))
     )
-    return f'<div class="jm-map-legend"><b>영업용 화물차 등록대수</b><ul>{rows}</ul></div>'
+    return f'<div class="jm-map-legend"><b>{title}</b><ul>{rows}</ul></div>'
 
 
 def _label_position(name: str, lon: float, lat: float) -> list[float]:
@@ -102,7 +117,8 @@ def _label_position(name: str, lon: float, lat: float) -> list[float]:
     return [lon + dx * M_PER_PX / meters_per_deg_lon, lat - dy * M_PER_PX / 110_540]
 
 
-def bubble_data(points: pd.DataFrame, sido: pd.DataFrame) -> list[dict]:
+def bubble_data(points: pd.DataFrame, sido: pd.DataFrame, unit: str = "대", bounds: tuple = DEFAULT_BOUNDS,
+                variant: str = "default") -> list[dict]:
     """버블 레코드 (큰 버블부터 → 작은 버블이 위에 그려져 마우스로 고를 수 있음)."""
     df = points[["sido_name", "lon", "lat"]].merge(sido[["sido_name", "truck_count"]], on="sido_name")
     vmax = int(df["truck_count"].max())
@@ -110,12 +126,12 @@ def bubble_data(points: pd.DataFrame, sido: pd.DataFrame) -> list[dict]:
     records = []
     for r in df.to_dict("records"):
         count = int(r["truck_count"])
-        _, _, fill, text_color = tier_of(count)
+        fill, text_color = tier_of(count, bounds, variant)
         share = math.sqrt(count / vmax)
         name = "전남·광주" if r["sido_name"] == "전남광주" else r["sido_name"]
         records.append({
-            **r, "truck_count": count, "radius": round(MAX_RADIUS_M * share), "count_label": f"{count:,}대",
-            "label": f"{name}\n{count:,}대", "fill": fill, "text_color": text_color,
+            **r, "truck_count": count, "radius": round(MAX_RADIUS_M * share), "count_label": f"{count:,}{unit}",
+            "label": f"{name}\n{count:,}{unit}", "fill": fill, "text_color": text_color,
             "dark": text_color[0] == 255,
             "text_size_m": round((11 + 6 * share) * M_PER_PX),  # 큰 버블일수록 글자도 크게 (기준 줌에서 11~17px)
             "label_position": _label_position(r["sido_name"], r["lon"], r["lat"]),
@@ -130,14 +146,24 @@ def build_deck(
     selected: str | None = None,
     labels: bool = True,
     zoom: float = BASE_ZOOM,
+    unit: str = "대",
+    tooltip_label: str = "영업용 화물차",
+    basis: str | None = None,
+    bounds: tuple = DEFAULT_BOUNDS,
+    variant: str = "default",
+    bubble_max_px: int | None = None,
 ) -> pdk.Deck:
-    data = bubble_data(points, sido)
+    """시도별 버블 지도. 표시 데이터와 문구(unit·tooltip_label·basis)만 바꿔 두 현황 화면이 같은 디자인을 쓴다."""
+    data = bubble_data(points, sido, unit, bounds, variant)
+    outline = variant == "drivers"   # 가상 기사 현황: 얇은 하늘빛 테두리
     # 주의: pydeck은 문자열 인자를 JS 식으로 바꾼다 (예: "fill" → 각 레코드의 fill 값).
     #       단위·크기는 숫자로, 글자 그대로의 값은 "'auto'"처럼 따옴표로 감싸서 넘긴다.
     layers = [
         pdk.Layer(
-            "ScatterplotLayer", data, id=LAYER_ID, pickable=True, stroked=False, filled=True,
+            "ScatterplotLayer", data, id=LAYER_ID, pickable=True, stroked=outline, filled=True,
             get_position=["lon", "lat"], get_radius="radius", radius_min_pixels=3,
+            **({"radius_max_pixels": bubble_max_px} if bubble_max_px else {}),
+            get_line_color=DRIVER_LINE, line_width_min_pixels=1.5,
             get_fill_color="fill", auto_highlight=True, highlight_color=HOVER,  # hover 시 조금 더 진한 블루
         )
     ]
@@ -146,6 +172,7 @@ def build_deck(
             "ScatterplotLayer", [d for d in data if d["sido_name"] == selected], id="selected",
             pickable=False, stroked=False, filled=True, get_position=["lon", "lat"], get_radius="radius",
             radius_min_pixels=3, get_fill_color=SELECTED_FILL,
+            **({"radius_max_pixels": bubble_max_px} if bubble_max_px else {}),
         ))
     if labels:  # 버블 안에 지역명 + 등록대수. 진한 버블은 흰 글자, 연한 버블은 네이비 글자
         for dark in (False, True):
@@ -165,8 +192,8 @@ def build_deck(
                 outline_color=[29, 78, 216, 230] if dark else [255, 255, 255, 230],
             ))
     tooltip = {
-        "html": f"<b style='font-size:14px'>{{sido_name}}</b><br/>영업용 화물차 <b style='color:#2563EB'>{{count_label}}</b>"
-                f"<br/><span style='color:#5B6475'>{month_label} 기준</span>",
+        "html": f"<b style='font-size:14px'>{{sido_name}}</b><br/>{tooltip_label} <b style='color:#2563EB'>{{count_label}}</b>"
+                f"<br/><span style='color:#5B6475'>{basis or month_label + ' 기준'}</span>",
         "style": TOOLTIP_STYLE,
     }
     view = pdk.ViewState(latitude=BASE_LAT, longitude=127.75, zoom=zoom, min_zoom=5.3, max_zoom=10)  # 한국 중심
