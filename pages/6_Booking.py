@@ -152,7 +152,7 @@ st.html(
 )
 
 if quote.get("vehicle_check_note"):
-    st.caption(f"차량 확인 안내: {quote['vehicle_check_note']} — 차량은 물품 크기별 개수 기준으로 추천했어요.")
+    st.caption(f"차량 확인 안내: 차량은 물품 크기별 개수 기준으로 추천했어요.")
 
 preferred = st.session_state.get(SELECTED_DRIVER_KEY)
 if preferred:
