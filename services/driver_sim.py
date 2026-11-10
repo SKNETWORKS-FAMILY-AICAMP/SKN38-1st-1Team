@@ -98,7 +98,7 @@ _STATUS_SQL = """
 """
 
 
-@st.cache_data(ttl=60, show_spinner="가상 기사 현황을 불러오는 중...")
+@st.cache_data(ttl=60, show_spinner="기사 현황을 불러오는 중...")
 def load_driver_status() -> dict:
     """drivers에 저장된 배정 가능 가상 기사 수 (시군구 기준, 차종별 열 포함).
 

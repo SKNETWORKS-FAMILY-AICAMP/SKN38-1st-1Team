@@ -27,6 +27,7 @@ from services.transport_request import (
     ITEM_SIZES,
     REQUEST_KEY,
     SELECTED_DRIVER_KEY,
+    floor_label,
     VEHICLE_TYPES,
     validate_request,
 )
@@ -62,10 +63,6 @@ if SEL_KEY not in st.session_state:
 FLOOR_OPTIONS = [f for f in range(FLOOR_MIN, FLOOR_MAX + 1) if f != 0]   # 0층은 없음
 
 
-def floor_label(floor: int) -> str:
-    return f"지하 {-floor}층" if floor < 0 else f"{floor}층"
-
-
 def _icon(path: str, size: int = 18, color: str = "#2563EB") -> str:
     """선 아이콘 (st.html이 인라인 svg를 지우므로 data URI 이미지로 넣음)."""
     svg = (f'<svg xmlns="http://www.w3.org/2000/svg" width="{size}" height="{size}" viewBox="0 0 24 24" fill="none" '
@@ -75,8 +72,11 @@ def _icon(path: str, size: int = 18, color: str = "#2563EB") -> str:
 
 ICON_BUILDING = _icon('<rect x="4" y="3" width="11" height="18" rx="1.5"/><path d="M15 9h4a1 1 0 0 1 1 1v11H15"/>'
                       '<path d="M8 7h3M8 11h3M8 15h3"/>')
-ICON_BOX = _icon('<path d="M21 8 12 3 3 8v8l9 5 9-5z"/><path d="m3 8 9 5 9-5M12 13v8"/>')
-ICON_BOX_SM = _icon('<path d="M21 8 12 3 3 8v8l9 5 9-5z"/><path d="m3 8 9 5 9-5M12 13v8"/>', 16, "#9AA3B2")
+BOX_PATH = ('<path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0'
+            'l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/><path d="m7.5 4.27 9 5.15"/>')
+ICON_BOX = _icon(BOX_PATH)                                  # 02 구역 제목
+ICON_BOX_SM = _icon(BOX_PATH, 16)                           # 카드의 크기 기준 버튼
+BOX_CHIP = f'<span class="jm-box-chip">{_icon(BOX_PATH, 13)}</span>'   # 설명 문장 안의 박스 표시
 ICON_CALENDAR = _icon('<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>')
 
 
@@ -219,16 +219,23 @@ with left:
                                                  index=0 if saved.get(f"{key}_has_elevator", True) else 1)
         origin_floor, origin_elev = floors["origin"], floors["origin_elev"]
         dest_floor, dest_elev = floors["dest"], floors["dest_elev"]
-        st.caption("엘리베이터가 없으면 1층 기준 한 층마다 계단 작업 요금이 더해져요. (출발지·도착지 각각)")
+        st.caption("엘리베이터가 없으면 1층 기준 한 층마다 5,000원의 계단 작업 요금이 더해져요. (출발지·도착지 각각)  \n"
+                   "6층 이상 · 지하 3층 이하는 계단 작업 요금이 자동 계산되지 않아 별도 협의가 필요해요. "
+                   "(엘리베이터가 있으면 추가 요금 없음)")
 
         # 02. 물품 정보: 크기별 개수 (기존 2단계 estimate 함수 호환을 위해 소문자 키로 저장)
-        section_head("02", "물품 정보", "운송할 짐의 크기별 개수를 입력해 주세요.", ICON_BOX)
+        section_head("02", "물품 정보", f"운송할 짐의 크기별 개수를 입력해 주세요. {BOX_CHIP}에 마우스를 올리면 "
+                     "크기·무게 기준을 볼 수 있어요.", ICON_BOX)
         counts = {}
         for row in (ITEM_SIZES[:2], ITEM_SIZES[2:]):
             for col, size in zip(st.columns(2), row):
                 key = f"item_{size.lower()}_count"
                 with col, st.container(key=f"rq_item_{size.lower()}"):
-                    st.html(f'<div class="jm-rq-item"><b>{size} 사이즈</b>{ICON_BOX_SM}'
+                    grade = ITEM_GRADES[size]
+                    tip = (f'<span class="jm-rq-tip" tabindex="0" aria-label="{size} 크기 기준 보기">{ICON_BOX_SM}<span class="tip">'
+                           f'<b>{size} 사이즈 기준 (운임표)</b>가로+세로+높이 {grade["max_size_sum"]}cm 이하<br>'
+                           f'무게 {grade["max_weight"]}kg 이하</span></span>')
+                    st.html(f'<div class="jm-rq-item"><b>{size} 사이즈</b>{tip}'
                             f'<span>{escape(ITEM_GRADES[size]["description"])}</span></div>')
                     counts[key] = st.number_input(f"{size} 개수", min_value=0, max_value=ITEM_MAX, step=1,
                                                   value=saved.get(key, 0), label_visibility="collapsed")

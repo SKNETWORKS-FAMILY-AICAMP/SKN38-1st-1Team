@@ -55,7 +55,7 @@ def confirm_booking(request: dict, quote: dict, customer: dict, preferred: dict 
     request = {**request, "quote": quote, "agreement": agreement}          # create_booking은 request["quote"]·["agreement"] 사용
     candidates = candidate_drivers(request, quote, preferred)
     if not candidates:
-        raise AssignmentError("조건에 맞는 시연용 기사님이 없어 예약을 저장하지 않았어요. 날짜나 출발지를 바꿔 다시 시도해 주세요.")
+        raise AssignmentError("조건에 맞는 기사님이 없어 예약을 저장하지 않았어요. 날짜나 출발지를 바꿔 다시 시도해 주세요.")
     for tried, driver in enumerate(candidates, start=1):
         try:
             booking_id = create_booking(request, driver, customer)
