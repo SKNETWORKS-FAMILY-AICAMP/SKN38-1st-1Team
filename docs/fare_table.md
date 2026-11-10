@@ -1,9 +1,3 @@
-# 짐니 운임표
-
-완료: No
-강의: SKN_PROJECT_1 (https://app.notion.com/p/SKN_PROJECT_1-c112147b11e48311bd2c011af86b1b91?pvs=21)
-유형: 과제
-
 # 짐니 실제 요금 기준표
 
 **예상 운임 계산식**
@@ -103,22 +97,6 @@
 
 **근거**: 퀵·용달 플랫폼 평균 수수료 약 23%. 그중 5%를 고객 이용료로 나눠서 기사님 부담을 23%에서 18%로 줄임
 
-![image.png](%EC%A7%90%EB%8B%88%20%EC%9A%B4%EC%9E%84%ED%91%9C/image.png)
-
-![image.png](%EC%A7%90%EB%8B%88%20%EC%9A%B4%EC%9E%84%ED%91%9C/image%201.png)
-
-![image.png](%EC%A7%90%EB%8B%88%20%EC%9A%B4%EC%9E%84%ED%91%9C/image%202.png)
-
-[[baechaking.tistory](https://baechaking.tistory.com/265?category=1191119)][[soomgo](https://soomgo.com/blog/moving/%EC%9A%A9%EB%8B%AC%EB%B9%84%EC%9A%A9/)][[xn--2j1bqa183chzj94e](https://xn--2j1bqa183chzj94e.kr/%EB%8B%A4%EB%A7%88%EC%8A%A4-%EC%9A%A9%EB%8B%AC-%EA%B1%B0%EB%A6%AC%EB%B3%84-%EA%B0%80%EA%B2%A9%ED%91%9C/)]
-
-![스크린샷 2026-11-08 오후 1.16.23.png](%EC%A7%90%EB%8B%88%20%EC%9A%B4%EC%9E%84%ED%91%9C/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA_2026-11-08_%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE_1.16.23.png)
-
-![스크린샷 2026-11-08 오후 1.10.52.png](%EC%A7%90%EB%8B%88%20%EC%9A%B4%EC%9E%84%ED%91%9C/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA_2026-11-08_%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE_1.10.52.png)
-
-![스크린샷 2026-11-08 오후 1.15.51.png](%EC%A7%90%EB%8B%88%20%EC%9A%B4%EC%9E%84%ED%91%9C/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA_2026-11-08_%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE_1.15.51.png)
-
-![스크린샷 2026-11-08 오후 1.21.48.png](%EC%A7%90%EB%8B%88%20%EC%9A%B4%EC%9E%84%ED%91%9C/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA_2026-11-08_%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE_1.21.48.png)
-
 ### 기사 및 추가 작업자 요금
 
 단위: 원 / 편도
@@ -129,7 +107,3 @@
 | 기사 상하차 도움 | 40,000 | 공개 안내 범위 2~4만원의 중간값 |
 | 추가 작업자 1명 | 70,000 | 초기 정책 제안 |
 | 추가 작업자 2명 | 140,000 | 초기 정책 제안 |
-
-[[soomgo](https://soomgo.com/blog/moving/%EC%9A%A9%EB%8B%AC%EC%9D%B4%EC%82%AC/)][[https://placemanual.com/price/oneroom-1ton-yongdal-moving-price/?utm_source=chatgpt.com](https://placemanual.com/price/oneroom-1ton-yongdal-moving-price/?utm_source=chatgpt.com)]
-
-#
