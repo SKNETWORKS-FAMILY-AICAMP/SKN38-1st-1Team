@@ -20,6 +20,7 @@ menu_pages = [
     st.Page("pages/1_Delivery_Request.py", title="운송 신청", icon=":material/local_shipping:", url_path="request"),
     st.Page("pages/4_Truck_Map.py", title="지역별 현황", icon=":material/map:", url_path="truck-map"),
     st.Page("pages/3_Booking_Lookup.py", title="예약 조회", icon=":material/event_note:", url_path="booking-lookup"),
+    st.Page("pages/8_Driver_Login.py", title="파트너센터", icon=":material/badge:", url_path="driver-login"),
     st.Page("pages/5_FAQ.py", title="FAQ", icon=":material/help:", url_path="faq"),
 ]
 hidden_pages = [
