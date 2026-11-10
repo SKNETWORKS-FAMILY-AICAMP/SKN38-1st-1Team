@@ -6,6 +6,7 @@
 - 거리·운임·차량 추천·기사 매칭은 각 담당 기능에서 계산 (이 화면에서 계산하지 않음)
 """
 
+from base64 import b64encode
 from datetime import date, datetime, time, timedelta
 from html import escape
 
@@ -29,6 +30,7 @@ from services.transport_request import (
     VEHICLE_TYPES,
     validate_request,
 )
+from services.fare_table import ITEM_GRADES
 from services.ui import step_header
 
 SIDES = {"pickup": "출발지", "dropoff": "도착지"}
@@ -54,6 +56,34 @@ if SEL_KEY not in st.session_state:
         for side in SIDES
     }
     st.session_state[DETAIL_KEY] = {side: saved.get(f"{side}_detail_address", "") for side in SIDES}
+
+
+FLOOR_OPTIONS = [f for f in range(FLOOR_MIN, FLOOR_MAX + 1) if f != 0]   # 0층은 없음
+
+
+def floor_label(floor: int) -> str:
+    return f"지하 {-floor}층" if floor < 0 else f"{floor}층"
+
+
+def _icon(path: str, size: int = 18, color: str = "#2563EB") -> str:
+    """선 아이콘 (st.html이 인라인 svg를 지우므로 data URI 이미지로 넣음)."""
+    svg = (f'<svg xmlns="http://www.w3.org/2000/svg" width="{size}" height="{size}" viewBox="0 0 24 24" fill="none" '
+           f'stroke="{color}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">{path}</svg>')
+    return f'<img src="data:image/svg+xml;base64,{b64encode(svg.encode()).decode()}" width="{size}" height="{size}" alt="">'
+
+
+ICON_BUILDING = _icon('<rect x="4" y="3" width="11" height="18" rx="1.5"/><path d="M15 9h4a1 1 0 0 1 1 1v11H15"/>'
+                      '<path d="M8 7h3M8 11h3M8 15h3"/>')
+ICON_BOX = _icon('<path d="M21 8 12 3 3 8v8l9 5 9-5z"/><path d="m3 8 9 5 9-5M12 13v8"/>')
+ICON_BOX_SM = _icon('<path d="M21 8 12 3 3 8v8l9 5 9-5z"/><path d="m3 8 9 5 9-5M12 13v8"/>', 16, "#9AA3B2")
+ICON_CALENDAR = _icon('<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>')
+
+
+def section_head(no: str, title: str, desc: str, icon: str) -> None:
+    """폼 구역 제목 (아이콘 · 번호 · 제목 · 설명)."""
+    line = '<hr class="jm-rq-hr">' if no != "01" else ""          # 두 번째 구역부터 위에 구분선
+    st.html(f'{line}<div class="jm-rq-head"><span class="ic">{icon}</span>'
+            f'<div><b>{no}. {title}</b><p>{desc}</p></div></div>')
 
 
 PAGE_SIZE = 5   # 검색 결과 기본 표시 개수 (나머지는 '더 보기')
@@ -172,39 +202,46 @@ with left:
     selection = st.session_state[SEL_KEY]
     render_location_map([{**loc, "label": SIDES[side]} for side, loc in selection.items() if loc])
 
-    # [기능 2-2] 운송 정보 입력 폼 구성
+    # [기능 2-2] 운송 정보 입력 폼 구성 (01 건물 정보 · 02 물품 정보 · 03 일정·추가 인력)
     with st.form("transport_request_form"):
-        # 1-2. 층수 및 엘리베이터 여부 입력
-        c1, c2 = st.columns(2)
-        with c1:
-            origin_floor = st.number_input("출발지 층수", min_value=FLOOR_MIN, max_value=FLOOR_MAX, step=1,
-                                           value=saved.get("origin_floor", 1))
-            origin_elev = st.radio("출발지 엘리베이터", ["있음", "없음"], horizontal=True,
-                                   index=0 if saved.get("origin_has_elevator", True) else 1)
-        with c2:
-            dest_floor = st.number_input("도착지 층수", min_value=FLOOR_MIN, max_value=FLOOR_MAX, step=1,
-                                         value=saved.get("dest_floor", 1))
-            dest_elev = st.radio("도착지 엘리베이터", ["있음", "없음"], horizontal=True,
-                                 index=0 if saved.get("dest_has_elevator", True) else 1)
+        # 01. 건물 정보: 층수 · 엘리베이터
+        section_head("01", "건물 정보", "짐을 싣고 내리는 장소의 작업 환경을 알려 주세요.", ICON_BUILDING)
+        c1, c2 = st.columns(2, gap="large")
+        floors = {}
+        for col, side, key in ((c1, "출발지", "origin"), (c2, "도착지", "dest")):
+            with col, st.container(key=f"rq_place_{key}"):
+                st.html(f'<p class="jm-rq-side">{side}</p>')
+                floor = saved.get(f"{key}_floor", 1)
+                floors[key] = st.selectbox("층수", FLOOR_OPTIONS, format_func=floor_label, key=f"rq_{key}_floor",
+                                           index=FLOOR_OPTIONS.index(floor) if floor in FLOOR_OPTIONS else FLOOR_OPTIONS.index(1))
+                floors[f"{key}_elev"] = st.radio("엘리베이터", ["있음", "없음"], horizontal=True, key=f"rq_{key}_elev",
+                                                 index=0 if saved.get(f"{key}_has_elevator", True) else 1)
+        origin_floor, origin_elev = floors["origin"], floors["origin_elev"]
+        dest_floor, dest_elev = floors["dest"], floors["dest_elev"]
+        st.caption("엘리베이터가 없으면 1층 기준 한 층마다 계단 작업 요금이 더해져요. (출발지·도착지 각각)")
 
-        # 1-3. 물품 크기별 개수 입력 (기존 2단계 estimate 함수 호환을 위해 소문자 키로 저장)
-        st.markdown("**물품 크기별 개수**")
-        item_cols = st.columns(len(ITEM_SIZES))
+        # 02. 물품 정보: 크기별 개수 (기존 2단계 estimate 함수 호환을 위해 소문자 키로 저장)
+        section_head("02", "물품 정보", "운송할 짐의 크기별 개수를 입력해 주세요.", ICON_BOX)
         counts = {}
-        for col, size in zip(item_cols, ITEM_SIZES):
-            # 대소문자 차이로 인한 매칭 오류 방지를 위해 소문자 키(item_s_count 등)로 통일
-            key = f"item_{size.lower()}_count"
-            counts[key] = col.number_input(size, min_value=0, max_value=ITEM_MAX, step=1, value=saved.get(key, 0))
+        for row in (ITEM_SIZES[:2], ITEM_SIZES[2:]):
+            for col, size in zip(st.columns(2), row):
+                key = f"item_{size.lower()}_count"
+                with col, st.container(key=f"rq_item_{size.lower()}"):
+                    st.html(f'<div class="jm-rq-item"><b>{size} 사이즈</b>{ICON_BOX_SM}'
+                            f'<span>{escape(ITEM_GRADES[size]["description"])}</span></div>')
+                    counts[key] = st.number_input(f"{size} 개수", min_value=0, max_value=ITEM_MAX, step=1,
+                                                  value=saved.get(key, 0), label_visibility="collapsed")
 
-        # 1-4. 희망 일시 및 추가 인력 선택
-        st.markdown("**희망 운송 일시 · 추가 인력**")
-        c3, c4 = st.columns(2)
-        sched_date = c3.date_input("날짜", value=default_dt.date(), min_value=date.today())
-        sched_time = c4.time_input("시간", value=default_dt.time(), step=timedelta(minutes=30))
+        # 03. 운송 일정 및 추가 인력
+        section_head("03", "운송 일정 및 추가 인력", "원하는 날짜와 운반 도움 여부를 선택해 주세요.", ICON_CALENDAR)
+        with st.container(key="rq_schedule"):
+            c3, c4 = st.columns(2, gap="large")
+            sched_date = c3.date_input("희망 운송 날짜", value=default_dt.date(), min_value=date.today())
+            sched_time = c4.time_input("시간", value=default_dt.time(), step=timedelta(minutes=30))
 
-        helper_keys = list(HELPER_OPTIONS)
-        helper = st.radio("추가 인력", helper_keys, format_func=HELPER_OPTIONS.get, horizontal=True,
-                          index=helper_keys.index(saved.get("helper_option", "NONE")) if saved.get("helper_option", "NONE") in helper_keys else 0)
+            helper_keys = list(HELPER_OPTIONS)
+            helper = st.radio("추가 인력", helper_keys, format_func=HELPER_OPTIONS.get, horizontal=True,
+                              index=helper_keys.index(saved.get("helper_option", "NONE")) if saved.get("helper_option", "NONE") in helper_keys else 0)
 
         # 폼 제출 버튼
         submitted = st.form_submit_button("매칭 시작하기", type="primary", width="stretch")
