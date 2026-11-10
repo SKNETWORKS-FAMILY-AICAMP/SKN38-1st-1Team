@@ -109,7 +109,7 @@ def validate(faqs: list[dict]) -> list[str]:
 
 
 def check_fares(faqs: list[dict]) -> list[str]:
-    """FAQ에 적힌 운임·추가요금이 예준님 운임표(services/fare_table.py)와 같은지 확인."""
+    """FAQ에 적힌 운임·추가요금이 운임표(services/fare_table.py)와 같은지 확인."""
     from services.fare_table import FARE_RULES, SERVICE_RULES
 
     notes = []

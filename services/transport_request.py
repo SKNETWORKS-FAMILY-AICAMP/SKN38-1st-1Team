@@ -1,7 +1,7 @@
 """운송 요청 입력값 정의·검증 및 페이지 간 전달 (st.session_state).
 
 운송 요청은 st.session_state[REQUEST_KEY]에 아래 dict 형태로 저장된다.
-기사 매칭·운임 계산 담당은 이 dict를 입력으로 사용하면 된다.
+기사 매칭·운임 계산은 이 dict를 입력으로 사용한다.
 
     {
         # 카카오 주소 검색에서 사용자가 선택한 위치 (좌표는 카카오 응답 x=경도, y=위도를 변환한 값)
@@ -43,7 +43,7 @@ def floor_label(floor: int) -> str:
 ITEM_MAX = 50
 
 REQUEST_KEY = "transport_request"        # 운송 요청 입력값
-SELECTED_DRIVER_KEY = "selected_driver"  # 매칭 화면에서 고른 기사 (매칭 담당이 채움)
+SELECTED_DRIVER_KEY = "selected_driver"  # 매칭 화면에서 고른 기사
 
 
 def location_of(req: dict, side: str) -> dict:

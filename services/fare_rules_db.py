@@ -1,9 +1,7 @@
-"""요금표 조회 (MySQL fare_rules 테이블) — 홈 화면의 요금표 보기에서 사용.
+"""요금표 화면용 표 — services/fare_table.py 기준표를 화면 표로 바꾼다 (services/fare_view.py가 사용).
 
-services/fare_table.py는 운임 계산용 기준표(예준님 담당)로 바뀌었으므로, DB 조회 함수는 이 파일에 둔다.
 운임 '계산' 로직은 services/fare.py 소관이며 여기서는 기준을 표로 보여주기만 한다.
-fare_rules가 비어 있으면 빈 DataFrame을 돌려주고, 화면에서 '요금표 확정 전'으로 안내한다.
-요금표 페이지(7_Fare_Table)의 운임·추가 요금 표는 fare_table.py 기준표를 화면용으로 바꿔서 보여준다.
+load_fare_rules(): MySQL fare_rules 조회 (현재 화면에서는 사용하지 않음).
 """
 from __future__ import annotations
 

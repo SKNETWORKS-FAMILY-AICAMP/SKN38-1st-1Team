@@ -4,7 +4,7 @@
    services/driver_sim.load_driver_status: MySQL drivers에 저장된 배정 가능 기사 10,000명을 시도·시군구·차종별 집계
    (scripts/seed_drivers_excel.py가 통계누리 엑셀 '계' 열 비율로 배분해 생성 — 예약 매칭이 쓰는 바로 그 기사들)
 2) 화물차 등록 현황 (국토교통부 공식 통계)
-   services/truck_stats.py: MySQL registration_stats 최신 기준월 조회 (기존 화면 그대로)
+   services/truck_stats.py: MySQL registration_stats 최신 기준월 조회
 
 지도: services/truck_map.build_deck (시도 대표 좌표 data/processed/sido_bubble_points.csv, 면적 ∝ 수치).
       두 화면은 데이터와 문구(단위·제목·툴팁)·색 구간 경계만 다르고 지도 디자인·3단계 색·크기 비례는 같다.

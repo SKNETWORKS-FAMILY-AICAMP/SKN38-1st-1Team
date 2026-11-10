@@ -3,10 +3,10 @@
 기준
     - 원본: data/processed/화물차_시군구별_등록현황_202609.xlsx 마지막 열 '계' (services/driver_sim.py가 소계·총계 제외·검증)
     - 전국 10,000명(등록대수 472,852대의 약 2.1%)을 시군구 263곳에 등록대수 비율대로 배분 (최대 나머지 방식 → 합계가 정확히 10,000)
-    - 차종: 다마스 40% · 라보 30% · 1톤 30% (전국 18,800 · 14,100 · 14,100명, 각 지역도 이 순서로 섞어 배분)
+    - 차종: 다마스 40% · 라보 30% · 1톤 30% (전국 4,000 · 3,000 · 3,000명, 각 지역도 이 순서로 섞어 배분)
     - 좌표: 그 시군구 안의 실제 장소 좌표(data/processed/driver_places.csv, scripts/collect_driver_places.py가 카카오로 수집)를
             기사마다 하나씩 배정 (무작위 이동 없음 → 점이 시군구 밖·바다로 나가지 않음). 장소가 인원보다 적으면 같은 장소를 함께 씀.
-            장소 파일이 없는 시군구만 예전처럼 시군구 중심 ± 약 2km
+            장소 파일이 없는 시군구만 시군구 중심 ± 약 2km
     - 출처: data_sources 'DEMO_DRIVERS_XLSX' 1행 (짐니 팀 자체 생성)
     - 별점: seed_drivers.py와 같은 규칙 (평균 3.5~5.0 · 개수 3~30건, 10%는 신규 기사) → drivers.avg_rating · rating_count
             별점 칸이 없으면 먼저 추가 (seed_drivers.ensure_rating_columns, 표 구조 변경이라 --dry-run이어도 적용됨)
@@ -31,7 +31,7 @@ from collections import Counter
 
 import pandas as pd
 
-from scripts.seed_drivers import (CACHE, COUNT_MAX, COUNT_MIN, NEW_DRIVER_RATIO, RATING_MAX, RATING_MIN,  # 예준님 규칙 재사용
+from scripts.seed_drivers import (CACHE, COUNT_MAX, COUNT_MIN, NEW_DRIVER_RATIO, RATING_MAX, RATING_MIN,  # 기존 규칙 재사용
                                   RATING_MODE, SIDO_CENTER, SURNAMES, ensure_rating_columns, region_center)
 from services.db import get_connection
 from services.driver_sim import EXCEL_PATH, load_driver_simulation
