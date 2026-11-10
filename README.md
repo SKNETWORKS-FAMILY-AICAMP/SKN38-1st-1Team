@@ -221,7 +221,9 @@ SKN38-1st-1Team/
 
 ---
 
-## Meet the Team
+
+
+<h2>👥 Meet the Team</h2>
 
 <p align="center">
   <b>SK Networks Family AI Camp 38기 · 1팀</b>
@@ -229,29 +231,76 @@ SKN38-1st-1Team/
 
 <table align="center">
   <tr>
-    <td align="center" width="140">
-      <img src="assets/jimni2.png" width="110" height="110"><br>
-      <b>김예준</b><br>
-      <sub>역할</sub><br>
-      <sub>담당 기능</sub>
+    <td align="center" width="170">
+      <img src="assets/jimni2.png" width="110" height="110">
     </td>
-    <td align="center" width="140">
-      <img src="assets/jimni6.png" width="110" height="110"><br>
-      <b>이지우</b><br>
-      <sub>역할</sub><br>
-      <sub>담당 기능</sub>
+    <td align="center" width="170">
+      <img src="assets/jimni6.png" width="110" height="110">
     </td>
-    <td align="center" width="140">
-      <img src="assets/jimni4.png" width="110" height="110"><br>
-      <b>정흥기</b><br>
-      <sub>역할</sub><br>
-      <sub>담당 기능</sub>
+    <td align="center" width="170">
+      <img src="assets/jimni4.png" width="110" height="110">
     </td>
-    <td align="center" width="140">
-      <img src="assets/jimni3.png" width="110" height="110"><br>
-      <b>최웅</b><br>
-      <sub>역할</sub><br>
-      <sub>담당 기능</sub>
+    <td align="center" width="170">
+      <img src="assets/jimni3.png" width="110" height="110">
+    </td>
+  </tr>
+
+  <tr>
+    <td align="center"><b>김예준</b></td>
+    <td align="center"><b>이지우</b></td>
+    <td align="center"><b>정흥기</b></td>
+    <td align="center"><b>최웅</b></td>
+  </tr>
+
+  <tr>
+    <td align="center">
+      <sub>Full-Stack<br>Developer</sub>
+    </td>
+    <td align="center">
+      <sub>Team Leader &amp;<br>Full-Stack Developer</sub>
+    </td>
+    <td align="center">
+      <sub>Data<br>Engineering</sub>
+    </td>
+    <td align="center">
+      <sub>Planning &amp;<br>UI/UX Design</sub>
+    </td>
+  </tr>
+
+  <tr>
+    <td align="center">
+      <sub>
+        ERD 설계<br>
+        데이터 파이프라인 구현<br>
+        카카오모빌리티 API 연동<br>
+        운임 계산·기사 매칭 구현<br>
+        예약 로직 구현
+      </sub>
+    </td>
+    <td align="center">
+      <sub>
+        프로젝트 총괄<br>
+        카카오 주소 검색 API 연동<br>
+        공공데이터 파이프라인 구축<br>
+        지도 시각화·예약 조회·평가 구현
+      </sub>
+    </td>
+    <td align="center">
+      <sub>
+        공공데이터 수집<br>
+        데이터 전처리·검증<br>
+        ERD 설계 참여
+      </sub>
+    </td>
+    <td align="center">
+      <sub>
+        서비스 아이디어·기획 주도<br>
+        사용자 흐름·디자인 기획<br>
+        ERD 설계 참여<br>
+        발표 준비
+      </sub>
     </td>
   </tr>
 </table>
+
+
