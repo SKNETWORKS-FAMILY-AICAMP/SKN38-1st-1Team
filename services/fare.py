@@ -408,37 +408,23 @@ def calc_service_fee(service_type):
 # ============================================================
 
 def calc_stair_fee(floor, has_elevator):
-    """출발지 또는 도착지의 계단 작업 비용을 계산합니다."""
+    """출발지 또는 도착지의 계단 작업 비용을 계산합니다. (지하층은 음수: -1 = 지하 1층)"""
     if not isinstance(has_elevator, bool):
         raise ValueError("엘리베이터 여부는 True 또는 False여야 합니다.")
 
-    if (
-        isinstance(floor, bool)
-        or not isinstance(floor, int)
-        or floor < 1
-    ):
-        raise ValueError("층수는 1 이상의 정수여야 합니다.")
+    if isinstance(floor, bool) or not isinstance(floor, int) or floor == 0:
+        raise ValueError("층수는 0이 아닌 정수여야 합니다. (지하 1층은 -1)")
 
     if has_elevator:
-        return {
-            "fee": 0,
-            "manual_check": False,
-            "reason": "엘리베이터 이용",
-        }
+        return {"fee": 0, "manual_check": False, "reason": "엘리베이터 이용"}
 
-    if floor > MAX_STAIR_FLOOR:
-        return {
-            "fee": None,
-            "manual_check": True,
-            "reason": f"{MAX_STAIR_FLOOR + 1}층 이상: 별도 협의",
-        }
+    floor_name = f"지하 {-floor}층" if floor < 0 else f"{floor}층"
+    min_floor = min(STAIR_RULES)                         # fare_table에 가중치가 있는 가장 낮은 층 (예: -2)
 
-    return {
-        "fee": STAIR_RULES[floor],
-        "manual_check": False,
-        "reason": f"{floor}층 계단 작업",
-    }
+    if floor > MAX_STAIR_FLOOR or floor < min_floor or floor not in STAIR_RULES:
+        return {"fee": None, "manual_check": True, "reason": f"{floor_name}: 별도 협의"}
 
+    return {"fee": STAIR_RULES[floor], "manual_check": False, "reason": f"{floor_name} 계단 작업"}
 
 # ============================================================
 # 8. 최종 운임 계산
@@ -503,7 +489,7 @@ def calc_fare(
         "reason": (
             "정상 계산"
             if not manual_check
-            else "6층 이상 계단 작업 등 별도 확인 필요"
+            else "6층 이상·지하 3층 이하 계단 작업 등 별도 확인 필요"
         ),
     }
 

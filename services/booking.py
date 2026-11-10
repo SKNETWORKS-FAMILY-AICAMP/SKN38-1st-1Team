@@ -13,6 +13,7 @@ from datetime import date
 
 from services.booking_lookup import normalize_phone
 from services.db import get_connection
+from services.settlement import calc_settlement          # 수수료 계산
 
 DONE_STATUS = ("CANCELLED", "COMPLETED")          # 끝난 예약은 기사 일정에서 제외
 # 주소의 시도 표기 → DB(regions) 표기 (팀 적재 스크립트는 약칭 사용, 광주·전남은 2026-07 통합)
@@ -103,6 +104,7 @@ def create_booking(request: dict, driver: dict, customer: dict) -> int:
                 raise BookingError("차량 요금 규칙을 찾을 수 없습니다.")
 
             booking_id = _next_booking_id(cur)
+            money = calc_settlement(quote["estimated_fare"])   # 운임 → 결제액·수수료·기사 정산액
 
             # 3-3. bookings 1행 저장
             row = {
@@ -117,7 +119,10 @@ def create_booking(request: dict, driver: dict, customer: dict) -> int:
                 "item_l_count": request.get("item_l_count", 0), "item_xl_count": request.get("item_xl_count", 0),
                 "helper_option": request.get("helper_option", "NONE"),
                 "distance_km": quote.get("distance_km"), "estimated_minutes": quote.get("estimated_minutes"),
-                "scheduled_at": request["scheduled_at"], "estimated_fare": int(quote["estimated_fare"]),
+                "scheduled_at": request["scheduled_at"],
+                "estimated_fare": money["customer_total"],          # 고객 결제액 (운임 + 이용료 5%)
+                "commission_amount": money["platform_revenue"],     # 이용료 + 기사 수수료
+                "driver_payout": money["driver_payout"],            # 기사 정산액 (운임 − 18%)
                 "origin_region_id": _region_id(cur, request["origin_address"]),
                 "dest_region_id": _region_id(cur, request["dest_address"]),
                 "fare_rule_id": rule["fare_rule_id"], "driver_id": driver["driver_id"],

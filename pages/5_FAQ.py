@@ -7,27 +7,17 @@
 
 import streamlit as st
 
-from services.db import DBConnectionError
 from services.faq import ALL, answer_markdown, categories, category_label, filter_faqs, load_faqs
-from services.fare_rules_db import load_fare_rules
 
 st.title("FAQ")
 
-# ── 운임 요금표 (요금 카테고리는 맨 위 요금표로 안내) ────────────────────
+# ── 운임 요금표 (상세 표는 [요금표 보기] → 요금표 페이지) ────────────────────
 with st.container(border=True):
     head, link = st.columns([3, 1], vertical_alignment="center")
     head.subheader("운임 요금표")
     if link.button("요금표 보기", width="stretch"):
         st.switch_page("pages/7_Fare_Table.py")
-    try:
-        fares = load_fare_rules()
-        if fares.empty:
-            st.caption("요금표가 아직 확정되지 않았습니다. 운임 기준이 등록되면 이곳에 표시됩니다.")
-        else:
-            st.dataframe(fares[["차종", "기본요금(원)", "km당 요금(원)"]], hide_index=True)
-            st.caption("확정 전 운임 기준으로 참고용입니다.")
-    except DBConnectionError as e:
-        st.caption(str(e))
+    st.caption("거리별 기본 운임 · 작업 추가 요금 · 계단 요금 · 수수료는 [요금표 보기]에서 확인하세요.")
 
 # ── 자주 묻는 질문 ────────────────────────────────────────────────────
 st.subheader("자주 묻는 질문")
