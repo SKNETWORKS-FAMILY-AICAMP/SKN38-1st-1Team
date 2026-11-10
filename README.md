@@ -47,6 +47,11 @@
 </details>
 
 ---
+## Fare Guide
+
+다마스·라보·1톤 차량별 거리 구간 운임과 추가 작업 비용을 안내합니다.
+
+[운임 기준표 자세히 보기](docs/fare_table.md)
 
 ## Key Features
 
@@ -256,8 +261,4 @@ SKN38-1st-1Team/
   </tr>
 </table>
 
----
 
-<p align="center">
-  <b>SK Networks Family AI Camp · SKN38 1st Project · 1Team</b>
-</p>
