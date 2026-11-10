@@ -8,6 +8,8 @@
             기사마다 하나씩 배정 (무작위 이동 없음 → 점이 시군구 밖·바다로 나가지 않음). 장소가 인원보다 적으면 같은 장소를 함께 씀.
             장소 파일이 없는 시군구만 예전처럼 시군구 중심 ± 약 2km
     - 출처: data_sources 'DEMO_DRIVERS_XLSX' 1행 (짐니 팀 자체 생성)
+    - 별점: seed_drivers.py와 같은 규칙 (평균 3.5~5.0 · 개수 3~30건, 10%는 신규 기사) → drivers.avg_rating · rating_count
+            별점 칸이 없으면 먼저 추가 (seed_drivers.ensure_rating_columns, 표 구조 변경이라 --dry-run이어도 적용됨)
 
 기존 가상 기사(seed_drivers.py, 출처 DEMO_DRIVERS) 정리
     - 예약에 쓰이지 않은 기사는 삭제, 예약에 쓰인 기사는 is_active=0(배정 불가)로 남겨 예약 기록 보존
@@ -29,7 +31,8 @@ from collections import Counter
 
 import pandas as pd
 
-from scripts.seed_drivers import CACHE, SIDO_CENTER, SURNAMES, region_center   # 예준님 좌표·이름 규칙 재사용
+from scripts.seed_drivers import (CACHE, COUNT_MAX, COUNT_MIN, NEW_DRIVER_RATIO, RATING_MAX, RATING_MIN,  # 예준님 규칙 재사용
+                                  RATING_MODE, SIDO_CENTER, SURNAMES, ensure_rating_columns, region_center)
 from services.db import get_connection
 from services.driver_sim import EXCEL_PATH, load_driver_simulation
 
@@ -54,6 +57,13 @@ def allocate(sigungu: pd.DataFrame, total: int = TOTAL_DRIVERS) -> pd.DataFrame:
     order = (quota - df["drivers"]).sort_values(ascending=False, kind="stable").index[:rest]
     df.loc[order, "drivers"] += 1
     return df
+
+
+def demo_rating(rnd: random.Random) -> tuple:
+    """시연용 (평균 별점, 별점 개수) — seed_drivers.demo_rating과 같은 규칙, 같은 결과가 나오게 rnd 사용."""
+    if rnd.random() < NEW_DRIVER_RATIO:
+        return None, 0
+    return round(rnd.triangular(RATING_MIN, RATING_MAX, RATING_MODE), 2), rnd.randint(COUNT_MIN, COUNT_MAX)
 
 
 def build_rows(alloc: pd.DataFrame, region_ids: dict, fare_rule_ids: dict, source_id: int, start_id: int) -> list[tuple]:
@@ -88,7 +98,7 @@ def build_rows(alloc: pd.DataFrame, region_ids: dict, fare_rule_ids: dict, sourc
                 lat = float(center[0]) + rnd.uniform(-JITTER, JITTER)
                 lng = float(center[1]) + rnd.uniform(-JITTER, JITTER)
             rows.append((next_id, f"{rnd.choice(SURNAMES)}**", round(float(lat), 6), round(float(lng), 6),
-                         source_id, region_id, fare_rule_ids[vehicle]))
+                         source_id, region_id, fare_rule_ids[vehicle], *demo_rating(rnd)))
             next_id += 1
     if fallback:
         print("장소 파일이 없어 시군구 중심 ±2km로 배치:", ", ".join(fallback))
@@ -127,6 +137,7 @@ def main() -> None:
     with get_connection() as conn:
         try:
             with conn.cursor() as cur:
+                ensure_rating_columns(cur)                   # 별점 칸 (이미 있으면 넘어감, 표 구조 변경은 바로 반영됨)
                 cur.execute("SELECT region_id, sido_name, sigungu_name FROM regions WHERE sigungu_name IS NOT NULL")
                 region_ids = {(r["sido_name"], r["sigungu_name"]): r["region_id"] for r in cur.fetchall()}
                 missing = [k for k in zip(alloc["sido_name"], alloc["sigungu_name"]) if k not in region_ids]
@@ -146,8 +157,9 @@ def main() -> None:
                 kept = cur.execute(f"UPDATE drivers SET is_active = FALSE WHERE {old}", OLD_SOURCE_CODES)
                 cur.execute("SELECT COALESCE(MAX(driver_id), 0) AS m FROM drivers")
                 rows = build_rows(alloc, region_ids, fare_rule_ids, source_id, cur.fetchone()["m"] + 1)
-                cur.executemany("""INSERT INTO drivers (driver_id, nickname, base_lat, base_lng, source_id, region_id, fare_rule_id)
-                                   VALUES (%s, %s, %s, %s, %s, %s, %s)""", rows)
+                cur.executemany("""INSERT INTO drivers (driver_id, nickname, base_lat, base_lng, source_id, region_id,
+                                                           fare_rule_id, avg_rating, rating_count)
+                                   VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)""", rows)
 
                 # 검증: 활성 가상 기사 = 47,000, 차종 18,800/14,100/14,100
                 cur.execute("""SELECT f.vehicle_type, COUNT(*) AS n FROM drivers d JOIN fare_rules f USING (fare_rule_id)
@@ -161,7 +173,9 @@ def main() -> None:
                 print(f"[dry-run] 삭제 예정 {deleted}명 · 배정 불가로 보존 {kept}명 · 생성 {len(rows)}명 · 차종 {types} — DB 변경 없음")
                 return
             conn.commit()
-            print(f"완료: 기존 가상 기사 삭제 {deleted}명 · 예약 연결로 보존(배정 불가) {kept}명 · 새 가상 기사 {len(rows)}명 · 차종 {types}")
+            rated = sum(1 for row in rows if row[-1] > 0)
+            print(f"완료: 기존 가상 기사 삭제 {deleted}명 · 예약 연결로 보존(배정 불가) {kept}명 · 새 가상 기사 {len(rows)}명 "
+                  f"(별점 있음 {rated:,}명) · 차종 {types}")
         except BaseException:
             conn.rollback()
             raise

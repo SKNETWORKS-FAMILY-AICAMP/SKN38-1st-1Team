@@ -46,9 +46,9 @@ CREATE TABLE `drivers` (
 	`created_at`	DATETIME	NOT NULL	DEFAULT CURRENT_TIMESTAMP	COMMENT '등록일시',
 	`source_id`	INT	NOT NULL	COMMENT '출처번호',
 	`region_id`	INT	NOT NULL,
-	`fare_rule_id`	INT	NOT NULL
-	`avg_rating`    DECIMAL(3, 2) NULL              COMMENT '평균 별점 (1.00~5.00, 없으면 신규 기사)',
-    `rating_count`  INT           NOT NULL DEFAULT 0 COMMENT '받은 별점 개수',
+	`fare_rule_id`	INT	NOT NULL,
+	`avg_rating`	DECIMAL(3, 2)	NULL	COMMENT '평균 별점 (0.50~5.00, 없으면 신규 기사)',
+	`rating_count`	INT	NOT NULL	DEFAULT 0	COMMENT '받은 별점 개수'
 );
 
 CREATE TABLE `fare_rules` (
@@ -67,7 +67,7 @@ CREATE TABLE `regions` (
 	`region_level`	VARCHAR(10)	NOT NULL	COMMENT '지역단계',
 	`sido_name`	VARCHAR(20)	NOT NULL	COMMENT '시도',
 	`sigungu_name`	VARCHAR(50)	NULL	COMMENT '시군구',
-	`adm_code`	VARCHAR(1=0)	NULL	COMMENT '행정코드',
+	`adm_code`	VARCHAR(10)	NULL	COMMENT '행정코드',
 	`created_at`	DATETIME	NOT NULL	DEFAULT CURRENT_TIMESTAMP	COMMENT '등록일시',
 	`parent_region_id`	INT	NULL
 );

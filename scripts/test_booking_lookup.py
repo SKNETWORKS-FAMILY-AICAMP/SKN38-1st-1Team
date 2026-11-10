@@ -1,4 +1,4 @@
-"""예약 조회·평점 저장 테스트 — 실제 테이블에 데이터를 넣지 않는다.
+"""예약 조회·별점 저장 테스트 — 실제 테이블에 데이터를 넣지 않는다.
 
 방법: 한 연결(세션) 안에서 bookings / drivers / fare_rules와 같은 이름의 TEMPORARY TABLE을 만든다.
       MySQL은 그 세션에서 임시 테이블을 우선 사용하므로 테스트 데이터는 임시 테이블에만 들어가고,
@@ -87,15 +87,19 @@ def run_service_tests(conn) -> None:
     check("기사 미배정(없는 driver_id) → driver_id None", bl.find_booking(conn, 900007, PHONE)["driver_id"] is None)
     check("예약번호 형식 검사", bl.parse_booking_id("12a") is None and bl.parse_booking_id(" 900001 ") == 900001)
 
-    for bad in (0, 6, "3", True, 3.5):
+    for bad in (0, 0.2, 3.3, 5.5, 6, "3", True):                    # 0.5 ~ 5.0, 0.5점 단위만 허용
         check(f"잘못된 평점 {bad!r} 거부", bl.submit_rating(conn, 900004, PHONE, bad) == bl.INVALID_RATING)
     check("미완료 운송 평가 거부", bl.submit_rating(conn, 900001, PHONE, 5) == bl.NOT_COMPLETED)
     check("취소 예약 평가 거부", bl.submit_rating(conn, 900005, PHONE, 5) == bl.NOT_COMPLETED)
     check("연락처 불일치 평가 거부", bl.submit_rating(conn, 900004, "010-0000-0000", 5) == bl.NOT_FOUND)
-    check("완료 운송 평가 저장", bl.submit_rating(conn, 900004, PHONE, 4) == bl.SAVED)
-    check("저장된 평점 확인", bl.find_booking(conn, 900004, PHONE)["rating"] == 4)
+    check("완료 운송 평가 저장 (0.5점 단위)", bl.submit_rating(conn, 900004, PHONE, 4.5) == bl.SAVED)
+    check("저장된 평점 확인", bl.find_booking(conn, 900004, PHONE)["rating"] == 4.5)
+    with conn.cursor() as cur:
+        cur.execute("SELECT avg_rating, rating_count FROM drivers WHERE driver_id = 1")
+        d = cur.fetchone()
+    check("기사 평균 별점 갱신", float(d["avg_rating"]) == 4.5 and d["rating_count"] == 1)
     check("중복 평가 거부", bl.submit_rating(conn, 900004, PHONE, 1) == bl.ALREADY_RATED)
-    check("중복 평가 후 평점 유지", bl.find_booking(conn, 900004, PHONE)["rating"] == 4)
+    check("중복 평가 후 평점 유지", bl.find_booking(conn, 900004, PHONE)["rating"] == 4.5)
 
 
 class _KeepOpen:
@@ -114,8 +118,9 @@ class _KeepOpen:
 def run_page_tests(conn) -> None:
     from streamlit.testing.v1 import AppTest
 
-    original = db.get_connection
+    original, auto = db.get_connection, bl.DEMO_AUTO_PROGRESS
     db.get_connection = lambda: _KeepOpen(conn)
+    bl.DEMO_AUTO_PROGRESS = False          # 시연용 자동 진행을 끄고 기본 동작(상태 보여주기)만 확인
     try:
         page = str(ROOT / "pages" / "3_Booking_Lookup.py")
 
@@ -130,6 +135,7 @@ def run_page_tests(conn) -> None:
             parts = [e.value for kind in ("markdown", "error", "warning", "info", "success", "caption")
                      for e in getattr(at, kind)]
             parts += [f"{m.label} {m.value}" for m in at.metric]
+            parts += [e.proto.body for e in at.get("html")]
             return " ".join(str(p) for p in parts)
 
         at = lookup(900003, PHONE)
@@ -143,17 +149,19 @@ def run_page_tests(conn) -> None:
         at = lookup(900007, PHONE)
         check("[화면] 기사 미배정 안내", "배정된 기사가 없습니다" in text(at))
         at = lookup(900004, PHONE)
-        check("[화면] 평가 완료 예약은 평점 표시", "평가 완료: 4점" in text(at) and len(at.radio) == 0)
+        check("[화면] 평가 완료 예약은 평점 표시", "4.5점 · 평가 완료" in text(at) and len(at.slider) == 0)
 
         with conn.cursor() as cur:  # 완료·미평가 예약 하나 더 (임시 테이블)
             cur.execute("UPDATE bookings SET status='COMPLETED' WHERE booking_id=900003")
         conn.commit()
         at = lookup(900003, PHONE)
-        at.radio[0].set_value(5)
-        at.button[1].click().run(timeout=30)
-        check("[화면] 평점 저장 → 평가 완료 표시", not at.exception and "평가 완료: 5점" in text(at))
+        check("[화면] 완료·미평가 예약 → 별점 입력 창", len(at.slider) == 1)
+        at.slider(key="rating_value").set_value(3.5)
+        at.button(key="rating_submit").click().run(timeout=30)
+        at = lookup(900003, PHONE)
+        check("[화면] 별점 저장 → 평가 완료 표시", not at.exception and "3.5점 · 평가 완료" in text(at))
     finally:
-        db.get_connection = original
+        db.get_connection, bl.DEMO_AUTO_PROGRESS = original, auto
 
 
 def main() -> int:

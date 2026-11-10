@@ -101,8 +101,9 @@ def render_driver_detail(sido, points) -> None:
         st.caption(f"기준점 반경 {radius}km 안 기사 {len(inside):,}명 · 거리는 등록 주소지와 기준점 사이의 직선거리예요.")
         table = inside[["nickname", "vehicle_type", "sigungu_name", "distance_km", "rating"]].head(200).rename(
             columns={"nickname": "기사", "vehicle_type": "차량", "sigungu_name": "시군구", "distance_km": "거리(km)",
-                     "rating": "평점"})
-        st.dataframe(table, hide_index=True, height=300)
+                     "rating": "별점"})
+        st.dataframe(table, hide_index=True, height=300,
+                     column_config={"별점": st.column_config.NumberColumn(format="★ %.1f", help="평균 별점 (빈칸은 신규 기사)")})
         st.caption("가까운 순 최대 200명. 예약할 때는 차량 조건과 예약 일정까지 확인해 기사님을 추천해요.")
 
 

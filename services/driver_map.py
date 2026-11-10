@@ -7,7 +7,7 @@
 
 데이터 (기사 매칭 services/matching.py와 같은 기준)
     - drivers.base_lat · base_lng (DECIMAL(9,6)) = 기사 등록 주소지 좌표
-    - 배정 가능(is_active = TRUE) 기사만, 차종은 fare_rules.vehicle_type, 평점은 bookings.rating 평균 (matching과 같은 집계)
+    - 배정 가능(is_active = TRUE) 기사만, 차종은 fare_rules.vehicle_type, 별점은 drivers.avg_rating (matching·별점 입력과 같은 값)
     - 거리: matching.haversine_km (두 좌표 사이 직선거리, km). 도로 이동 거리 아님
     - 예약 일정·차량 조건까지 보는 실제 매칭 결과와는 다를 수 있다 (화면에 안내)
 
@@ -43,13 +43,11 @@ DRIVER_LAYER, OUTSIDE_LAYER, CLUSTER_LAYER = "drivers_in", "drivers_out", "drive
 
 _DRIVERS_SQL = """
     SELECT d.driver_id, d.nickname, d.base_lat, d.base_lng, f.vehicle_type, r.sido_name, r.sigungu_name,
-           ROUND(AVG(b.rating), 1) AS rating
+           d.avg_rating AS rating, d.rating_count                   -- 기사 평균 별점 (예약 조회에서 별점 입력 시 갱신)
     FROM drivers d
     JOIN fare_rules f ON f.fare_rule_id = d.fare_rule_id
     JOIN regions r ON r.region_id = d.region_id
-    LEFT JOIN bookings b ON b.driver_id = d.driver_id AND b.rating IS NOT NULL
     WHERE d.is_active = TRUE AND d.base_lat BETWEEN %s AND %s AND d.base_lng BETWEEN %s AND %s
-    GROUP BY d.driver_id, d.nickname, d.base_lat, d.base_lng, f.vehicle_type, r.sido_name, r.sigungu_name
 """
 
 
@@ -111,10 +109,10 @@ def all_drivers() -> pd.DataFrame:
     with get_connection() as conn, conn.cursor() as cur:
         cur.execute(_DRIVERS_SQL, (-90, 90, -180, 180))
         df = pd.DataFrame(cur.fetchall(), columns=["driver_id", "nickname", "base_lat", "base_lng", "vehicle_type",
-                                                   "sido_name", "sigungu_name", "rating"])
+                                                   "sido_name", "sigungu_name", "rating", "rating_count"])
     df["base_lat"] = df["base_lat"].astype(float)
     df["base_lng"] = df["base_lng"].astype(float)
-    df["rating"] = pd.to_numeric(df["rating"])
+    df["rating"] = pd.to_numeric(df["rating"]).round(1)       # 화면 표시는 소수 한 자리 (예: 4.6)
     return df
 
 
@@ -168,21 +166,24 @@ def driver_markers() -> dict:
     """기사 마커 (같은 좌표는 한 마커로 묶음, 위치 이동 없음).
 
     약 47,000명이라 지도 용량을 줄이려고 숫자만 담는다: p=[경도, 위도](소수 5자리 ≈ 1m), v=차종 번호,
-    r=지역 번호, s=성 번호, n=같은 좌표 인원. 툴팁 글자는 지도 안 스크립트가 번호 → 글자로 바꿔 만든다.
+    r=지역 번호, s=성 번호, n=같은 좌표 인원, a=별점×10 · c=별점 개수(한 명이고 별점이 있을 때만). 툴팁 글자는 지도 안 스크립트가 번호 → 글자로 바꿔 만든다.
     """
     df = all_drivers()
     g = df.groupby(["base_lat", "base_lng"], sort=False).agg(
         n=("driver_id", "size"), nickname=("nickname", "first"), vehicle=("vehicle_type", "first"),
-        sido=("sido_name", "first"), sigungu=("sigungu_name", "first")).reset_index()
+        sido=("sido_name", "first"), sigungu=("sigungu_name", "first"),
+        rating=("rating", "first"), count=("rating_count", "first")).reset_index()
     regions = sorted(set(g["sido"] + " " + g["sigungu"]))
     surnames = sorted({nick[0] for nick in g["nickname"]})
     r_idx, s_idx = {name: k for k, name in enumerate(regions)}, {ch: k for k, ch in enumerate(surnames)}
-    records = [
-        {"p": [round(b, 5), round(a, 5)], "v": VEHICLE_ORDER.index(v) if v in VEHICLE_ORDER else 1,
-         "r": r_idx[f"{sd} {sg}"], "s": s_idx[nick[0]], "n": int(n)}
-        for a, b, v, sd, sg, nick, n in zip(g["base_lat"], g["base_lng"], g["vehicle"], g["sido"], g["sigungu"],
-                                            g["nickname"], g["n"])
-    ]
+    records = []
+    for a, b, v, sd, sg, nick, n, rt, cnt in zip(g["base_lat"], g["base_lng"], g["vehicle"], g["sido"], g["sigungu"],
+                                                 g["nickname"], g["n"], g["rating"], g["count"]):
+        rec = {"p": [round(b, 5), round(a, 5)], "v": VEHICLE_ORDER.index(v) if v in VEHICLE_ORDER else 1,
+               "r": r_idx[f"{sd} {sg}"], "s": s_idx[nick[0]], "n": int(n)}
+        if n == 1 and pd.notna(rt):
+            rec["a"], rec["c"] = int(round(float(rt) * 10)), int(cnt)
+        records.append(rec)
     return {"records": records, "regions": regions, "surnames": surnames}
 
 
@@ -244,6 +245,8 @@ body { margin: 0; } #deck-container { border-radius: 20px; overflow: hidden; }</
     if (o.r !== undefined) {
       title = o.n > 1 ? "기사 " + o.n + "명" : SURNAMES[o.s] + "** 기사님 (" + VEHICLES[o.v] + ")";
       sub = REGIONS[o.r];
+      if (o.n === 1) sub = (o.a !== undefined ? "★ " + (o.a / 10).toFixed(1) + " (" + o.c + "건)" : "신규 기사")
+                           + " · " + sub;   // 별점 (매칭 화면과 같은 평균 별점)
     } else if (o.sido_name) {
       title = o.sido_name; sub = "배차 가능 기사 " + o.count_label;
     } else return null;
