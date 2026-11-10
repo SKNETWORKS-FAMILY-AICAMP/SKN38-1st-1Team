@@ -4,9 +4,11 @@
 - 저장 내용: 운송 입력값 + 견적(차량·거리·운임) + 매칭 기사 + 고객 정보 → bookings 1행
 - 예약번호(booking_id): 날짜 6자리 + 그날 순번 4자리 (예: 2611090001) → 예약 조회 화면에서 숫자로 조회
 - 같은 기사가 같은 날 이미 예약돼 있으면 저장하지 않고 BookingError
+- request["agreement"](사전 확정 운임 동의 증거)가 있으면 agreed_at · agreement_hash · agreed_terms도 함께 저장
 """
 from __future__ import annotations
 
+import json
 from datetime import date
 
 from services.booking_lookup import normalize_phone
@@ -64,6 +66,16 @@ def _next_booking_id(cur) -> int:
     return (last or base) + 1
 
 
+# ── 사전 확정 운임 동의 컬럼 확인 (sql/bookings_agreement_columns.sql 적용 전 DB에서도 예약은 저장되도록)
+AGREEMENT_COLUMNS = ("agreed_at", "agreement_hash", "agreed_terms")
+
+
+def _has_agreement_columns(cur) -> bool:
+    cur.execute("SELECT COUNT(*) AS n FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() "
+                "AND TABLE_NAME = 'bookings' AND COLUMN_NAME IN (%s, %s, %s)", AGREEMENT_COLUMNS)
+    return cur.fetchone()["n"] == len(AGREEMENT_COLUMNS)
+
+
 # ── 3. 예약 저장 (페이지에서 호출하는 함수)
 def create_booking(request: dict, driver: dict, customer: dict) -> int:
     quote = request.get("quote")                                       # 2페이지에서 기사 선택 시 함께 저장
@@ -116,6 +128,14 @@ def create_booking(request: dict, driver: dict, customer: dict) -> int:
                 "fare_rule_id": rule["fare_rule_id"], "driver_id": driver["driver_id"],
                 "status": "BOOKED",
             }
+            # 3-4. 사전 확정 운임 동의 증거 (동의 시각·조건+운임 해시·스냅샷) — 컬럼이 있는 DB에서만 저장
+            agreement = request.get("agreement")
+            if agreement and _has_agreement_columns(cur):
+                row.update({
+                    "agreed_at": agreement["agreed_at"],
+                    "agreement_hash": agreement["agreement_hash"],
+                    "agreed_terms": json.dumps(agreement["agreed_terms"], ensure_ascii=False, default=str),
+                })
             cols = ", ".join(row)
             cur.execute(f"INSERT INTO bookings ({cols}, status_updated_at) VALUES ({', '.join(['%s'] * len(row))}, NOW())",
                         list(row.values()))

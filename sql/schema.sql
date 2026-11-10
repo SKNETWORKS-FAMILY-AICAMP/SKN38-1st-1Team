@@ -30,7 +30,10 @@ CREATE TABLE `bookings` (
 	`status`	VARCHAR(20)	NOT NULL	DEFAULT 'BOOKED',
 	`status_updated_at`	DATETIME	NULL,
 	`rating`	INT	NULL,
-	`created_at`	DATETIME	NOT NULL	DEFAULT CURRENT_TIMESTAMP
+	`created_at`	DATETIME	NOT NULL	DEFAULT CURRENT_TIMESTAMP,
+	`agreed_at`	DATETIME	NULL	COMMENT '사전 운임 동의 시각',
+	`agreement_hash`	CHAR(64)	NULL	COMMENT '동의한 조건+운임 해시',
+	`agreed_terms`	JSON	NULL	COMMENT '동의 당시 조건·운임 스냅샷'
 );
 
 CREATE TABLE `drivers` (

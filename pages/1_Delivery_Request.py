@@ -159,7 +159,7 @@ def address_picker(side: str, label: str) -> None:
         st.caption("검색 결과에서 주소를 선택해야 다음 단계로 진행할 수 있어요.")
 
 
-left, _ = st.columns([3, 1])
+left = st.container()  # 단계 표시와 같은 전체 폭 사용 (예전 3:1 칸 나눔은 오른쪽이 비어 왼쪽으로 쏠려 보였음)
 
 with left:
     st.caption(f"운송 차량: {' · '.join(VEHICLE_TYPES)} (입력한 짐에 맞춰 추천 예정)")

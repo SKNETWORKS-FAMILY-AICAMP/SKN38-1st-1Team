@@ -55,7 +55,7 @@ def ensure_demo_source(cur) -> int:
     sid = cur.fetchone()["n"]
     cur.execute("""INSERT INTO data_sources (source_id, source_code, dataset_name, provider, portal_url, file_name,
                    base_month, retrieved_at, collection_method, coverage_note, region_id)
-                   VALUES (%s, %s, '시연용 가상 기사 데이터', '딱용달팀 자체 생성', '-', 'scripts/seed_drivers.py',
+                   VALUES (%s, %s, '시연용 가상 기사 데이터', '짐니 팀 자체 생성', '-', 'scripts/seed_drivers.py',
                            NULL, CURDATE(), 'GENERATED', '등록대수 비율로 생성한 가상 기사, 실제 사업자·주소 아님',
                            (SELECT region_id FROM regions WHERE sido_name = '전국'      -- 팀 규칙: 전국 단위 출처는 '전국' 지역
                             ORDER BY region_id LIMIT 1))""", (sid, SOURCE_CODE))

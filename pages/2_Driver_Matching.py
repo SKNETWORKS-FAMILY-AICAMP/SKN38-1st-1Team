@@ -12,7 +12,8 @@
 
 import streamlit as st
 
-from services import fare, matching, settlement
+from services import agreement, fare, matching, settlement
+
 from services.transport_request import (
     HELPER_OPTIONS,
     ITEM_SIZES,
@@ -237,10 +238,10 @@ if estimate_result:
 
 
 # ============================================================
-# 6. 매칭된 기사님 (1명 카드 → 바로 예약하기)
+# 6. 추천 기사님 (1명 카드 → 예약하기, 실제 배정은 예약 확정 시 services/assignment.py)
 # ============================================================
 
-st.subheader("매칭된 기사님")
+st.subheader("추천 기사님")
 
 recommend_fn = getattr(matching, "recommend_drivers", None)
 drivers = []
@@ -269,19 +270,17 @@ if drivers:
         rating = f"★ {d['rating']:.1f}" if d["rating"] is not None else "신규 기사님"
         c2.write(f"🚚 {d['vehicle_type']}  ·  📍 출발지에서 {d['distance_km']}km  ·  {rating}")
         c2.caption(f"추천 {idx + 1} / {len(drivers)}  ·  시연용 가상 기사이며 사진은 일러스트입니다.")
+        c2.caption("예약을 확정할 때 배정돼요. 그사이 이 기사님 일정이 생기면 조건에 맞는 다른 가상 기사님이 자동 배정됩니다.")
 
     b1, b2 = st.columns(2)
     if len(drivers) > 1 and b1.button("다른 기사님 보기", use_container_width=True):
         st.session_state[idx_key] = idx + 1
         st.rerun()
     if b2.button("이 기사님으로 예약하기", type="primary", use_container_width=True):
-        st.session_state[SELECTED_DRIVER_KEY] = d               # 예약하기 화면으로 기사 정보 전달
-        request["quote"] = {                                    # 화면에 보여준 견적을 예약 저장 때 그대로 사용
-            "vehicle_type": vehicle_type if estimate_result else None,
-            "distance_km": distance_km if estimate_result else None,
-            "estimated_minutes": estimated_minutes if estimate_result else None,
-            "estimated_fare": estimated_fare if estimate_result else None,
-        }
+        st.session_state[SELECTED_DRIVER_KEY] = d               # 예약하기 화면으로 기사 정보 전달 (선호 기사)
+        # 화면에 보여준 견적(운임 내역 + 견적 당시 조건 해시)을 사전 확정 운임 동의·예약 저장에 그대로 사용
+        request["quote"] = agreement.build_quote(request, estimate_result, service_type)
+        st.switch_page("pages/6_Booking.py")
         st.switch_page("pages/6_Booking.py")
 
 
