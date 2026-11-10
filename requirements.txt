@@ -3,6 +3,7 @@ pandas==3.1.1
 python-dotenv==1.2.4
 requests==2.34.2
 PyMySQL==1.2.3
+certifi    # 클라우드 MySQL 암호화 연결(DB_SSL=true)용 인증서 목록
 openpyxl==3.1.5    # 지역별 현황(배차 가능 기사 시뮬레이션)에서 통계누리 엑셀 읽기
 
 # --- 추후 필요 시 주석 해제 후 설치 ---
