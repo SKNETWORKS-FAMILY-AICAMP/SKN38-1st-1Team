@@ -1,6 +1,6 @@
 """팀 전처리 CSV → DB 적재 (국토부 API 키가 없을 때 대신 사용)
 - 저장 로직은 update_registration_db.py 함수를 그대로 재사용 (지역 매핑·출처·중복 방지·검증 동일)
-- API 수집 단계만 CSV 읽기로 바꿈. 나중에 API로 같은 기준월을 실행하면 "새 기준월 없음"으로 그냥 종료됨
+- API 수집 단계만 CSV 읽기로 바꿈. 나중에 API로 같은 기준월을 실행하면 "새 기준월 없음"으로 종료됨
 실행: python -m scripts.load_registration_csv
 라이브러리: pandas(CSV 읽기)
 """

@@ -1,7 +1,7 @@
 """운송 요청 입력값 정의·검증 및 페이지 간 전달 (st.session_state).
 
 운송 요청은 st.session_state[REQUEST_KEY]에 아래 dict 형태로 저장된다.
-기사 매칭·운임 계산 담당은 이 dict를 입력으로 사용하면 된다.
+기사 매칭·운임 계산은 이 dict를 입력으로 사용한다.
 
     {
         # 카카오 주소 검색에서 사용자가 선택한 위치 (좌표는 카카오 응답 x=경도, y=위도를 변환한 값)
@@ -32,11 +32,18 @@ HELPER_OPTIONS = {  # bookings.helper_option (VARCHAR(20), 기본값 'NONE')
     "DRIVER_HELP": "기사님 운반 도움",
     "EXTRA_WORKER": "추가 인력 1명",
 }
-FLOOR_MIN, FLOOR_MAX = -5, 99
+FLOOR_MIN, FLOOR_MAX = -2, 6   # 운임표 계단 요금 범위 (지하 2층 ~ 5층) + 6층 = '6층 이상'(별도 협의)
+
+
+def floor_label(floor: int) -> str:
+    """층수 표시 (-2 → 지하 2층, 6 → 6층 이상). 입력·매칭·예약 화면 공통."""
+    if floor >= FLOOR_MAX:
+        return f"{FLOOR_MAX}층 이상"
+    return f"지하 {-floor}층" if floor < 0 else f"{floor}층"
 ITEM_MAX = 50
 
 REQUEST_KEY = "transport_request"        # 운송 요청 입력값
-SELECTED_DRIVER_KEY = "selected_driver"  # 매칭 화면에서 고른 기사 (매칭 담당이 채움)
+SELECTED_DRIVER_KEY = "selected_driver"  # 매칭 화면에서 고른 기사
 
 
 def location_of(req: dict, side: str) -> dict:
@@ -65,7 +72,7 @@ def validate_request(req: dict, now: datetime | None = None) -> list[str]:
     for key, label in (("origin_floor", "출발지"), ("dest_floor", "도착지")):
         floor = req.get(key)
         if not isinstance(floor, int) or not FLOOR_MIN <= floor <= FLOOR_MAX or floor == 0:
-            errors.append(f"{label} 층수를 확인해 주세요 (지하는 -1, -2 …, 0층 없음).")
+            errors.append(f"{label} 층수를 확인해 주세요 (지하 2층 ~ 6층 이상 중에서 선택).")
     counts = [req.get(f"item_{s.lower()}_count", 0) for s in ITEM_SIZES]
     if any(not isinstance(c, int) or c < 0 or c > ITEM_MAX for c in counts):
         errors.append(f"물품 개수는 크기별 0~{ITEM_MAX}개로 입력해 주세요.")

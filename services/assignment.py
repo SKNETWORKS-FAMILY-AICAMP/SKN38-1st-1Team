@@ -1,6 +1,6 @@
-"""예약 확정 시 시연용 가상 기사 자동 배정 — 예준님 매칭(matching.recommend_drivers)·예약 저장(booking.create_booking) 재사용
+"""예약 확정 시 기사 자동 배정 — 매칭(matching.recommend_drivers)·예약 저장(booking.create_booking) 재사용
 
-- 후보: recommend_drivers(견적 차량 이상 · 출발지 주변 · 같은 날 일정 없음 · 가까운 순)를 예약 확정 시점에 다시 조회
+- 후보: recommend_drivers(견적 차량과 같은 차종 우선 · 출발지 주변 · 같은 날 일정 없음 · 가까운 순)를 예약 확정 시점에 다시 조회
 - 매칭 결과 화면에서 고른 기사님이 아직 후보에 있으면 그 기사님을 먼저 시도
 - create_booking은 기사 행을 잠그고 같은 날 일정을 다시 확인한 뒤 1건만 저장(실패 시 롤백)
   → 그 사이 일정이 생긴 기사면 다음 후보로 넘어감. 모든 후보가 안 되면 아무것도 저장하지 않고 실패
@@ -55,7 +55,7 @@ def confirm_booking(request: dict, quote: dict, customer: dict, preferred: dict 
     request = {**request, "quote": quote, "agreement": agreement}          # create_booking은 request["quote"]·["agreement"] 사용
     candidates = candidate_drivers(request, quote, preferred)
     if not candidates:
-        raise AssignmentError("조건에 맞는 시연용 기사님이 없어 예약을 저장하지 않았어요. 날짜나 출발지를 바꿔 다시 시도해 주세요.")
+        raise AssignmentError("조건에 맞는 기사님이 없어 예약을 저장하지 않았어요. 날짜나 출발지를 바꿔 다시 시도해 주세요.")
     for tried, driver in enumerate(candidates, start=1):
         try:
             booking_id = create_booking(request, driver, customer)
