@@ -1,7 +1,8 @@
-"""시연용 데이터 준비 (한 번에): 차종(fare_rules) → 시연 출처(data_sources) → 가상 기사(drivers)
+"""시연용 데이터 준비 (한 번에): 차종(fare_rules) → 시연 출처(data_sources) → 별점 칸 → 가상 기사(drivers)
 - 먼저 필요: regions · registration_stats (팀 update_registration_db.py로 적재)
 - 기사 수: 시군구별 영업용 화물차 등록대수 비율 / 차종: 가정 비율 / 좌표: 시군구 중심 ±약 2km (실제 주소 아님)
-- 여러 번 실행해도 중복 없음
+- 별점: 시연용 평균 3.5~5.0 · 개수 3~30건 (10%는 신규 기사), 고객 별점은 예약 조회에서 이어서 반영
+- 여러 번 실행해도 중복 없음 (예약에 쓰인 기사는 지우지 않고 별점도 그대로 유지)
 실행: python -m scripts.seed_drivers
 """
 import os
@@ -20,7 +21,10 @@ MAX_LOAD_KG = {"다마스": 450, "라보": 550, "1톤": 1000}      # fare_table�
 SOURCE_CODE = "DEMO_DRIVERS"
 RATIO, MIN_N, MAX_N = 0.005, 1, 25                          # 등록대수의 0.5% (지역별 1~25명)
 VEHICLE_RATIO = [0.4, 0.3, 0.3]                             # VEHICLE_ORDER 순서 (다마스:라보:1톤) 가정 비율
-CACHE = "data/processed/sigungu_coordinates.csv"                 # 시군구 좌표 캐시 (카카오 재호출 방지)
+NEW_DRIVER_RATIO = 0.1                                      # 별점 없는 신규 기사 비율
+RATING_MIN, RATING_MODE, RATING_MAX = 3.5, 4.6, 5.0         # 시연용 평균 별점 (4.6 근처가 가장 많게)
+COUNT_MIN, COUNT_MAX = 3, 30                                # 시연용 별점 개수
+CACHE = "data/processed/sigungu_coordinates.csv"            # 시군구 좌표 캐시 (카카오 재호출 방지)
 SIDO_CENTER = "data/processed/sido_bubble_points.csv"
 GWANGJU_GU = {"광산구", "남구", "동구", "북구", "서구"}
 SURNAMES = list("김이박최정강조윤장임한오서신권황안송류홍")
@@ -61,8 +65,26 @@ def ensure_demo_source(cur) -> int:
                             ORDER BY region_id LIMIT 1))""", (sid, SOURCE_CODE))
     return sid
 
+# ── 3. 별점 칸: drivers 평균 별점·개수 추가 + bookings 별점을 0.5점 단위(소수)로 (이미 돼 있으면 넘어감)
+def ensure_rating_columns(cur) -> None:
+    cur.execute("SHOW COLUMNS FROM drivers LIKE 'avg_rating'")
+    if not cur.fetchone():
+        cur.execute("""ALTER TABLE drivers
+                       ADD COLUMN avg_rating DECIMAL(3, 2) NULL COMMENT '평균 별점 (0.50~5.00, 없으면 신규 기사)',
+                       ADD COLUMN rating_count INT NOT NULL DEFAULT 0 COMMENT '받은 별점 개수'""")
+    cur.execute("SHOW COLUMNS FROM bookings LIKE 'rating'")
+    col = cur.fetchone()
+    if col and not col["Type"].lower().startswith("decimal"):
+        cur.execute("ALTER TABLE bookings MODIFY rating DECIMAL(2, 1) NULL COMMENT '별점 (0.5점 단위)'")
 
-# ── 3. 시군구 중심 좌표 (캐시 → 카카오 → 시도 중심 순서)
+def demo_rating() -> tuple:
+    """시연용 (평균 별점, 별점 개수) — 신규 기사는 (None, 0)"""
+    if random.random() < NEW_DRIVER_RATIO:
+        return None, 0
+    return round(random.triangular(RATING_MIN, RATING_MAX, RATING_MODE), 2), random.randint(COUNT_MIN, COUNT_MAX)
+
+
+# ── 4. 시군구 중심 좌표 (캐시 → 카카오 → 시도 중심 순서)
 def region_center(r: dict, cache: dict, sido: pd.DataFrame):
     key = r["region_id"]
     if key not in cache:
@@ -86,6 +108,8 @@ def main():
     sido = pd.read_csv(SIDO_CENTER)
 
     with get_connection() as conn, conn.cursor() as cur:
+        ensure_rating_columns(cur)                            # 표 구조 변경은 데이터 작업보다 먼저 (자동 저장되는 명령)
+
         cur.execute(_load_queries()[2])                       # 팀 쿼리 3번: 시군구별 등록대수
         regions = [r for r in cur.fetchall() if r["truck_count"]]
         if not regions:
@@ -94,7 +118,7 @@ def main():
         rules = ensure_fare_rules(cur)
         source_id = ensure_demo_source(cur)
 
-        # 4. 예전 시연 기사 삭제 (예약에 쓰인 기사는 남김) → 새 번호부터 생성
+        # 5. 예전 시연 기사 삭제 (예약에 쓰인 기사는 별점과 함께 남김) → 새 번호부터 생성
         cur.execute("""DELETE FROM drivers WHERE source_id = %s
                        AND driver_id NOT IN (SELECT driver_id FROM bookings)""", (source_id,))
         cur.execute("SELECT COALESCE(MAX(driver_id), 0) AS m FROM drivers")
@@ -110,15 +134,17 @@ def main():
                 rows.append((next_id, f"{random.choice(SURNAMES)}**",
                              round(center[0] + random.uniform(-0.02, 0.02), 6),
                              round(center[1] + random.uniform(-0.02, 0.02), 6),
-                             source_id, r["region_id"], rules[vt]))
+                             source_id, r["region_id"], rules[vt], *demo_rating()))
                 next_id += 1
 
-        cur.executemany("""INSERT INTO drivers (driver_id, nickname, base_lat, base_lng, source_id, region_id, fare_rule_id)
-                           VALUES (%s, %s, %s, %s, %s, %s, %s)""", rows)
+        cur.executemany("""INSERT INTO drivers (driver_id, nickname, base_lat, base_lng, source_id, region_id,
+                                                fare_rule_id, avg_rating, rating_count)
+                           VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)""", rows)
         conn.commit()
 
     pd.DataFrame([(k, *v) for k, v in cache.items() if v], columns=["region_id", "lat", "lng"]).to_csv(CACHE, index=False)
-    print(f"차종 {len(rules)}종, 지역 {len(regions)}곳, 가상 기사 {len(rows)}명 준비 완료")
+    rated = sum(1 for row in rows if row[-1] > 0)
+    print(f"차종 {len(rules)}종, 지역 {len(regions)}곳, 가상 기사 {len(rows)}명 (별점 있음 {rated}명) 준비 완료")
 
 
 if __name__ == "__main__":

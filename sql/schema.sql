@@ -29,7 +29,7 @@ CREATE TABLE `bookings` (
 	`driver_payout`	INT	NULL,
 	`status`	VARCHAR(20)	NOT NULL	DEFAULT 'BOOKED',
 	`status_updated_at`	DATETIME	NULL,
-	`rating`	INT	NULL,
+	`rating`	DECIMAL(2, 1)	NULL	COMMENT '별점 (0.5점 단위)',
 	`created_at`	DATETIME	NOT NULL	DEFAULT CURRENT_TIMESTAMP,
 	`agreed_at`	DATETIME	NULL	COMMENT '사전 운임 동의 시각',
 	`agreement_hash`	CHAR(64)	NULL	COMMENT '동의한 조건+운임 해시',
@@ -47,6 +47,8 @@ CREATE TABLE `drivers` (
 	`source_id`	INT	NOT NULL	COMMENT '출처번호',
 	`region_id`	INT	NOT NULL,
 	`fare_rule_id`	INT	NOT NULL
+	`avg_rating`    DECIMAL(3, 2) NULL              COMMENT '평균 별점 (1.00~5.00, 없으면 신규 기사)',
+    `rating_count`  INT           NOT NULL DEFAULT 0 COMMENT '받은 별점 개수',
 );
 
 CREATE TABLE `fare_rules` (
@@ -65,7 +67,7 @@ CREATE TABLE `regions` (
 	`region_level`	VARCHAR(10)	NOT NULL	COMMENT '지역단계',
 	`sido_name`	VARCHAR(20)	NOT NULL	COMMENT '시도',
 	`sigungu_name`	VARCHAR(50)	NULL	COMMENT '시군구',
-	`adm_code`	VARCHAR(1ㅌ0)	NULL	COMMENT '행정코드',
+	`adm_code`	VARCHAR(1=0)	NULL	COMMENT '행정코드',
 	`created_at`	DATETIME	NOT NULL	DEFAULT CURRENT_TIMESTAMP	COMMENT '등록일시',
 	`parent_region_id`	INT	NULL
 );

@@ -25,7 +25,8 @@ class AssignmentError(RuntimeError):
 
 def candidate_drivers(request: dict, quote: dict, preferred: dict | None = None) -> list[dict]:
     """견적 차량 기준 후보 기사 (선호 기사가 후보에 있으면 맨 앞)."""
-    drivers = matching.recommend_drivers(request, {"vehicle": {"vehicle_type": quote.get("vehicle_type")}})
+    drivers = matching.recommend_drivers(request, {"vehicle": {"vehicle_type": quote.get("vehicle_type")}},
+                                         limit=matching.NEAR_POOL)   # 별점순으로 고른 기사도 후보에 들어오게 15명
     if preferred:
         drivers.sort(key=lambda d: d["driver_id"] != preferred.get("driver_id"))   # 안정 정렬: 나머지 순서 유지
     return drivers
