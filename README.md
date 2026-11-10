@@ -246,18 +246,18 @@ SKN38-1st-1Team/
   </tr>
 
   <tr>
-    <td align="center"><b>김예준</b></td>
     <td align="center"><b>이지우</b></td>
+    <td align="center"><b>김예준</b></td>
     <td align="center"><b>정흥기</b></td>
     <td align="center"><b>최웅</b></td>
   </tr>
 
   <tr>
     <td align="center">
-      <sub>Full-Stack<br>Developer</sub>
+      <sub>PM &amp;<br>Full-Stack Developer</sub>
     </td>
     <td align="center">
-      <sub>Team Leader &amp;<br>Full-Stack Developer</sub>
+      <sub>Full-Stack<br>Developer</sub>
     </td>
     <td align="center">
       <sub>Data<br>Engineering</sub>
@@ -271,18 +271,18 @@ SKN38-1st-1Team/
     <td align="center">
       <sub>
         ERD 설계<br>
-        데이터 파이프라인 구현<br>
-        카카오모빌리티 API 연동<br>
-        운임 계산·기사 매칭 구현<br>
-        예약 로직 구현
-      </sub>
-    </td>
-    <td align="center">
-      <sub>
         프로젝트 총괄<br>
         카카오 주소 검색 API 연동<br>
         공공데이터 파이프라인 구축<br>
         지도 시각화·예약 조회·평가 구현
+      </sub>
+    </td>
+    <td align="center">
+      <sub>
+        데이터 파이프라인 구현<br>
+        카카오모빌리티 API 연동<br>
+        운임 계산·기사 매칭 구현<br>
+        예약 로직 구현
       </sub>
     </td>
     <td align="center">
