@@ -52,15 +52,18 @@ if not request:
 
 with st.expander("입력한 운송 조건", expanded=True):
 
+    def floor_text(floor: int) -> str:                # -2 → 지하 2층
+        return f"지하 {-floor}층" if floor < 0 else f"{floor}층"
+
     st.write(
         f"**출발지** {request['origin_address']} "
-        f"({request['origin_floor']}층, "
+        f"({floor_text(request['origin_floor'])}, "
         f"엘리베이터 {'있음' if request['origin_has_elevator'] else '없음'})"
     )
 
     st.write(
         f"**도착지** {request['dest_address']} "
-        f"({request['dest_floor']}층, "
+        f"({floor_text(request['dest_floor'])}, "
         f"엘리베이터 {'있음' if request['dest_has_elevator'] else '없음'})"
     )
 
