@@ -356,6 +356,11 @@ a[data-testid="stTopNavLink"][aria-current="page"] span {{ color: {BLUE}; font-w
 .jm-status .s.done::before, .jm-status .s.now::before {{ background: {BLUE}; }}
 .jm-status .s.now {{ font-weight: 700; }}
 
+/* ── 제목 옆 작은 [요금표 보기] 버튼 (services/fare_view.title_with_fare_button) ── */
+[class*="st-key-fare_btn_"] button {{ min-height: 36px; height: 36px; padding: 0 14px; font-size: 14px;
+    border-radius: 999px; color: {BLUE}; border-color: #C9D7F5; background: #F5F8FF; }}
+[class*="st-key-fare_btn_"] button:hover {{ border-color: {BLUE}; background: #EAF1FF; }}
+
 /* ── 운송 신청 폼 — 01 건물 · 02 물품 · 03 일정 (pages/1_Delivery_Request.py) ───────── */
 [data-testid="stForm"]:has(.jm-rq-head) {{ padding: 28px 30px 26px; border-radius: 20px; border-color: {LINE};
     background: #FFFFFF; box-shadow: 0 8px 28px rgba(17, 31, 63, .05); }}
