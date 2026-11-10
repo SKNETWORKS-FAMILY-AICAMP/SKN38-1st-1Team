@@ -289,14 +289,14 @@ SKN38-1st-1Team/
       <sub>
         공공데이터 수집<br>
         데이터 전처리·검증<br>
-        ERD 설계 참여
+        ERD 설계
       </sub>
     </td>
     <td align="center">
       <sub>
         서비스 아이디어·기획 주도<br>
         사용자 흐름·디자인 기획<br>
-        ERD 설계 참여<br>
+        ERD 설계<br>
         발표 준비
       </sub>
     </td>
