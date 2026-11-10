@@ -12,7 +12,7 @@
     - 예약 일정·차량 조건까지 보는 실제 매칭 결과와는 다를 수 있다 (화면에 안내)
 
 성능
-    - 배정 가능 기사(약 47,000명)의 필요한 열만 한 번 조회해 60초 캐시, 같은 좌표는 한 마커로 묶어 지도 용량 절약
+    - 배정 가능 기사(약 10,000명)의 필요한 열만 한 번 조회해 60초 캐시, 같은 좌표는 한 마커로 묶어 지도 용량 절약
     - 반경 판정은 기준점 주변 사각 범위로 먼저 거른 뒤 Haversine
     - 마커(사람 모양)는 확대했을 때만 서서히 나타나고, 그 전에는 그려지지 않음 (visible=false)
     - 같은 좌표의 기사는 위치를 옮기지 않고 한 마커로 묶어 툴팁에 함께 표시
@@ -165,7 +165,7 @@ VEHICLE_ORDER = list(VEHICLE_COLORS)        # 마커 차종 번호 (0 다마스 
 def driver_markers() -> dict:
     """기사 마커 (같은 좌표는 한 마커로 묶음, 위치 이동 없음).
 
-    약 47,000명이라 지도 용량을 줄이려고 숫자만 담는다: p=[경도, 위도](소수 5자리 ≈ 1m), v=차종 번호,
+    약 10,000명이라 지도 용량을 줄이려고 숫자만 담는다: p=[경도, 위도](소수 5자리 ≈ 1m), v=차종 번호,
     r=지역 번호, s=성 번호, n=같은 좌표 인원, a=별점×10 · c=별점 개수(한 명이고 별점이 있을 때만). 툴팁 글자는 지도 안 스크립트가 번호 → 글자로 바꿔 만든다.
     """
     df = all_drivers()
@@ -225,7 +225,7 @@ def build_zoom_deck(national: pdk.Deck, center: tuple[float, float], radius_km: 
 # 기사 마커는 SHOW_START→SHOW_END 동안 서서히 나타난다 (구간이 겹쳐 버블 → 흐려짐 → 마커로 자연스럽게 이어짐)
 FADE_START, FADE_END = 7.4, 9.2
 SHOW_START, SHOW_END = 8.3, 9.6
-MARKER_SIZE_M, MARKER_MIN_PX, MARKER_MAX_PX = 250, 9, 28   # 원형 사람 아이콘 지름 (m 기준, 화면에서 9~28px)
+MARKER_SIZE_M, MARKER_MIN_PX, MARKER_MAX_PX = 400, 13, 30  # 원형 사람 아이콘 지름 (m 기준, 화면에서 13~30px)
 BUBBLE_IDS = ("sido_bubble", "selected", "labels_light", "labels_dark")
 MARKER_IDS = tuple(f"{DRIVER_LAYER}_{k}" for k in range(len(VEHICLE_COLORS))) + ("radius_circle", "center_point")
 

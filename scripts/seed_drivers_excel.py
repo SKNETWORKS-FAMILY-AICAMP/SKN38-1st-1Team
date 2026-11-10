@@ -1,8 +1,8 @@
-"""시연용 가상 기사 47,000명 생성 → MySQL drivers (통계누리 엑셀의 시군구별 영업용 화물차 등록대수 비율로 배분)
+"""시연용 가상 기사 10,000명 생성 → MySQL drivers (통계누리 엑셀의 시군구별 영업용 화물차 등록대수 비율로 배분)
 
 기준
     - 원본: data/processed/화물차_시군구별_등록현황_202609.xlsx 마지막 열 '계' (services/driver_sim.py가 소계·총계 제외·검증)
-    - 전국 47,000명(등록대수 472,852대의 약 10%)을 시군구 263곳에 등록대수 비율대로 배분 (최대 나머지 방식 → 합계가 정확히 47,000)
+    - 전국 10,000명(등록대수 472,852대의 약 2.1%)을 시군구 263곳에 등록대수 비율대로 배분 (최대 나머지 방식 → 합계가 정확히 10,000)
     - 차종: 다마스 40% · 라보 30% · 1톤 30% (전국 18,800 · 14,100 · 14,100명, 각 지역도 이 순서로 섞어 배분)
     - 좌표: 그 시군구 안의 실제 장소 좌표(data/processed/driver_places.csv, scripts/collect_driver_places.py가 카카오로 수집)를
             기사마다 하나씩 배정 (무작위 이동 없음 → 점이 시군구 밖·바다로 나가지 않음). 장소가 인원보다 적으면 같은 장소를 함께 씀.
@@ -13,8 +13,8 @@
 
 기존 가상 기사(seed_drivers.py, 출처 DEMO_DRIVERS) 정리
     - 예약에 쓰이지 않은 기사는 삭제, 예약에 쓰인 기사는 is_active=0(배정 불가)로 남겨 예약 기록 보존
-    - 같은 출처(DEMO_DRIVERS_XLSX)의 이전 생성분도 같은 규칙으로 정리 → 여러 번 실행해도 활성 기사는 47,000명
-    - 한 트랜잭션: 검증(합계 47,000, 차종 18,800/14,100/14,100)에 실패하면 전부 롤백
+    - 같은 출처(DEMO_DRIVERS_XLSX)의 이전 생성분도 같은 규칙으로 정리 → 여러 번 실행해도 활성 기사는 10,000명
+    - 한 트랜잭션: 검증(합계 10,000, 차종 4,000/3,000/3,000)에 실패하면 전부 롤백
 
 실행 (프로젝트 루트)
     python -m scripts.seed_drivers_excel --dry-run   배분 결과만 확인 (DB 쓰기 없음)
@@ -36,15 +36,15 @@ from scripts.seed_drivers import (CACHE, COUNT_MAX, COUNT_MIN, NEW_DRIVER_RATIO,
 from services.db import get_connection
 from services.driver_sim import EXCEL_PATH, load_driver_simulation
 
-TOTAL_DRIVERS = 47_000
+TOTAL_DRIVERS = 10_000
 VEHICLE_PATTERN = ["다마스", "라보", "1톤", "다마스", "라보", "1톤", "다마스", "라보", "1톤", "다마스"]  # 10명당 4:3:3
 SOURCE_CODE = "DEMO_DRIVERS_XLSX"
 OLD_SOURCE_CODES = ("DEMO_DRIVERS", SOURCE_CODE)
 JITTER = 0.02                       # 장소 파일이 없는 시군구만: 시군구 중심에서 ±0.02도 (약 2km)
 PLACES = os.path.join("data", "processed", "driver_places.csv")
 SEED = 4700
-DATASET_NAME = "시연용 가상 기사 데이터 (등록대수 비율 47,000명)"
-COVERAGE_NOTE = ("통계누리 시군구별 영업용 화물차 등록대수(2026-09)의 약 10% 비율로 47,000명 배분, "
+DATASET_NAME = "시연용 가상 기사 데이터 (등록대수 비율 10,000명)"
+COVERAGE_NOTE = ("통계누리 시군구별 영업용 화물차 등록대수(2026-09)의 약 2.1% 비율로 10,000명 배분, "
                  "차종 다마스40·라보30·1톤30 가정, 좌표는 카카오 장소 좌표. 실제 사업자·주소 아님")
 
 
@@ -161,7 +161,7 @@ def main() -> None:
                                                            fare_rule_id, avg_rating, rating_count)
                                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)""", rows)
 
-                # 검증: 활성 가상 기사 = 47,000, 차종 18,800/14,100/14,100
+                # 검증: 활성 가상 기사 = 10,000, 차종 4,000/3,000/3,000
                 cur.execute("""SELECT f.vehicle_type, COUNT(*) AS n FROM drivers d JOIN fare_rules f USING (fare_rule_id)
                                WHERE d.source_id = %s AND d.is_active = TRUE GROUP BY f.vehicle_type""", (source_id,))
                 types = {r["vehicle_type"]: r["n"] for r in cur.fetchall()}
