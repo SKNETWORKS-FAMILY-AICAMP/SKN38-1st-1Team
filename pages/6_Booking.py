@@ -4,7 +4,8 @@
 - 동의: services/agreement.py (조건·운임이 바뀌면 동의 자동 해제, 확정 직전에 다시 검증)
 - 저장·배정: services/assignment.py → 예준님 matching.recommend_drivers + booking.create_booking 재사용
 - 매칭 완료 알림은 DB에 저장된 예약을 다시 읽어 온 경우에만 표시
-- 같은 조건으로 이미 예약을 마친 세션은 완료 화면을 다시 보여 주고 새로 저장하지 않음 (중복 예약 방지)
+- 예약 저장·기사 배정은 이 화면의 [예약 확정하기]에서만 실행 (3단계 [이 기사님으로 예약하기]는 이 화면으로 이동만 함)
+- 확정 직후 5단계 완료 화면 + 매칭 완료 팝업(st.dialog, 한 번만). 다시 확정을 눌러도 중복 저장하지 않음
 """
 
 from html import escape
@@ -15,9 +16,10 @@ from services import agreement, assignment, notifications
 from services import booking_lookup as bl
 from services.db import DBConnectionError, get_connection
 from services.transport_request import HELPER_OPTIONS, ITEM_SIZES, REQUEST_KEY, SELECTED_DRIVER_KEY
-from services.ui import step_header
+from services.ui import image_data_uri, step_header
 
-RESULT_KEY = "booking_result"   # {"conditions_hash", "booking"(DB 행), "driver_vehicle", "phone"}
+RESULT_KEY = "booking_result"   # {"conditions_hash", "booking"(DB 행), "driver_vehicle", "phone"} — 확정 직후에만 존재
+POPUP_KEY = "booking_match_popup"  # 매칭 완료 팝업을 띄울 예약번호 (한 번 띄우면 지움 → 다시 실행해도 안 뜸)
 LOOKUP_AUTH_KEY = "lookup_auth"  # 예약 조회 화면의 확인 정보 (예약 직후 바로 조회되도록 채움)
 SERVICE_NAMES = {"VEHICLE_ONLY": "추가 인력 없음", "DRIVER_HELP": "기사 상하차 도움", "WORKER_1": "추가 작업자 1명"}
 
@@ -44,31 +46,64 @@ def place(prefix: str, side: str) -> str:
     return f"{escape(addr)}{(' ' + escape(detail)) if detail else ''}<small>{floor_text} · {elevator}</small>"
 
 
-# ── 예약 완료 화면 (같은 조건으로 이미 저장된 경우) ──────────────────────
+def vehicle_text(b: dict) -> str:
+    """배정 기사님 차량 (운임 기준 차량과 다르면 함께 표시)."""
+    driver_v, fare_v = b.get("driver_vehicle_type"), b.get("vehicle_type")
+    if driver_v and fare_v and driver_v != fare_v:
+        return f"{driver_v} (운임 기준 {fare_v})"
+    return driver_v or fare_v or "-"
+
+
+def matched_title(b: dict) -> str:
+    """DB에 저장된 driver_id로 조회한 기사 이름 기준 (조회 실패 시 이름 없이)."""
+    name = (b.get("driver_name") or "").strip()
+    return f"{name} 기사님이 매칭되었습니다!" if name else "기사님이 매칭되었습니다!"
+
+
+def open_lookup(b: dict, phone: str) -> None:
+    st.session_state[LOOKUP_AUTH_KEY] = {"booking_id": b["booking_id"], "phone": phone}
+    st.switch_page("pages/3_Booking_Lookup.py")
+
+
+@st.dialog("예약 완료", width="small")
+def match_popup(b: dict, phone: str) -> None:
+    st.html(
+        '<div class="jm-match-pop">'
+        f'<img src="{image_data_uri("jimni1.png")}" alt="">'
+        f'<p class="t">{escape(matched_title(b))}</p>'
+        '<p class="d">운송 예약이 완료되었어요.<br>예약 내역에서 자세한 정보를 확인해 주세요.</p>'
+        "<dl>"
+        f"<div><dt>예약번호</dt><dd>{b['booking_id']}</dd></div>"
+        f"<div><dt>차량 종류</dt><dd>{escape(vehicle_text(b))}</dd></div>"
+        "</dl></div>"
+    )
+    c1, c2 = st.columns(2)
+    if c1.button("예약 내역 확인하기", type="primary", width="stretch", key="popup_lookup"):
+        open_lookup(b, phone)
+    if c2.button("닫기", width="stretch", key="popup_close"):
+        st.rerun()   # 팝업만 닫히고 5단계 완료 화면 유지
+
+
+# ── 5단계 예약 완료 화면 (방금 [예약 확정하기]로 저장된 경우에만) ────────────
 result = st.session_state.get(RESULT_KEY)
 if result and result["conditions_hash"] == agreement.conditions_hash(request):
     step_header(5)
     st.title("예약 완료")
     b = result["booking"]
-    notice = notifications.NOTICES["BOOKED"]
-    notifications.toast_once(f"{b['booking_id']}:matched", notice)
-    notifications.render_notice(notice, [
+    notifications.render_notice({**notifications.NOTICES["BOOKED"], "title": matched_title(b)}, [
         ("예약번호", str(b["booking_id"])),
-        ("배정 기사님", f"{b['driver_name']} 기사님 (시연용 가상 기사)"),
-        ("차량 종류", (f"{b['driver_vehicle_type']} (운임 기준 {b['vehicle_type']})"
-                      if b.get("driver_vehicle_type") and b["driver_vehicle_type"] != b["vehicle_type"]
-                      else b.get("driver_vehicle_type") or b["vehicle_type"] or "-")),
+        ("배정 기사님", f"{b['driver_name']} 기사님" if b.get("driver_name") else "-"),
+        ("차량 종류", vehicle_text(b)),
         ("운송 일시", f"{b['scheduled_at']:%Y년 %m월 %d일 %H:%M}"),
         ("합의 운임", won(b["estimated_fare"])),
     ])
-    st.caption("학습용 시연 서비스로, 실제 기사님께 운송 요청이 전달되거나 결제가 이루어지지 않습니다. "
-               "예약번호는 예약 조회에 필요하니 꼭 기록해 두세요.")
     c1, c2, _ = st.columns([2, 1, 2])
     if c1.button("예약 조회에서 확인하기", type="primary", width="stretch", icon=":material/event_note:"):
-        st.session_state[LOOKUP_AUTH_KEY] = {"booking_id": b["booking_id"], "phone": result["phone"]}
-        st.switch_page("pages/3_Booking_Lookup.py")
+        open_lookup(b, result["phone"])
     if c2.button("홈으로", width="stretch"):
         st.switch_page("pages/0_Home.py")
+    if st.session_state.pop(POPUP_KEY, None) == b["booking_id"]:   # 확정 직후 한 번만
+        match_popup(b, result["phone"])
     st.stop()
 
 # ── 1. 최종 운임 · 작업 조건 확인 ───────────────────────────────────────
@@ -121,8 +156,7 @@ if quote.get("vehicle_check_note"):
 
 preferred = st.session_state.get(SELECTED_DRIVER_KEY)
 if preferred:
-    st.caption(f"추천 기사님: {preferred['nickname']} · {preferred['vehicle_type']} (시연용 가상 기사) — "
-               "예약을 확정할 때 이 기사님부터 배정을 시도하고, 일정이 겹치면 조건에 맞는 다른 가상 기사님이 자동 배정돼요.")
+    st.caption(f"추천 기사님: {preferred['nickname']} · {preferred['vehicle_type']}")
 
 # ── 2. 예약자 정보 · 동의 · 확정 ────────────────────────────────────────
 with st.container(key="jm_booking_form"):
@@ -175,6 +209,7 @@ if confirm:
                     "conditions_hash": agreement.conditions_hash(request), "booking": row,
                     "driver_vehicle": saved["driver"].get("vehicle_type"), "phone": bl.normalize_phone(phone),
                 }
+                st.session_state[POPUP_KEY] = row["booking_id"]
                 st.session_state.pop(agreement.AGREEMENT_KEY, None)
                 st.rerun()
 

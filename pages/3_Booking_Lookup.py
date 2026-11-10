@@ -86,8 +86,7 @@ with st.container(border=True):
     else:
         verified = booking["verification_status"] == "VERIFIED"
         name = booking["driver_name"].replace("*", "\\*")   # 마스킹 별표가 굵게 표시로 바뀌지 않게
-        info_row("기사님", f"{name} 기사님" + (" · 사업자 확인 완료" if verified else "")
-                 + "  \n:gray[시연용 가상 기사 (실제 기사 아님)]")
+        info_row("기사님", f"{name} 기사님" + (" · 사업자 확인 완료" if verified else ""))
     info_row("차량 종류", vehicle_text(booking))
     info_row("운임", f"**{booking['estimated_fare']:,}원**" if booking["estimated_fare"] is not None else "-")
 

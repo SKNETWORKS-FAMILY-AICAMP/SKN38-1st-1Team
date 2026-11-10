@@ -262,8 +262,7 @@ if drivers:
         c2.markdown(f"#### {d['nickname'].replace('*', chr(92) + '*')} 기사님")   # 마스킹 별표 그대로 표시
         rating = f"★ {d['rating']:.1f}" if d["rating"] is not None else "신규 기사님"
         c2.write(f"🚚 {d['vehicle_type']}  ·  📍 출발지에서 {d['distance_km']}km  ·  {rating}")
-        c2.caption(f"추천 {idx + 1} / {len(drivers)}  ·  시연용 가상 기사이며 사진은 일러스트입니다.")
-        c2.caption("예약을 확정할 때 배정돼요. 그사이 이 기사님 일정이 생기면 조건에 맞는 다른 가상 기사님이 자동 배정됩니다.")
+        c2.caption(f"추천 {idx + 1} / {len(drivers)}")
 
     b1, b2 = st.columns(2)
     if len(drivers) > 1 and b1.button("다른 기사님 보기", use_container_width=True):
@@ -271,6 +270,7 @@ if drivers:
         st.rerun()
     if b2.button("이 기사님으로 예약하기", type="primary", use_container_width=True):
         st.session_state[SELECTED_DRIVER_KEY] = d               # 예약하기 화면으로 기사 정보 전달 (선호 기사)
+        st.session_state.pop("booking_result", None)            # 새 예약 진행: 이전 완료 화면 대신 4단계 예약하기부터
         # 화면에 보여준 견적(운임 내역 + 견적 당시 조건 해시)을 사전 확정 운임 동의·예약 저장에 그대로 사용
         request["quote"] = agreement.build_quote(request, estimate_result, service_type)
         st.switch_page("pages/6_Booking.py")

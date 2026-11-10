@@ -222,6 +222,22 @@ a[data-testid="stTopNavLink"][aria-current="page"] span {{ color: {BLUE}; font-w
                                                  padding: 12px 14px; }}
 [class*="st-key-jm_booking_form"] .stCheckbox p {{ font-weight: 600; color: {NAVY}; }}
 
+/* ── 매칭 완료 팝업 (st.dialog) ─────────────────────────────────── */
+[data-testid="stDialog"] [role="dialog"] {{ border-radius: 22px !important; animation: jm-pop-in .28s cubic-bezier(.2, .8, .3, 1) both; }}
+@keyframes jm-pop-in {{ from {{ opacity: 0; transform: scale(.94) translateY(8px); }} to {{ opacity: 1; transform: none; }} }}
+@media (prefers-reduced-motion: reduce) {{ [data-testid="stDialog"] [role="dialog"] {{ animation: none; }} }}
+.jm-match-pop {{ text-align: center; padding: 4px 4px 8px; }}
+.jm-match-pop img {{ height: 96px; width: auto; display: block; margin: 0 auto 10px; }}
+.jm-match-pop .t {{ font-size: 22px; font-weight: 800; color: {NAVY}; margin: 0; line-height: 1.35; word-break: keep-all; }}
+.jm-match-pop .d {{ font-size: 15px; color: {MUTED}; margin: 8px 0 16px; line-height: 1.6; }}
+.jm-match-pop dl {{ display: grid; grid-template-columns: 1fr 1fr; gap: 0; margin: 0 !important; padding: 0 !important;
+                    background: #F3F7FF; border: 1px solid #BFD3FB; border-radius: 14px; overflow: hidden; }}
+.jm-match-pop dl div {{ padding: 12px 10px; }}
+.jm-match-pop dl div + div {{ border-left: 1px solid #BFD3FB; }}
+.jm-match-pop dt {{ font-size: 12px; font-weight: 600; color: {MUTED}; margin: 0; }}
+.jm-match-pop dd {{ font-size: 16px; font-weight: 800; color: {BLUE}; margin: 2px 0 0 !important; word-break: keep-all; }}
+.jm-match-pop .n {{ font-size: 12px; color: {MUTED}; margin: 12px 0 0; }}
+
 /* ── 웹 알림 카드 (매칭 완료·기사 출발·운송 완료) ─────────────────────── */
 .jm-notice {{ display: flex; gap: 16px; align-items: flex-start; background: #F3F7FF; border: 1px solid #BFD3FB;
               border-radius: 18px; padding: 20px 22px; }}
@@ -415,7 +431,7 @@ def render_footer() -> None:
             st.html('<p class="jm-foot-title">정보</p>')
             st.page_link("pages/7_Fare_Table.py", label="요금표")
         st.html("<hr>")
-        st.caption("SK Networks Family AI Camp 38기 1팀 프로젝트 · 본 서비스는 학습용 시연 서비스로, 실제 운송 예약·결제는 이루어지지 않습니다.")
+        st.caption("SK Networks Family AI Camp 38기 1팀 프로젝트")
 
 
 def status_stepper(labels: list[str], current_index: int, images: list[str] | None = None) -> None:
