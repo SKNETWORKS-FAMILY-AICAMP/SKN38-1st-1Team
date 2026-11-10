@@ -101,7 +101,7 @@ def vehicle_text(b: dict) -> str:
     """배정 기사님 차량 (운임 기준 차량과 다르면 함께 표시: 더 큰 차량 기사님이 배정될 수 있음)."""
     driver_v, fare_v = b.get("driver_vehicle_type"), b.get("vehicle_type")
     if driver_v and fare_v and driver_v != fare_v:
-        return f"{driver_v} (운임 기준 {fare_v})"
+        return f"{driver_v} (운임은 {fare_v} 기준)"   # 근처에 같은 차종이 없어 더 큰 차량이 배정된 경우
     return driver_v or fare_v or "정보 없음"
 
 

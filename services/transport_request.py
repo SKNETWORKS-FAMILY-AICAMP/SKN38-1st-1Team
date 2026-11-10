@@ -32,7 +32,14 @@ HELPER_OPTIONS = {  # bookings.helper_option (VARCHAR(20), 기본값 'NONE')
     "DRIVER_HELP": "기사님 운반 도움",
     "EXTRA_WORKER": "추가 인력 1명",
 }
-FLOOR_MIN, FLOOR_MAX = -5, 99
+FLOOR_MIN, FLOOR_MAX = -2, 6   # 운임표 계단 요금 범위 (지하 2층 ~ 5층) + 6층 = '6층 이상'(별도 협의)
+
+
+def floor_label(floor: int) -> str:
+    """층수 표시 (-2 → 지하 2층, 6 → 6층 이상). 입력·매칭·예약 화면 공통."""
+    if floor >= FLOOR_MAX:
+        return f"{FLOOR_MAX}층 이상"
+    return f"지하 {-floor}층" if floor < 0 else f"{floor}층"
 ITEM_MAX = 50
 
 REQUEST_KEY = "transport_request"        # 운송 요청 입력값
@@ -65,7 +72,7 @@ def validate_request(req: dict, now: datetime | None = None) -> list[str]:
     for key, label in (("origin_floor", "출발지"), ("dest_floor", "도착지")):
         floor = req.get(key)
         if not isinstance(floor, int) or not FLOOR_MIN <= floor <= FLOOR_MAX or floor == 0:
-            errors.append(f"{label} 층수를 확인해 주세요 (지하는 -1, -2 …, 0층 없음).")
+            errors.append(f"{label} 층수를 확인해 주세요 (지하 2층 ~ 6층 이상 중에서 선택).")
     counts = [req.get(f"item_{s.lower()}_count", 0) for s in ITEM_SIZES]
     if any(not isinstance(c, int) or c < 0 or c > ITEM_MAX for c in counts):
         errors.append(f"물품 개수는 크기별 0~{ITEM_MAX}개로 입력해 주세요.")

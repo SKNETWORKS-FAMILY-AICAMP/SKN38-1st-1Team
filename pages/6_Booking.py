@@ -15,7 +15,7 @@ import streamlit as st
 from services import agreement, assignment, notifications, settlement
 from services import booking_lookup as bl
 from services.db import DBConnectionError, get_connection
-from services.transport_request import HELPER_OPTIONS, ITEM_SIZES, REQUEST_KEY, SELECTED_DRIVER_KEY
+from services.transport_request import HELPER_OPTIONS, ITEM_SIZES, REQUEST_KEY, SELECTED_DRIVER_KEY, floor_label
 from services.ui import image_data_uri, step_header
 
 RESULT_KEY = "booking_result"   # {"conditions_hash", "booking"(DB 행), "driver_vehicle", "phone"} — 확정 직후에만 존재
@@ -40,7 +40,7 @@ def won(value) -> str:
 def place(prefix: str, side: str) -> str:
     detail = request.get(f"{side}_detail_address") or ""
     floor = request[f"{prefix}_floor"]
-    floor_text = f"지하 {-floor}층" if floor < 0 else f"{floor}층"
+    floor_text = floor_label(floor)
     elevator = "엘리베이터 있음" if request[f"{prefix}_has_elevator"] else "엘리베이터 없음"
     addr = request["origin_address" if prefix == "origin" else "dest_address"]
     return f"{escape(addr)}{(' ' + escape(detail)) if detail else ''}<small>{floor_text} · {elevator}</small>"
@@ -50,7 +50,7 @@ def vehicle_text(b: dict) -> str:
     """배정 기사님 차량 (운임 기준 차량과 다르면 함께 표시)."""
     driver_v, fare_v = b.get("driver_vehicle_type"), b.get("vehicle_type")
     if driver_v and fare_v and driver_v != fare_v:
-        return f"{driver_v} (운임 기준 {fare_v})"
+        return f"{driver_v} (운임은 {fare_v} 기준)"
     return driver_v or fare_v or "-"
 
 

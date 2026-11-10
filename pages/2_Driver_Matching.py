@@ -19,6 +19,7 @@ from services.transport_request import (
     ITEM_SIZES,
     REQUEST_KEY,
     SELECTED_DRIVER_KEY,
+    floor_label,
 )
 from services.ui import step_header
 
@@ -52,8 +53,7 @@ if not request:
 
 with st.expander("입력한 운송 조건", expanded=True):
 
-    def floor_text(floor: int) -> str:                # -2 → 지하 2층
-        return f"지하 {-floor}층" if floor < 0 else f"{floor}층"
+    floor_text = floor_label                          # -2 → 지하 2층, 6 → 6층 이상
 
     st.write(
         f"**출발지** {request['origin_address']} "
