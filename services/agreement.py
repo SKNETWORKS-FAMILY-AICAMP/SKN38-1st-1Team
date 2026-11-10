@@ -12,6 +12,9 @@
 
 DB 저장: 예약 확정 시 agreement_record()를 bookings.agreed_at · agreement_hash · agreed_terms에 저장
       (sql/bookings_agreement_columns.sql). 합의 운임은 estimated_fare, 조건은 기존 컬럼에 그대로 저장된다.
+
+금액: estimated_fare = 운임(fare.estimate), usage_fee = 서비스 이용료(5%), payable_total = 고객 결제액(운임 + 이용료).
+      동의 화면의 최종 금액은 payable_total → 예약 저장(booking.py: calc_settlement(운임)의 customer_total)과 같은 값.
 """
 
 from __future__ import annotations
@@ -19,6 +22,8 @@ from __future__ import annotations
 import hashlib
 import json
 from datetime import datetime
+
+from services.settlement import calc_settlement
 
 AGREEMENT_KEY = "fare_agreement"   # {"terms_hash": str, "agreed_at": datetime}
 AGREEMENT_TEXT = "위 운송 조건과 최종 운임을 확인했으며, 해당 내용에 동의합니다."
@@ -32,7 +37,8 @@ CONDITION_FIELDS = (
 )
 # 동의 대상 견적 값 (fare.estimate 결과에서 옮겨 온 값)
 QUOTE_FIELDS = ("vehicle_type", "distance_km", "estimated_minutes", "service_type", "distance_code",
-                "base_fare", "service_fee", "origin_stair_fee", "destination_stair_fee", "estimated_fare")
+                "base_fare", "service_fee", "origin_stair_fee", "destination_stair_fee", "estimated_fare",
+                "usage_fee", "payable_total")   # 서비스 이용료 · 고객 결제액도 동의 대상
 
 
 def _canonical(value):
@@ -64,6 +70,8 @@ def build_quote(request: dict, estimate: dict | None, service_type: str | None) 
     distance = estimate.get("distance") or {}
     fare = estimate.get("fare") or {}
     breakdown = fare.get("fare_breakdown") or {}
+    total = estimate.get("total_fare")
+    money = calc_settlement(total) if total is not None else None    # 운임 → 서비스 이용료 · 고객 결제액
     return {
         "vehicle_type": vehicle.get("vehicle_type"),
         "distance_km": distance.get("distance_km"),
@@ -75,7 +83,9 @@ def build_quote(request: dict, estimate: dict | None, service_type: str | None) 
         "service_fee": breakdown.get("service_fee"),
         "origin_stair_fee": breakdown.get("origin_stair_fee"),
         "destination_stair_fee": breakdown.get("destination_stair_fee"),
-        "estimated_fare": estimate.get("total_fare"),
+        "estimated_fare": total,                                              # 운임 (이용료 제외)
+        "usage_fee": money["service_fee"] if money else None,                 # 서비스 이용료 (5%)
+        "payable_total": money["customer_total"] if money else None,          # 고객 결제액 = 운임 + 이용료
         # 운임 확정 여부는 운임 계산 결과(fare.success: 거리 구간·계단 작업이 표준 요금표 안)로 판단.
         # 차량 쪽 manual_check(물품 무게 미입력 등)는 적재 확인 안내일 뿐 금액에는 영향이 없어 별도 표시만 한다.
         "fare_confirmed": bool(fare.get("success")) and estimate.get("total_fare") is not None,
@@ -90,6 +100,8 @@ def quote_problem(request: dict, quote: dict | None) -> str | None:
         return "견적 정보가 없습니다. 매칭 결과 화면에서 운임을 다시 확인해 주세요."
     if quote.get("conditions_hash") != conditions_hash(request):
         return "운송 조건이 바뀌어 기존 견적과 동의가 무효가 되었습니다. 운임을 다시 확인해 주세요."
+    if quote.get("estimated_fare") is not None and quote.get("payable_total") is None:   # 예전 형식 견적
+        return "운임 정보가 바뀌었습니다. 매칭 결과 화면에서 운임을 다시 확인해 주세요."
     if not quote.get("fare_confirmed") or quote.get("estimated_fare") is None:
         return "계단 작업 층수 등 별도 확인이 필요한 조건이 있어 최종 운임을 확정할 수 없습니다."
     return None
