@@ -4,11 +4,6 @@
 
 <h3 align="center">짐 옮길 땐, 짐니! — 생활 물류·소형 화물 운송 중개 플랫폼</h3>
 
-<p align="center">
-  <img src="assets/jimni_main.jpg" alt="짐니 메인 일러스트" width="520">
-</p>
-
-생활 속에서 발생하는 **소형 이사·단건 운송 수요와 개인 운송사업자를 연결하는 양면 플랫폼**입니다.
 
 소비자에게는 투명하고 편리한 운송 경험을, 기사에게는 효율적인 일감 확보와 업무 관리 환경을 제공합니다.
 
@@ -17,105 +12,87 @@
 > 본 서비스는 학습용 시연 서비스입니다. 기사 정보는 시연용 가상 데이터이며, 실제 운송 요청·결제는 이루어지지 않습니다.
 
 ## 🎯 프로젝트 목표
-
-- **합리적인 운송:** 운송 조건에 따른 차량 추천과 예상 운임 제공
-- **투명한 거래:** 소비자·기사 간 최종 운임 사전 합의 및 추가요금 분쟁 예방
+- **간편한 예약:** 운송 조건 입력부터 기사 추천·예약 조회까지 연결된 흐름
+- **운임 투명성:** 거리·물품·작업 옵션을 반영한 운임 확인과 예약 전 동의
 - **안심 서비스:** 기사 정보 및 운송 진행 상태 확인
 - **효율적인 중개:** 기사 매칭과 수수료·정산 정보 제공
-- **공공데이터 활용:** 지역별 영업용 화물차 등록 현황 시각화
-
-## 🧭 서비스 흐름
-
-![서비스 흐름](docs/serviceflow.png)
-
-| 단계 | 화면 | 내용 |
-|---|---|---|
-| 1 | 운송 신청 | 카카오 주소 검색으로 출발지·도착지 선택, 층수·엘리베이터·물품·인력·일시 입력 |
-| 2 | 매칭 결과 | 추천 차량·예상 거리·운임 내역 확인, 추천 기사님(시연용 가상 기사) 확인 |
-| 3 | 사전 동의 | 최종 운임·작업 조건 확인 후 동의 (조건이 바뀌면 동의 자동 해제·재계산) |
-| 4 | 예약 확정 | 예약 저장 + 조건에 맞는 기사 자동 배정 → 예약번호 발급, **"기사님이 매칭되었습니다!"** 알림 |
-| 5 | 예약 조회 | 예약번호 + 연락처로 예약 내용·운송 상태 확인, 운송 완료 후 별점 평가 |
-
-## ✅ 구현 완료 기능
-
-| 기능 | 주요 내용 |
-|---|---|
-| 📦 운송 신청 | 카카오 로컬 API 주소·장소 검색(카드형 결과, Enter 검색), 좌표 저장, 상세주소, 입력 검증(주소 미선택·같은 위치·0층 차단), 페이지 이동 후 입력값 유지 |
-| 💵 운임 계산·차량 추천 | 카카오모빌리티 경로 거리, 거리 구간별 기본 운임 + 인력 비용 + 계단 작업 비용, 물품 크기·수량 기반 차량(다마스·라보·1톤) 추천 |
-| 🤝 사전 확정 운임제 | 예약 전 최종 운임·작업 조건 확인 및 동의, 조건 변경 시 동의 자동 해제·재계산, 동의 시각·조건+운임 해시·스냅샷을 `bookings`에 저장 |
-| 🚚 기사 매칭·예약 | 출발지 주변·차량 조건·같은 날 일정 기준 추천, 예약 확정 시 기사 자동 배정(일정이 겹치면 다음 후보), 중복 예약 방지, 예약번호 발급, 트랜잭션 롤백 |
-| 🔔 웹 알림 | 예약·배정 저장 직후 매칭 완료 알림, 예약 조회에서 운송 상태(예약 완료·기사 출발·운송 중·운송 완료)별 알림 |
-| 📋 예약 조회·평가 | 로그인 없이 예약번호 + 연락처로 본인 확인 후 조회, 운송 상태 단계 표시, 운송 완료 상태에서만 별점 평가 |
-| ❓ FAQ | 팀이 작성한 FAQ 29건, 카테고리 필터 + 질문·답변 키워드 검색, 운임 요금표 안내 |
-| 💳 요금표 | 차종별 기본요금·km당 요금 (`fare_rules`) |
-| 🗺️ 화물차 현황 지도 | 국토교통부 OpenAPI 시도별 버블 지도(등록대수 구간별 색), 시도 클릭·선택 시 시군구 상세, 기준월·출처 안내 |
-| 🎨 공통 화면 | 상단 메뉴(홈·운송 신청·화물차 현황·예약 조회·FAQ), 공통 푸터, 브랜드 컬러·Pretendard, 반응형 |
-| 🗺️ 운송 신청 위치 지도 | 부분 구현 (카카오 JavaScript 키의 사이트 도메인 등록 필요) | 카카오 개발자 콘솔에 `http://localhost:8501` 등록 |
-
-## 🚧 남은 기능
-
-| 기능 | 현재 상태 | 계획 |
-|---|---|---|
-| 💰 수수료 및 정산 | 미구현 (`services/settlement.py` 빈 파일, `commission_*`·`driver_payout` 컬럼은 비어 있음) | 플랫폼 수수료율 확정 후 확정 운임·수수료·기사 예상 정산액 표시 |
-| 🔄 운송 상태 변경 | 미구현 (예약은 `BOOKED`로 유지) | 시연용 관리자 화면에서 기사 출발 → 운송 중 → 운송 완료 변경 |
-| ✏️ 예약 취소·변경 | 미구현 | 확정 예약의 취소, 조건 변경 시 재동의 |
-| 🛡️ 기사 정보 보강 | 부분 구현 (평점·차량만 표시, 가상 기사는 모두 사업자 미확인) | 완료 건수·사업자 확인 정보 표시 |
-| ❓ FAQ DB 적재 | 부분 구현 (`faqs` 테이블이 비어 있어 JSON 파일로 표시) | 정책 확정 후 `scripts/load_faqs.py --apply`로 적재 |
+- **데이터 활용:** 공공데이터 기반 지역별 영업용 화물차 등록 현황 시각화
 
 
-## 💻 기술 스택
+## 🧭 서비스 이용 방법
 
-| 구분 | 기술 |
-|---|---|
-| Language | Python |
-| Data Processing | Pandas |
-| Database | MySQL (PyMySQL) |
-| Web Application | Streamlit |
-| Visualization | pydeck (버블 지도) |
-| Public Data | 국토교통부 통계누리 OpenAPI |
-| External API | 카카오 로컬 API(주소·장소 검색), 카카오모빌리티 길찾기 API(거리), Kakao Maps JavaScript SDK(위치 지도) |
-| Collaboration | Git, GitHub |
+<p align="center">
+  <img src="docs/readme_2.png" alt="짐니 이용 방법" width="1000" />
+</p>
 
-## 🗂️ 프로젝트 폴더 구조
+| 단계 | 주요 기능 |
+|:---|:---|
+| **01 · 정보 입력** | 카카오 주소·장소 검색, 출발지·도착지 선택 및 물품·작업 조건 입력 |
+| **02 · 매칭 결과** | 도로 이동 거리, 예상 운임 및 적합한 차량 확인 |
+| **03 · 기사님 선택** | 조건에 맞는 시연용 기사 추천·선택 |
+| **04 · 예약하기** | 최종 운임·작업 조건 확인, 동의 및 예약 확정 |
+| **05 · 예약 완료** | 기사 자동 배정 알림, 예약번호 발급 및 예약 조회 |
 
-```text
-SKN38-1st-1Team/
-│
-├── app.py                      # Streamlit 진입점 (상단 메뉴·공통 디자인·푸터)
-├── pages/                      # 화면
-│   ├── 0_Home.py               # 홈 (서비스 소개·이용 방법·공공데이터 소개)
-│   ├── 1_Delivery_Request.py   # 운송 신청 (카카오 주소 검색)
-│   ├── 2_Driver_Matching.py    # 매칭 결과 (운임·차량 추천·추천 기사)
-│   ├── 6_Booking.py            # 예약하기 (사전 동의·예약 확정·매칭 완료 알림)
-│   ├── 3_Booking_Lookup.py     # 예약 조회·운송 상태·평가
-│   ├── 4_Truck_Map.py          # 화물차 현황 (버블 지도)
-│   ├── 5_FAQ.py                # FAQ
-│   └── 7_Fare_Table.py         # 요금표
-│
-├── services/                   # 기능 로직
-│   ├── fare.py · fare_table.py # 운임 계산·차량 추천·요금 기준
-│   ├── matching.py             # 기사 추천
-│   ├── booking.py              # 예약 저장
-│   ├── agreement.py            # 사전 확정 운임 동의
-│   ├── assignment.py           # 예약 확정 시 기사 자동 배정
-│   ├── notifications.py        # 웹 알림
-│   ├── booking_lookup.py       # 예약 조회·평가
-│   ├── kakao_local.py          # 카카오 주소 검색·위치 지도
-│   ├── truck_stats.py · truck_map.py  # 화물차 통계·버블 지도
-│   ├── faq.py                  # FAQ 조회·검색
-│   └── ui.py                   # 공통 디자인·헤더·푸터
-│
-├── scripts/                    # 데이터 수집·적재 (국토부 API, 시연 기사, FAQ)
-├── data/                       # 원본·전처리 데이터, FAQ 원본
-├── sql/                        # schema.sql, 조회 쿼리, 추가 컬럼 SQL
-├── docs/                       # ERD, 서비스 흐름, 파이프라인 문서
-├── assets/                     # 로고·지니 캐릭터 이미지
-│
-├── requirements.txt            # Python 라이브러리 목록
-├── .env.example                # 환경변수 예시
-├── .gitignore                  # Git 업로드 제외 설정
-└── README.md
-```
+<details>
+<summary><b>서비스 흐름도 자세히 보기</b></summary>
+
+<p align="center">
+  <img src="docs/serviceflow.png" alt="짐니 서비스 흐름도" width="900" />
+</p>
+</details>
+
+## ✨ 주요 기능
+
+| 기능 | 설명 |
+|:---|:---|
+| 운송 신청 | 카카오 API를 통한 주소 검색 및 위치 확인, 물품·운송 조건 입력 |
+| 운임 계산 및 차량 추천 | 실제 도로 이동 거리, 물품 크기, 층수, 추가 인력을 반영한 예상 운임 계산 |
+| 기사 추천 및 매칭 | 운송 조건과 지역을 고려한 시연용 가상 기사 추천 및 예약 확정 시 자동 배정 |
+| 사전 운임 동의 | 최종 운임과 작업 조건 확인, 조건 변경 시 운임 재계산 및 재동의 |
+| 예약 조회 및 평가 | 예약번호와 연락처로 예약 조회, 운송 상태 확인 및 완료 후 별점 평가 |
+| FAQ | 팀에서 작성한 FAQ 29건에 대한 카테고리별 조회 및 키워드 검색 |
+| 지역별 화물차 현황 | 국토교통부 공공데이터 기반 시도별 버블 지도 및 시군구 상세 통계 |
+| 웹 알림 | 기사 매칭 완료 알림과 예약 상태에 따른 안내 메시지 |
+
+## 📊 데이터 수집 및 전처리
+
+짐니는 국토교통부 공공데이터를 수집하고 전처리하여 지역별 영업용 화물차 등록 현황을 시각화합니다.
+
+### 데이터 수집
+
+- **데이터 출처:** 국토교통부 자동차등록현황 OpenAPI
+- **기준월:** 2026년 9월
+- **수집 대상:** 시도·시군구별 영업용 화물차 등록대수
+- **전국 등록대수:** 472,852대
+- **시군구 데이터:** 263건
+
+### 전처리 내용
+
+1. 전체 자동차 등록 통계에서 영업용 화물차 데이터 추출
+2. 시도별 소계 행 제거 및 중복 집계 방지
+3. 시도·시군구 지역명 정리
+4. 누락값 및 중복 데이터 검증
+5. 시군구별 합계와 공식 통계 비교
+6. 전처리 데이터를 MySQL에 저장
+
+동일 기준월의 중복 저장을 방지하고, 오류 발생 시 트랜잭션을 롤백하여 데이터 정합성을 유지합니다.
+
+자세한 과정은 [데이터 수집 및 전처리 문서](docs/registration_pipeline.md)에서 확인할 수 있습니다.
+
+### 데이터 활용
+
+수집한 데이터는 `registration_stats` 테이블에 저장되며, Streamlit의 지역별 화물차 현황 페이지에서 활용됩니다.
+
+- 전국 영업용 화물차 등록대수 조회
+- 시도별 버블 지도 시각화
+- 시도 선택 시 시군구별 상세 통계 조회
+- 기준월 및 데이터 출처 표시
+
+버블 위치는 SGIS 행정구역 경계 데이터에서 계산한 시도별 대표 좌표를 활용합니다.
+
+> 화물차 등록대수는 공식 등록 통계이며, 실제 운행 중인 차량 수나 실시간 배차 가능한 기사 수를 의미하지 않습니다.
+
+---
 
 ## 🗂️ ERD (데이터베이스 설계)
 
@@ -142,6 +119,74 @@ SKN38-1st-1Team/
 - `regions` → `registration_stats` : 지역별 화물차 등록 통계
 - `fare_rules` → `drivers`, `bookings` : 차종별 운임 기준
 - `drivers` → `bookings` : 기사별 운송 예약
+
+## 💻 기술 스택
+
+| 구분 | 기술 |
+|:---|:---|
+| Language | Python |
+| Web Framework | Streamlit |
+| Data Processing | Pandas |
+| Database | MySQL, PyMySQL |
+| Visualization | pydeck |
+| Public Data | 국토교통부 자동차등록현황 OpenAPI |
+| Location API | Kakao Local API |
+| Route API | 카카오모빌리티 길찾기 API |
+| Map SDK | Kakao Maps JavaScript SDK |
+| Collaboration | Git, GitHub |
+
+## 📁 프로젝트 구조
+
+<details>
+<summary><b>폴더 구조 자세히 보기</b></summary>
+
+```text
+SKN38-1st-1Team/
+│
+├── app.py                 # Streamlit 진입점
+│
+├── pages/                 # 웹페이지
+│   ├── 0_Home.py
+│   ├── 1_Delivery_Request.py
+│   ├── 2_Driver_Matching.py
+│   ├── 3_Booking_Lookup.py
+│   ├── 4_Truck_Map.py
+│   ├── 5_FAQ.py
+│   ├── 6_Booking.py
+│   └── 7_Fare_Table.py
+│
+├── services/              # 주요 비즈니스 로직
+│   ├── fare.py
+│   ├── fare_table.py
+│   ├── matching.py
+│   ├── booking.py
+│   ├── agreement.py
+│   ├── assignment.py
+│   ├── notifications.py
+│   ├── booking_lookup.py
+│   ├── kakao_local.py
+│   ├── truck_stats.py
+│   ├── truck_map.py
+│   ├── faq.py
+│   └── ui.py
+│
+├── scripts/               # 공공데이터 수집 및 DB 적재
+├── data/                  # 원본·전처리 데이터 및 FAQ
+├── sql/                   # DB 스키마 및 SQL
+├── docs/                  # ERD 및 프로젝트 문서
+├── assets/                # 로고·캐릭터·일러스트
+├── .streamlit/            # Streamlit 설정
+│
+├── requirements.txt
+├── .env.example
+├── .gitignore
+└── README.md
+```
+
+</details>
+
+---
+
 
 ### 🤝 사전 확정 운임 동의 기록 (`bookings`)
 
@@ -235,51 +280,41 @@ python -m streamlit run app.py
 
 ## 👥 팀원 소개
 
+<p align="center">
+  <b>SK Networks Family AI Camp 38기 · 1팀</b>
+</p>
+
 <table>
   <tr>
     <td align="center" width="25%">
-      <img src="assets/jimni2.png" alt="팀원 1" width="110"><br>
+      <img src="assets/jimni2.png" alt="팀원 1 캐릭터" width="110" height="110"><br>
       <b>[이름]</b><br>
-      [역할]<br>
+      <sub>[역할]</sub><br>
       <sub>[담당 기능]</sub>
     </td>
     <td align="center" width="25%">
-      <img src="assets/jimni6.png" alt="팀원 2" width="110"><br>
+      <img src="assets/jimni6.png" alt="팀원 2 캐릭터" width="110" height="110"><br>
       <b>[이름]</b><br>
-      [역할]<br>
+      <sub>[역할]</sub><br>
       <sub>[담당 기능]</sub>
     </td>
     <td align="center" width="25%">
-      <img src="assets/jimni4.png" alt="팀원 3" width="110"><br>
+      <img src="assets/jimni4.png" alt="팀원 3 캐릭터" width="110" height="110"><br>
       <b>[이름]</b><br>
-      [역할]<br>
+      <sub>[역할]</sub><br>
       <sub>[담당 기능]</sub>
     </td>
     <td align="center" width="25%">
-      <img src="assets/jimni3.png" alt="팀원 4" width="110"><br>
+      <img src="assets/jimni3.png" alt="팀원 4 캐릭터" width="110" height="110"><br>
       <b>[이름]</b><br>
-      [역할]<br>
+      <sub>[역할]</sub><br>
       <sub>[담당 기능]</sub>
     </td>
   </tr>
 </table>
 
-## 🤝 GitHub 협업
-
-팀원 4명이 `main` 브랜치를 기준으로 기능별 파일을 분담하여 개발합니다.
-
-**작업 순서:** `Pull → 개발 → Commit → Pull → Push`
-
-- 작업 전 최신 코드 Pull
-- 담당 파일 위주로 수정
-- 공통 파일 수정 시 팀원에게 공유
-- API 키, DB 비밀번호, `.env`, `.venv` 업로드 금지
-- 충돌 발생 시 강제 Push 금지
-
-### 팀 GitHub
-
-https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN38-1st-1Team
-
 ---
 
-**SK Networks Family AI Camp · SKN38 1st Project · 1Team**
+<p align="center">
+  <b>SK Networks Family AI Camp · SKN38 1st Project · 1Team</b>
+</p>
