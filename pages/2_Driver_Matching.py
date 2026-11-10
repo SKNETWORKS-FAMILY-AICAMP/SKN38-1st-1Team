@@ -142,15 +142,7 @@ except Exception as error:
 # ============================================================
 
 if estimate_result:
-
-    if not estimate_result.get("success", False):
-        st.warning(
-            estimate_result.get(
-                "reason",
-                "정확한 운임을 계산하기 위해 추가 확인이 필요합니다."
-            )
-        )
-
+    
     vehicle_result = estimate_result.get("vehicle", {})
     distance_result = estimate_result.get("distance", {})
     fare_result = estimate_result.get("fare", {})
@@ -231,9 +223,6 @@ if estimate_result:
                     st.write(
                         f"**결제 예상 금액: {money['customer_total']:,}원**"
                     )
-
-        if estimate_result.get("manual_check"):
-            st.warning("차량 규격 또는 운송 조건에 대한 추가 확인이 필요합니다.")
 
 
 
