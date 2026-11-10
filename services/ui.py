@@ -356,14 +356,47 @@ a[data-testid="stTopNavLink"][aria-current="page"] span {{ color: {BLUE}; font-w
 .jm-status .s.done::before, .jm-status .s.now::before {{ background: {BLUE}; }}
 .jm-status .s.now {{ font-weight: 700; }}
 
+/* ── 운송 신청 폼 — 01 건물 · 02 물품 · 03 일정 (pages/1_Delivery_Request.py) ───────── */
+[data-testid="stForm"]:has(.jm-rq-head) {{ padding: 28px 30px 26px; border-radius: 20px; border-color: {LINE};
+    background: #FFFFFF; box-shadow: 0 8px 28px rgba(17, 31, 63, .05); }}
+.jm-rq-hr {{ border: 0; border-top: 1px solid {LINE}; margin: 14px 0 22px; }}
+.jm-rq-head {{ display: flex; gap: 12px; align-items: flex-start; margin: 0 0 6px; }}
+.jm-rq-head .ic {{ width: 38px; height: 38px; border-radius: 11px; background: #EAF1FF; flex: none;
+    display: flex; align-items: center; justify-content: center; }}
+.jm-rq-head b {{ display: block; font-size: 17px; color: {NAVY}; letter-spacing: -0.01em; }}
+.jm-rq-head p {{ margin: 2px 0 0; font-size: 14px; color: {MUTED}; }}
+.jm-rq-side {{ font-weight: 700; color: {NAVY}; font-size: 15px; margin: 6px 0 0; }}
+[class*="st-key-rq_place_"] [data-testid="stWidgetLabel"] p,
+[class*="st-key-rq_schedule"] [data-testid="stWidgetLabel"] p {{ color: {MUTED}; font-size: 13px; }}
+/* 선택지(엘리베이터·추가 인력)는 동그라미 대신 알약 버튼 */
+[class*="st-key-rq_"] [role="radiogroup"] {{ gap: 8px; flex-wrap: wrap; }}
+[class*="st-key-rq_"] label[data-testid="stRadioOption"] {{ margin: 0; padding: 8px 18px;
+    border: 1px solid {LINE}; border-radius: 999px; background: #FFFFFF; cursor: pointer;
+    transition: border-color .15s ease, background-color .15s ease; }}
+[class*="st-key-rq_"] label[data-testid="stRadioOption"] > div > div:first-child {{ display: none; }}
+[class*="st-key-rq_"] label[data-testid="stRadioOption"]:hover {{ border-color: {BLUE}; }}
+[class*="st-key-rq_"] label[data-testid="stRadioOption"][data-selected="true"] {{ background: #EAF1FF; border-color: {BLUE}; }}
+[class*="st-key-rq_"] label[data-testid="stRadioOption"][data-selected="true"] p {{ color: {BLUE}; font-weight: 700; }}
+/* 물품 카드 (2 × 2) */
+[class*="st-key-rq_item_"] {{ border: 1px solid {LINE}; border-radius: 16px; padding: 14px 16px 12px;
+    background: #FFFFFF; transition: border-color .15s ease, box-shadow .15s ease; }}
+[class*="st-key-rq_item_"]:hover {{ border-color: #C9D7F5; box-shadow: 0 4px 14px rgba(37, 99, 235, .08); }}
+.jm-rq-item {{ display: grid; grid-template-columns: 1fr auto; align-items: center; row-gap: 2px; }}
+.jm-rq-item b {{ font-size: 15px; color: {NAVY}; }}
+.jm-rq-item span {{ grid-column: 1 / -1; font-size: 12.5px; color: {MUTED}; }}
+[class*="st-key-rq_item_"] .stNumberInput div[data-baseweb="input"] {{ background: {SOFT}; border-color: transparent; }}
+[class*="st-key-rq_item_"] .stNumberInput input {{ text-align: center; font-size: 18px; font-weight: 700; color: {NAVY}; }}
+
 /* ── 푸터 — st.container(key="footer") ──────────────────────────── */
 /* 카드가 아닌 화면 맨 아래 가로 전체 띠로 표시 (홈 하단 파란 안내 영역과 구분) */
 [class*="st-key-footer"] {{ background: {NAVY}; border-radius: 0; padding: 40px 0 28px; margin-top: 88px;
     margin-bottom: -32px; box-shadow: 0 0 0 100vmax {NAVY}; clip-path: inset(0 -100vmax -100vmax); }}
 [class*="st-key-footer"] p, [class*="st-key-footer"] [data-testid="stCaptionContainer"] {{ color: rgba(255,255,255,.72); }}
-[class*="st-key-footer"] .jm-foot-title {{ color: #FFFFFF; font-weight: 700; font-size: 15px; margin: 0 0 6px; }}
+[class*="st-key-footer"] .jm-foot-title {{ color: #FFFFFF; font-weight: 800; font-size: 17px; letter-spacing: -0.01em;
+    margin: 0 0 10px; }}
 [class*="st-key-footer"] a[data-testid="stPageLink-NavLink"] {{ padding: 4px 0; background: transparent; }}
-[class*="st-key-footer"] a[data-testid="stPageLink-NavLink"] p {{ color: rgba(255,255,255,.86); font-size: 14px; }}
+[class*="st-key-footer"] a[data-testid="stPageLink-NavLink"] p {{ color: rgba(255,255,255,.72); font-size: 14px;
+    font-weight: 400; }}   /* 링크는 보통 굵기 → 서비스·정보 제목이 더 진하게 보이게 */
 [class*="st-key-footer"] a[data-testid="stPageLink-NavLink"]:hover p {{ color: {YELLOW}; }}
 [class*="st-key-footer"] hr {{ border-color: rgba(255,255,255,.14); margin: 20px 0 14px; }}
 
@@ -481,6 +514,7 @@ def render_footer() -> None:
             st.page_link("pages/1_Delivery_Request.py", label="운송 신청")
             st.page_link("pages/4_Truck_Map.py", label="지역별 현황")
             st.page_link("pages/3_Booking_Lookup.py", label="예약 조회")
+            st.page_link("pages/8_Driver_Login.py", label="파트너센터")
             st.page_link("pages/5_FAQ.py", label="FAQ")
         with links2:
             st.html('<p class="jm-foot-title">정보</p>')
