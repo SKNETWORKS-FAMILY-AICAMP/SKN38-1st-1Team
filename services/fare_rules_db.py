@@ -1,16 +1,20 @@
-"""요금표 조회 (MySQL fare_rules 테이블) — 요금표 화면과 FAQ의 운임 요금표가 공통으로 사용.
+"""요금표 조회 (MySQL fare_rules 테이블) — 홈 화면의 요금표 보기에서 사용.
 
 services/fare_table.py는 운임 계산용 기준표(예준님 담당)로 바뀌었으므로, DB 조회 함수는 이 파일에 둔다.
-운임 '계산' 로직은 services/fare.py 소관이며 여기서는 DB에 등록된 기준을 표로 보여주기만 한다.
+운임 '계산' 로직은 services/fare.py 소관이며 여기서는 기준을 표로 보여주기만 한다.
 fare_rules가 비어 있으면 빈 DataFrame을 돌려주고, 화면에서 '요금표 확정 전'으로 안내한다.
+요금표 페이지(7_Fare_Table)의 운임·추가 요금 표는 fare_table.py 기준표를 화면용으로 바꿔서 보여준다.
 """
-
 from __future__ import annotations
 
 import pandas as pd
 import streamlit as st
 
 from services.db import get_connection
+from services.fare_table import (
+    FARE_RULES, ITEM_GRADES, MAX_STAIR_FLOOR, SERVICE_RULES, STAIR_RULES,
+    VEHICLE_CAPACITY, VEHICLE_ORDER,
+)
 
 COLUMNS = {
     "vehicle_type": "차종",
@@ -31,3 +35,46 @@ def load_fare_rules() -> pd.DataFrame:
         )
         rows = cur.fetchall()
     return pd.DataFrame(rows, columns=list(COLUMNS)).rename(columns=COLUMNS)
+
+
+# ── 요금표 페이지용: fare_table.py 기준표 → 화면용 표 (DB 없이 동작) ──
+def _plus(fee: int) -> str:
+    return "추가 없음" if fee == 0 else f"+{fee:,}원"          # 0원 → '추가 없음', 그 외 → '+10,000원'
+
+
+def fare_band_table() -> list[dict]:
+    """① 거리별 기본 운임 (D1~D7)"""
+    return [
+        {"거리": f"{r['min']}~{r['max']}km", **{v: f"{r['fares'][v]:,}원" for v in VEHICLE_ORDER}}
+        for r in FARE_RULES
+    ]
+
+
+def stair_fee_table() -> list[dict]:
+    """② 엘리베이터 없을 때 계단 작업 요금 (지하 포함)"""
+    rows = [
+        {"층수": f"지하 {-f}층" if f < 0 else f"{f}층", "추가 요금": _plus(STAIR_RULES[f])}
+        for f in sorted(STAIR_RULES)                               # 지하 2층 → 5층 순서
+    ]
+    rows.append({
+        "층수": f"{MAX_STAIR_FLOOR + 1}층 이상 · 지하 {-min(STAIR_RULES) + 1}층 이하",
+        "추가 요금": "별도 협의",
+    })
+    return rows
+
+
+def item_size_table() -> list[dict]:
+    """③ 짐 크기 등급별 차량 적재 가능 수량 (차량이 정해지면 ① 거리별 운임 적용)"""
+    def _count(n):
+        return "불가" if n == 0 else ("가능 (수량 별도 확인)" if n is None else f"최대 {n}개")
+    return [
+        {"등급": g, "크기 합(가로+세로+높이)": f"{s['max_size_sum']}cm 이하",
+         "무게": f"{s['max_weight']}kg 이하", "예시": s["description"],
+         **{v: _count(VEHICLE_CAPACITY[v][g]) for v in VEHICLE_ORDER}}
+        for g, s in ITEM_GRADES.items()
+    ]
+
+
+def extra_fee_table() -> list[dict]:
+    """④ 인력 추가 요금 (기사 상하차 도움·추가 작업자)"""
+    return [{"항목": r["name"], "추가 요금": _plus(r["fee"])} for r in SERVICE_RULES.values()]
