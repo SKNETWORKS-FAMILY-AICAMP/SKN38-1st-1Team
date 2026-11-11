@@ -20,10 +20,16 @@
    ## 🎬 Demo
 
    <p align="center">
-     <a href="assets/00_demo.mp4"><img src="assets/00_demo.gif" alt="짐니 시연 영상" width="800" /></a>
-   </p>
+  <a href="https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN38-1st-1Team/raw/main/assets/00_demo.mp4"><img src="assets/00_demo.gif" alt="짐니 시연 영상" width="800" /></a>
+</p>
 
-   ---
+   <p align="center">
+  <sub>4배속 미리보기 · 운송 신청 → 매칭 결과 → 기사님 선택 → 예약 → 운송 상태 조회 → 별점 평가</sub><br>
+  <sub>▶ 이미지를 누르면 원본 시연 영상(<code>00_demo.mp4</code>)이 다운로드됩니다</sub>
+
+</p>
+
+---
 
 ## Market & Problem
 
