@@ -1,0 +1,98 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 800" width="1000" height="800" role="img" aria-label="서비스 단계마다 기존의 불편을 짐니가 해결하는 방식">
+  <style>
+    text { font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", sans-serif; }
+    .kicker { font-size: 12px; font-weight: 800; letter-spacing: 2px; fill: #4674b9; }
+    .title { font-size: 28px; font-weight: 800; fill: #18212f; letter-spacing: -1px; }
+    .col { font-size: 12px; font-weight: 800; letter-spacing: 1.5px; fill: #8792a2; }
+    .num { font-size: 13px; font-weight: 800; letter-spacing: 1px; fill: #4674b9; }
+    .step { font-size: 16px; font-weight: 700; fill: #18212f; }
+    .pain { font-size: 14px; fill: #475467; }
+    .fix1 { font-size: 14px; font-weight: 700; fill: #18212f; }
+    .fix2 { font-size: 14px; fill: #344054; }
+  </style>
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto">
+      <path d="M3 1 L9 5 L3 9" fill="none" stroke="#8291a5" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+  </defs>
+
+  <rect x="0" y="0" width="1000" height="800" rx="24" fill="#f6f8fb"/>
+
+  <text x="40" y="64" class="kicker">JIMNI · PROBLEM → SOLUTION</text>
+  <text x="40" y="104" class="title">서비스 단계마다 기존의 불편을 하나씩 해결합니다</text>
+
+  <text x="230" y="158" class="col">기존의 불편</text>
+  <text x="612" y="158" class="col">짐니의 해결</text>
+
+  <!-- row 1 -->
+  <rect x="40" y="176" width="150" height="84" rx="14" fill="#eaf2ff" stroke="#cfe0ff"/>
+  <text x="62" y="210" class="num">01</text>
+  <text x="62" y="236" class="step">정보 입력</text>
+  <rect x="206" y="176" width="330" height="84" rx="14" fill="#ffffff" stroke="#e5eaf0"/>
+  <text x="230" y="212" class="pain">짐에 맞는 차량을</text>
+  <text x="230" y="236" class="pain">직접 판단하기 어려움</text>
+  <line x1="546" y1="218" x2="578" y2="218" stroke="#8291a5" stroke-width="1.6" marker-end="url(#arr)"/>
+  <rect x="588" y="176" width="372" height="84" rx="14" fill="#e8f7ef" stroke="#bfe8d0"/>
+  <text x="612" y="212" class="fix1">가장 작은 적합 차량 자동 추천</text>
+  <text x="612" y="236" class="fix2">물품 크기·수량으로 다마스·라보·1톤 중 선택</text>
+
+  <!-- row 2 -->
+  <rect x="40" y="272" width="150" height="84" rx="14" fill="#eaf2ff" stroke="#cfe0ff"/>
+  <text x="62" y="306" class="num">02</text>
+  <text x="62" y="332" class="step">매칭 결과</text>
+  <rect x="206" y="272" width="330" height="84" rx="14" fill="#ffffff" stroke="#e5eaf0"/>
+  <text x="230" y="308" class="pain">견적마다 금액이 다르고</text>
+  <text x="230" y="332" class="pain">현장에서 비용이 추가되기도 함</text>
+  <line x1="546" y1="314" x2="578" y2="314" stroke="#8291a5" stroke-width="1.6" marker-end="url(#arr)"/>
+  <rect x="588" y="272" width="372" height="84" rx="14" fill="#e8f7ef" stroke="#bfe8d0"/>
+  <text x="612" y="308" class="fix1">운임과 수수료를 항목별로 공개</text>
+  <text x="612" y="332" class="fix2">실제 주행거리·층수·인력을 반영한 예상 운임</text>
+
+  <!-- row 3 -->
+  <rect x="40" y="368" width="150" height="84" rx="14" fill="#eaf2ff" stroke="#cfe0ff"/>
+  <text x="62" y="402" class="num">03</text>
+  <text x="62" y="428" class="step">기사님 선택</text>
+  <rect x="206" y="368" width="330" height="84" rx="14" fill="#ffffff" stroke="#e5eaf0"/>
+  <text x="230" y="404" class="pain">처음 보는 기사에게</text>
+  <text x="230" y="428" class="pain">조건을 일일이 설명해야 함</text>
+  <line x1="546" y1="410" x2="578" y2="410" stroke="#8291a5" stroke-width="1.6" marker-end="url(#arr)"/>
+  <rect x="588" y="368" width="372" height="84" rx="14" fill="#e8f7ef" stroke="#bfe8d0"/>
+  <text x="612" y="404" class="fix1">조건 맞는 기사 5명을 비교 후 선택</text>
+  <text x="612" y="428" class="fix2">가까운 순 · 별점 높은 순 정렬</text>
+
+  <!-- row 4 -->
+  <rect x="40" y="464" width="150" height="84" rx="14" fill="#eaf2ff" stroke="#cfe0ff"/>
+  <text x="62" y="498" class="num">04</text>
+  <text x="62" y="524" class="step">예약하기</text>
+  <rect x="206" y="464" width="330" height="84" rx="14" fill="#ffffff" stroke="#e5eaf0"/>
+  <text x="230" y="500" class="pain">현장에서 금액이</text>
+  <text x="230" y="524" class="pain">달라질까 불안함</text>
+  <line x1="546" y1="506" x2="578" y2="506" stroke="#8291a5" stroke-width="1.6" marker-end="url(#arr)"/>
+  <rect x="588" y="464" width="372" height="84" rx="14" fill="#e8f7ef" stroke="#bfe8d0"/>
+  <text x="612" y="500" class="fix1">최종 운임·작업 조건 사전 동의</text>
+  <text x="612" y="524" class="fix2">조건이 바뀌면 운임 재계산·재동의</text>
+
+  <!-- row 5 -->
+  <rect x="40" y="560" width="150" height="84" rx="14" fill="#eaf2ff" stroke="#cfe0ff"/>
+  <text x="62" y="594" class="num">05</text>
+  <text x="62" y="620" class="step">예약 완료</text>
+  <rect x="206" y="560" width="330" height="84" rx="14" fill="#ffffff" stroke="#e5eaf0"/>
+  <text x="230" y="596" class="pain">기사 출발·운송 진행 상황을</text>
+  <text x="230" y="620" class="pain">알기 어려움</text>
+  <line x1="546" y1="602" x2="578" y2="602" stroke="#8291a5" stroke-width="1.6" marker-end="url(#arr)"/>
+  <rect x="588" y="560" width="372" height="84" rx="14" fill="#e8f7ef" stroke="#bfe8d0"/>
+  <text x="612" y="596" class="fix1">예약번호로 운송 단계 조회</text>
+  <text x="612" y="620" class="fix2">단계별 알림 · 운송 완료 후 별점 평가</text>
+
+  <!-- row 6: driver -->
+  <rect x="40" y="656" width="150" height="84" rx="14" fill="#fff5df" stroke="#f2dfb6"/>
+  <text x="62" y="690" class="num" fill="#a0701a">DRIVER</text>
+  <text x="62" y="716" class="step">기사님</text>
+  <rect x="206" y="656" width="330" height="84" rx="14" fill="#ffffff" stroke="#e5eaf0"/>
+  <text x="230" y="692" class="pain">가까운 소형 일감을 찾기 어렵고</text>
+  <text x="230" y="716" class="pain">수수료 부담이 큼</text>
+  <line x1="546" y1="698" x2="578" y2="698" stroke="#8291a5" stroke-width="1.6" marker-end="url(#arr)"/>
+  <rect x="588" y="656" width="372" height="84" rx="14" fill="#e8f7ef" stroke="#bfe8d0"/>
+  <text x="612" y="692" class="fix1">출발지 가까운 운송 요청 추천</text>
+  <text x="612" y="716" class="fix2">기사 수수료 18% · 정산 예상액 공개</text>
+</svg>
