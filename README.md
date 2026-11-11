@@ -17,8 +17,7 @@
 
 ## 🎬 Demo
 
-<!-- GitHub 웹 편집 화면에서 mp4를 이 줄 아래에 끌어다 놓으면 재생 플레이어로 보입니다. 아래 VIDEO_ID 줄은 지우기 -->
-https://github.com/user-attachments/assets/VIDEO_ID
+[▶ 시연 영상 보기](assets/00_demo.mp4)
 
 ---
 
@@ -88,6 +87,117 @@ https://github.com/user-attachments/assets/VIDEO_ID
 
 <p align="center">
   <img src="docs/serviceflow.png" alt="짐니 서비스 흐름도" width="900" />
+</p>
+
+</details>
+
+---
+
+## 🖥️ Service Pages
+
+<details>
+<summary><b>1. 홈</b> · 서비스 소개</summary>
+<br>
+
+- 서비스 한 줄 소개와 이용 5단계 안내
+- 운송 신청 · 요금표 바로가기, 전국 영업용 화물차 등록대수 요약
+
+<p align="center">
+  <img src="assets/01_home.png" alt="홈" width="760" />
+</p>
+
+</details>
+
+<details>
+<summary><b>2. 운송 신청</b> · 정보 입력</summary>
+<br>
+
+- 카카오 주소 검색으로 출발지·도착지 선택, 지도에서 위치 확인
+- 층수·엘리베이터, 짐 크기별(S·M·L·XL) 개수, 희망 일시, 추가 인력 입력
+
+<p align="center">
+  <img src="assets/02_request.png" alt="운송 신청" width="480" />
+</p>
+
+</details>
+
+<details>
+<summary><b>3. 매칭 결과</b> · 차량 · 운임 · 기사님 추천</summary>
+<br>
+
+- 짐에 맞는 가장 작은 차량, 실제 주행거리, 예상 소요시간, 항목별 예상 운임
+- 조건에 맞는 기사님 5명을 가까운 순 · 별점 높은 순으로 비교 후 예약
+
+<p align="center">
+  <img src="assets/03_matching.png" alt="매칭 결과" width="620" />
+</p>
+
+</details>
+
+<details>
+<summary><b>4. 예약하기</b> · 운임 동의 · 예약 확정</summary>
+<br>
+
+- 최종 운임과 작업 조건을 확인하고 동의하면 예약 확정
+- 확정 즉시 기사님 매칭 알림과 예약번호 발급
+
+<p align="center">
+  <img src="assets/04_booking.png" alt="예약하기" width="620" />
+  <img src="assets/04_booking_done.png" alt="예약하기" width="760" />
+</p>
+
+</details>
+
+<details>
+<summary><b>5. 예약 조회</b> · 운송 상태 · 별점 평가</summary>
+<br>
+
+- 예약번호와 연락처로 예약 정보와 운송 단계(예약 완료 → 기사 출발 → 운송 중 → 운송 완료) 확인
+- 운송 완료 시 팝업에서 0.5점 단위 별점 평가, 기사님 평균 별점에 바로 반영
+
+<p align="center">
+  <img src="assets/05_lookup.png" alt="예약 조회" width="620" />
+  <img src="assets/05_lookup_rating.png" alt="예약 조회" width="760" />
+</p>
+
+</details>
+
+<details>
+<summary><b>6. 지역별 현황</b> · 배차 가능 기사 · 화물차 등록</summary>
+<br>
+
+- 배차 가능 기사: 시연용 기사 10,000명의 지역·차종 분포와 기준 지역 주변 기사 목록
+- 화물차 등록: 국토교통부 공공데이터 기반 시도별 버블 지도와 시군구별 등록대수
+
+<p align="center">
+  <img src="assets/06_region_drivers.png" alt="지역별 현황" width="49%" />
+  <img src="assets/06_region_trucks.png" alt="지역별 현황" width="49%" />
+</p>
+
+</details>
+
+<details>
+<summary><b>7. 파트너센터</b> · 기사님 전용</summary>
+<br>
+
+- 양면 플랫폼 확장을 위한 기사님 로그인 화면 (시연용, 실제 인증 없음)
+- 가까운 운송 요청 · 일정 · 정산 관리 공간으로 확장 예정
+
+<p align="center">
+  <img src="assets/07_partner.png" alt="파트너센터" width="760" />
+</p>
+
+</details>
+
+<details>
+<summary><b>8. FAQ</b> · 자주 묻는 질문</summary>
+<br>
+
+- FAQ 29건을 카테고리별로 보고 키워드로 검색
+- 요금표 보기 버튼으로 운임 기준표 페이지 이동
+
+<p align="center">
+  <img src="assets/08_faq.png" alt="FAQ" width="760" />
 </p>
 
 </details>
@@ -239,6 +349,9 @@ SKN38-1st-1Team/
 
 <h2>👥 Meet the Team</h2>
 
+
+<h2>👥 Meet the Team</h2>
+
 <p align="center">
   <b>SK Networks Family AI Camp 38기 · 1팀</b>
 </p>
@@ -260,18 +373,18 @@ SKN38-1st-1Team/
   </tr>
 
   <tr>
-    <td align="center"><b>이지우</b></td>
     <td align="center"><b>김예준</b></td>
+    <td align="center"><b>이지우</b></td>
     <td align="center"><b>정흥기</b></td>
     <td align="center"><b>최웅</b></td>
   </tr>
 
   <tr>
     <td align="center">
-      <sub>PM &amp;<br>Full-Stack Developer</sub>
+      <sub>Full-Stack<br>Developer</sub>
     </td>
     <td align="center">
-      <sub>Full-Stack<br>Developer</sub>
+      <sub>Team Leader &amp;<br>Full-Stack Developer</sub>
     </td>
     <td align="center">
       <sub>Data<br>Engineering</sub>
@@ -285,18 +398,18 @@ SKN38-1st-1Team/
     <td align="center">
       <sub>
         ERD 설계<br>
-        프로젝트 총괄<br>
-        카카오 주소 검색 API 연동<br>
-        공공데이터 파이프라인 구축<br>
-        지도 시각화·예약 조회·평가 구현
-      </sub>
-    </td>
-    <td align="center">
-      <sub>
         데이터 파이프라인 구현<br>
         카카오모빌리티 API 연동<br>
         운임 계산·기사 매칭 구현<br>
         예약 로직 구현
+      </sub>
+    </td>
+    <td align="center">
+      <sub>
+        프로젝트 총괄<br>
+        카카오 주소 검색 API 연동<br>
+        공공데이터 파이프라인 구축<br>
+        지도 시각화·예약 조회·평가 구현
       </sub>
     </td>
     <td align="center">
@@ -316,5 +429,3 @@ SKN38-1st-1Team/
     </td>
   </tr>
 </table>
-
-
