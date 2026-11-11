@@ -33,8 +33,6 @@
 
 ## Market & Problem
 
-1인 가구의 주거 이동과 개인 간 중고거래가 늘면서, 짐의 양과 조건에 맞춘 **맞춤형 용달 매칭** 수요가 생기고 있습니다.
-
 <p align="center">
   <img src="assets/readme_market.png" alt="소형 화물 운송 시장의 변화" width="1000" />
 </p>
@@ -60,7 +58,7 @@
 
 ---
 
-## How It Works
+## 📈 How It Works
 
 <p align="center">
   <img src="docs/readme_2.png" alt="짐니 이용 방법" width="1000" />
