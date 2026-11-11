@@ -14,7 +14,7 @@
 </p>
 
 <p align="center">
-  <a href="https://jimni-delivery.streamlit.app/truck-map"><b>JIMNI 서비스 바로가기</b></a>
+  <a href="https://jimni-delivery.streamlit.app/truck-map"><b>JIMNI 바로가기</b></a>
 </p>
 
    ## 🎬 Demo
