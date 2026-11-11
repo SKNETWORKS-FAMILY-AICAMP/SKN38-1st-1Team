@@ -354,7 +354,6 @@ SKN38-1st-1Team/
 
 짐니는 **Streamlit Community Cloud**에 배포했으며, 데이터베이스는 **TiDB Cloud**를 사용합니다.
 
-- **웹 서비스:** [짐니 바로가기](https://jimni-delivery.streamlit.app/truck-map)
 - **앱 배포:** Streamlit Community Cloud
 - **클라우드 DB:** TiDB Cloud (MySQL 호환)
 - **보안:** Streamlit Secrets로 환경변수 관리 및 SSL/TLS 암호화 연결
