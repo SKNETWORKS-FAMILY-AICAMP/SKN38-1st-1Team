@@ -33,14 +33,8 @@
 
 ## Market & Problem
 
-1인 가구의 주거 이동과 개인 간 중고거래가 늘면서, 짐의 양과 조건에 맞춘 **맞춤형 용달 매칭** 수요가 생기고 있습니다.
-
 <p align="center">
-  <img src="docs/readme_market.svg" alt="개인 단위 소형 화물 운송 시장의 변화" width="1000" />
-</p>
-
-<p align="center">
-  <img src="docs/readme_problem.svg" alt="서비스 단계별 기존 불편과 짐니의 해결" width="1000" />
+  <img src="assets/readme_market.png" alt="소형 화물 운송 시장의 변화" width="1000" />
 </p>
 
 ### Target Users
@@ -64,7 +58,7 @@
 
 ---
 
-## How It Works
+## 📈 How It Works
 
 <p align="center">
   <img src="docs/readme_2.png" alt="짐니 이용 방법" width="1000" />
@@ -409,19 +403,19 @@ SKN38-1st-1Team/
   <tr>
     <td align="center">
       <sub>
+        프로젝트 총괄<br>
+        카카오 주소 검색 API 연동<br>
+        공공데이터 파이프라인 구축<br>
+        지도 시각화·예약 조회·평가 구현
+      </sub>
+    </td>
+    <td align="center">
+      <sub>
         ERD 설계<br>
         데이터 파이프라인 구현<br>
         카카오모빌리티 API 연동<br>
         운임 계산·기사 매칭 구현<br>
         예약 로직 구현
-      </sub>
-    </td>
-    <td align="center">
-      <sub>
-        프로젝트 총괄<br>
-        카카오 주소 검색 API 연동<br>
-        공공데이터 파이프라인 구축<br>
-        지도 시각화·예약 조회·평가 구현
       </sub>
     </td>
     <td align="center">
