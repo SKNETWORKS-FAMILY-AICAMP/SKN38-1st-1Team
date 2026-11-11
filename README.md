@@ -17,8 +17,9 @@
 
 ## 🎬 Demo
 
-[▶ 시연 영상 보기](assets/00_demo.mp4)
-
+   <p align="center">
+     <a href="assets/00_demo.mp4"><img src="assets/00_demo.gif" alt="짐니 시연 영상" width="800" /></a>
+   </p>
 ---
 
 ## Market & Problem
