@@ -239,11 +239,6 @@
   <img src="https://img.shields.io/badge/Git-F05032?style=for-the-badge&logo=git&logoColor=white" alt="Git" />
   <img src="https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white" alt="GitHub" />
 </p>
-
-<p align="center">
-  <sub>Visualization: pydeck · API: 국토교통부 OpenAPI, Kakao Local API, 카카오모빌리티 길찾기 API, Kakao Maps JavaScript SDK</sub>
-</p>
-
 ---
 
 ## Data Collection & Processing
