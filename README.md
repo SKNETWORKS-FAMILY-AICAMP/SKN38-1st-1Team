@@ -374,18 +374,18 @@ SKN38-1st-1Team/
   </tr>
 
   <tr>
-    <td align="center"><b>김예준</b></td>
     <td align="center"><b>이지우</b></td>
+    <td align="center"><b>김예준</b></td>
     <td align="center"><b>정흥기</b></td>
     <td align="center"><b>최웅</b></td>
   </tr>
 
   <tr>
     <td align="center">
-      <sub>Full-Stack<br>Developer</sub>
+      <sub>PM &amp;<br>Full-Stack Developer</sub>
     </td>
     <td align="center">
-      <sub>Team Leader &amp;<br>Full-Stack Developer</sub>
+      <sub>Full-Stack<br>Developer</sub>
     </td>
     <td align="center">
       <sub>Data<br>Engineering</sub>
