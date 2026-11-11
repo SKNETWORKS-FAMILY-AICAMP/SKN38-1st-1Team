@@ -7,6 +7,7 @@
             cur.execute("SELECT ... WHERE id = %s", (value,))   # 반드시 파라미터 바인딩 사용
 
 연결은 필요할 때 열고 바로 닫는다. 반복 조회 결과는 각 서비스에서 st.cache_data로 캐시한다.
+클라우드 MySQL(배포용)은 DB_SSL=true로 암호화 연결 (공인 인증서 목록 certifi 사용, 로컬은 설정하지 않음).
 """
 
 from __future__ import annotations
@@ -25,6 +26,13 @@ class DBConnectionError(RuntimeError):
     """MySQL에 연결할 수 없음 (서버 중지, .env 설정 오류 등)."""
 
 
+def _ssl_options() -> dict:
+    if os.getenv("DB_SSL", "").strip().lower() not in ("1", "true", "yes"):
+        return {}
+    import certifi
+    return {"ssl": {"ca": certifi.where()}}
+
+
 def get_connection():
     try:
         return pymysql.connect(
@@ -37,6 +45,7 @@ def get_connection():
             cursorclass=pymysql.cursors.DictCursor,
             autocommit=False,
             connect_timeout=5,
+            **_ssl_options(),
         )
     except (pymysql.MySQLError, ValueError, UnicodeError) as e:
         # 비밀번호 등 접속 정보는 메시지에 넣지 않는다.

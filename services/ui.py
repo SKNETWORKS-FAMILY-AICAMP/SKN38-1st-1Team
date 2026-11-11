@@ -389,6 +389,20 @@ a[data-testid="stTopNavLink"][aria-current="page"] span {{ color: {BLUE}; font-w
 .jm-rq-item {{ display: grid; grid-template-columns: 1fr auto; align-items: center; row-gap: 2px; }}
 .jm-rq-item b {{ font-size: 15px; color: {NAVY}; }}
 .jm-rq-item span {{ grid-column: 1 / -1; font-size: 12.5px; color: {MUTED}; }}
+/* 박스 아이콘: 마우스를 올리거나(탭) 누르면 운임표의 크기·무게 기준 */
+.jm-rq-item .jm-rq-tip {{ grid-column: auto; position: relative; display: inline-flex; align-items: center;
+    justify-content: center; justify-self: end; width: 32px; height: 32px; cursor: help; border-radius: 10px;
+    outline: none; background: #EAF1FF; border: 1px solid #C9D7F5; box-shadow: 0 2px 6px rgba(37, 99, 235, .12);
+    transition: background-color .15s ease, border-color .15s ease; }}
+.jm-rq-item .jm-rq-tip:hover, .jm-rq-item .jm-rq-tip:focus {{ background: #DCE8FF; border-color: {BLUE}; }}
+/* 설명 문장 안의 박스 표시 (카드 버튼과 같은 모양, 작게) */
+.jm-box-chip {{ display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px;
+    margin: 0 1px; border-radius: 6px; background: #EAF1FF; border: 1px solid #C9D7F5; vertical-align: -4px; }}
+.jm-rq-item .jm-rq-tip .tip {{ display: none; position: absolute; right: 0; top: 38px; z-index: 30;
+    width: max-content; max-width: 240px; padding: 10px 12px; border-radius: 10px; background: {NAVY};
+    color: #FFFFFF; font-size: 12.5px; line-height: 1.6; text-align: left; box-shadow: 0 8px 24px rgba(17, 31, 63, .25); }}
+.jm-rq-item .jm-rq-tip .tip b {{ display: block; color: #FFFFFF; font-size: 13px; margin-bottom: 2px; }}
+.jm-rq-item .jm-rq-tip:hover .tip, .jm-rq-item .jm-rq-tip:focus .tip {{ display: block; }}
 [class*="st-key-rq_item_"] .stNumberInput div[data-baseweb="input"] {{ background: {SOFT}; border-color: transparent; }}
 [class*="st-key-rq_item_"] .stNumberInput input {{ text-align: center; font-size: 18px; font-weight: 700; color: {NAVY}; }}
 

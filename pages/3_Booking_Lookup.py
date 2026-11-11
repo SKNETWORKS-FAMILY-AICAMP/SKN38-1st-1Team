@@ -41,7 +41,7 @@ if submitted:
         st.error("연락처를 정확히 입력해 주세요. (예: 010-1234-5678)")
     else:
         st.session_state[AUTH_KEY] = {"booking_id": booking_id, "phone": bl.normalize_phone(phone)}
-        st.session_state.get(DEMO_CLOCK_KEY, {}).pop(booking_id, None)     # 다시 조회하면 10초 새로 세기
+        st.session_state.get(DEMO_CLOCK_KEY, {}).pop(booking_id, None)     # 다시 조회하면 시간 새로 세기
         st.session_state.get(DEMO_DONE_KEY, {}).pop(booking_id, None)
         st.session_state.pop(f"rating_dismissed_{booking_id}", None)
 
@@ -52,11 +52,11 @@ if not auth:
 bid = auth["booking_id"]
 clock = st.session_state.setdefault(DEMO_CLOCK_KEY, {})
 done_at = st.session_state.setdefault(DEMO_DONE_KEY, {})
-clock.setdefault(bid, time.time())                          # 처음 조회한 순간부터 10초 세기
+clock.setdefault(bid, time.time())                          # 처음 조회한 순간부터 시간 세기
 
 
 def demo_advance(conn) -> bool:
-    """시연 모드: 마지막 단계 변경 후 10초가 지났으면 한 단계 진행 (DB는 그때만 접속)."""
+    """시연 모드: 마지막 단계 변경 후 DEMO_STEP_SECONDS초가 지났으면 한 단계 진행 (DB는 그때만 접속)."""
     if time.time() - clock[bid] < bl.DEMO_STEP_SECONDS:
         return False
     new_status = bl.advance_demo_status(conn, bid, auth["phone"], len(bl.STATUS_FLOW))
@@ -101,7 +101,7 @@ def vehicle_text(b: dict) -> str:
     """배정 기사님 차량 (운임 기준 차량과 다르면 함께 표시: 더 큰 차량 기사님이 배정될 수 있음)."""
     driver_v, fare_v = b.get("driver_vehicle_type"), b.get("vehicle_type")
     if driver_v and fare_v and driver_v != fare_v:
-        return f"{driver_v} (운임 기준 {fare_v})"
+        return f"{driver_v} (운임은 {fare_v} 기준)"   # 근처에 같은 차종이 없어 더 큰 차량이 배정된 경우
     return driver_v or fare_v or "정보 없음"
 
 

@@ -7,11 +7,11 @@
 - booking_lookup.py    : 예약 조회 (예약번호 + 연락처 확인), 운송 완료 후 평점 저장
 - fare_rules_db.py     : 요금표 조회 (MySQL fare_rules)
 - kakao_local.py       : 카카오 주소 검색·위치 지도 (운송 신청)
-- fare_table.py        : 운임 계산 기준표 (예준님)
-- fare.py       : 거리·물품 기반 참고 운임 계산, 차량 추천 (구현 예정)
-- matching.py   : 출발지 기준 기사 검색·추천 (구현 예정)
-- agreement.py  : 사전 확정 운임 합의·변경 재동의 (구현 예정)
-- settlement.py : 플랫폼 수수료 및 기사 정산액 계산 (구현 예정)
+- fare_table.py        : 운임 계산 기준표
+- fare.py       : 거리·물품 기반 참고 운임 계산, 차량 추천
+- matching.py   : 출발지 기준 기사 검색·추천
+- agreement.py  : 사전 확정 운임 합의·변경 재동의
+- settlement.py : 플랫폼 수수료 및 기사 정산액 계산
 
 페이지(pages/)에는 화면 코드만 두고, 계산·조회 로직은 이 폴더에 작성합니다.
 """

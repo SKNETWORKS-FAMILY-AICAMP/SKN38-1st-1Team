@@ -83,6 +83,9 @@ def recommend_drivers(request: dict, estimate: dict | None = None, sort_by: str 
     need = required_vehicle(request, estimate)
     usable = VEHICLE_TYPES[VEHICLE_TYPES.index(need):]              # 필요 차량과 그보다 큰 차량
     rows = _fetch_candidates(*origin, usable, request["scheduled_at"])
+    same = [r for r in rows if r["vehicle_type"] == need]
+    if same:                                                         # 추천 차량과 같은 차종 기사만 (예약 내역 차량 = 추천 차량)
+        rows = same                                                  # 근처에 같은 차종이 없을 때만 더 큰 차량 기사
 
     drivers = [{
         "driver_id": r["driver_id"],

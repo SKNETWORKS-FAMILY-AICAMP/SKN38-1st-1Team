@@ -1,14 +1,12 @@
-"""매칭 결과 — 화면 구조와 이동만 구현 (추천 계산·기사 데이터는 매칭/운임 담당: 예준님)
+"""매칭 결과 — 운임·추천 차량 표시와 기사 추천 목록
 
-연결 위치 (담당자가 아래 함수를 만들면 이 화면에 자동으로 표시됨)
+사용하는 함수
     services/fare.py      estimate(request: dict) -> dict
         예: {"vehicle_type": "라보", "distance_km": 12.3, "estimated_minutes": 35, "estimated_fare": 65000}
     services/matching.py  recommend_drivers(request: dict, estimate, sort_by) -> list[dict]
         예: [{"driver_id": 1, "nickname": ..., "vehicle_type": ..., "rating": ..., "rating_count": ..., "distance_km": ...}, ...]
 선택한 기사는 st.session_state[SELECTED_DRIVER_KEY]에 저장되어 예약하기 화면으로 전달된다.
 """
-
-"""매칭 결과 — 운임 계산 및 기사 매칭 연결"""
 
 import streamlit as st
 
@@ -19,6 +17,7 @@ from services.transport_request import (
     ITEM_SIZES,
     REQUEST_KEY,
     SELECTED_DRIVER_KEY,
+    floor_label,
 )
 from services.ui import step_header
 
@@ -52,8 +51,7 @@ if not request:
 
 with st.expander("입력한 운송 조건", expanded=True):
 
-    def floor_text(floor: int) -> str:                # -2 → 지하 2층
-        return f"지하 {-floor}층" if floor < 0 else f"{floor}층"
+    floor_text = floor_label                          # -2 → 지하 2층, 6 → 6층 이상
 
     st.write(
         f"**출발지** {request['origin_address']} "

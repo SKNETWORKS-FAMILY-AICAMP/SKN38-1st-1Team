@@ -24,7 +24,6 @@ STATUS_FLOW = ["BOOKED", "DEPARTED", "IN_TRANSIT", "COMPLETED"]
 RATING_MIN, RATING_MAX, RATING_STEP = 0.5, 5.0, 0.5      # 별 반 개 단위
 
 # 시연용 자동 진행: 실제 서비스에서는 False (기사님이 상태를 바꾸는 기능이 따로 필요)
-# 시연용 자동 진행: 실제 서비스에서는 False (기사님이 상태를 바꾸는 기능이 따로 필요)
 DEMO_AUTO_PROGRESS = True
 DEMO_STEP_SECONDS = 3
 DEMO_POPUP_DELAY = 0           # 운송 완료 후 별점 팝업까지 (초)

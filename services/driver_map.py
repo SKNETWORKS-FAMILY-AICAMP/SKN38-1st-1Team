@@ -1,12 +1,12 @@
-"""기사 위치 지도 — MySQL drivers의 주소지 좌표(base_lat, base_lng)로 반경 내 기사 조회·표시
+"""기사 위치 지도 — MySQL drivers의 위치 좌표(base_lat, base_lng)로 반경 내 기사 조회·표시
 
 화면 (pages/4_Truck_Map.py '기사 위치 자세히 보기')
-    - 처음엔 전국 지도(시도 버블). 기사 마커는 미터 단위 크기라 전국 축척에서는 보이지 않고,
-      지도를 확대하면 자연스럽게 나타난다 (pydeck은 줌 이벤트를 Python에 주지 않아 지도 자체의 축척으로 전환)
+    - 처음엔 전국 지도(시도 버블). 확대할수록 버블이 흐려지고 기사 아이콘이 나타난다
+      (pydeck은 줌 이벤트를 Python에 주지 않아 지도 안 스크립트로 전환 → zoom_map_html)
     - 반경은 5km 고정: 고른 시군구 기준점 주변 5km 원과 그 안의 기사 수·차종을 표시
 
 데이터 (기사 매칭 services/matching.py와 같은 기준)
-    - drivers.base_lat · base_lng (DECIMAL(9,6)) = 기사 등록 주소지 좌표
+    - drivers.base_lat · base_lng (DECIMAL(9,6)) = 기사 위치 좌표 (시군구 안 실제 장소 좌표, scripts/seed_drivers_excel.py)
     - 배정 가능(is_active = TRUE) 기사만, 차종은 fare_rules.vehicle_type, 별점은 drivers.avg_rating (matching·별점 입력과 같은 값)
     - 거리: matching.haversine_km (두 좌표 사이 직선거리, km). 도로 이동 거리 아님
     - 예약 일정·차량 조건까지 보는 실제 매칭 결과와는 다를 수 있다 (화면에 안내)
