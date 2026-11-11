@@ -17,7 +17,7 @@
 
 ## 🎬 Demo
 
-[▶ 시연 영상 보기](assets/skn_1_jimni.mp4)
+[▶ 시연 영상 보기](assets/00_demo.mp4)
 
 ---
 
@@ -67,6 +67,20 @@
 | **03 · 기사님 선택** | 조건에 맞는 시연용 기사 추천·선택 |
 | **04 · 예약하기** | 최종 운임·작업 조건 확인, 동의 및 예약 확정 |
 | **05 · 예약 완료** | 기사 자동 배정 알림, 예약번호 발급 및 예약 조회 |
+
+<details>
+<summary><b>실제 서비스 화면 보기</b></summary>
+
+| 화면 | 설명 |
+|:---:|:---|
+| <img src="docs/screens/01_request.png" width="420" /> | **01 · 정보 입력**<br>주소 검색, 짐 크기·수량, 층수·인력 조건 입력 |
+| <img src="docs/screens/02_result.png" width="420" /> | **02 · 매칭 결과**<br>실제 주행거리, 적합 차량, 항목별 예상 운임 |
+| <img src="docs/screens/03_drivers.png" width="420" /> | **03 · 기사님 선택**<br>기사님 5명을 가까운 순·별점 순으로 비교 |
+| <img src="docs/screens/04_booking.png" width="420" /> | **04 · 예약하기**<br>최종 운임·작업 조건 동의 후 예약 확정 |
+| <img src="docs/screens/05_lookup.png" width="420" /> | **05 · 예약 조회**<br>예약번호로 운송 단계 확인 |
+| <img src="docs/screens/06_rating.png" width="420" /> | **06 · 별점 평가**<br>운송 완료 후 0.5점 단위 별점 입력 |
+
+</details>
 
 <details>
 <summary><b>서비스 흐름도 자세히 보기</b></summary>
@@ -317,6 +331,9 @@ SKN38-1st-1Team/
 
 ---
 
+
+
+<h2>👥 Meet the Team</h2>
 
 
 <h2>👥 Meet the Team</h2>

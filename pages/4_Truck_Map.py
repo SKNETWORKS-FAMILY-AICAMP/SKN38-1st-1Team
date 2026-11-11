@@ -17,7 +17,7 @@ import streamlit as st
 
 from services import driver_map as dm
 from services.db import DBConnectionError
-from services.driver_sim import EXCEL_PATH, VEHICLES, load_driver_status
+from services.driver_sim import VEHICLES, load_driver_status
 from services.truck_map import (
     POINTS_SOURCE, build_deck, is_consistent, legend_html, load_points, match_points, picked_sido,
 )
@@ -165,7 +165,7 @@ top = sido.sort_values("truck_count", ascending=False).iloc[0]   # 원본 값 �
 if view == SIM:   # 기사: DB 저장 건수 + 차종별 합계
     types = stats["by_type"]
     stat_cards([
-        (cfg["total_card"], f"{int(sido['truck_count'].sum()):,}{unit}", "MySQL drivers 저장 건수"),
+        (cfg["total_card"], f"{int(sido['truck_count'].sum()):,}{unit}", "예약 시 추천·배정되는 기사"),
         ("차종별 (다마스 · 라보 · 1톤)", " · ".join(f"{types[v]:,}" for v in VEHICLES), "40% · 30% · 30%로 배분"),
         (cfg["top_card"], f"{top['sido_name']}", f"{int(top['truck_count']):,}{unit} · 시군구 {len(sigungu)}곳에 배치"),
     ])
@@ -199,7 +199,7 @@ else:
         if map_ok:
             with st.container(key="map_wrap"):  # 범례를 지도 오른쪽 아래에 겹쳐 표시
                 st.html(legend_html(cfg["legend"], unit, cfg["bounds"], "drivers" if view == SIM else "default"))
-                basis = "MySQL drivers 저장 기준" if view == SIM else f"{month} 기준"
+                basis = f"{month} 등록대수 비율 기준" if view == SIM else f"{month} 기준"
                 event = st.pydeck_chart(
                     build_deck(points, sido, month, selected=st.session_state.get(SELECT_KEY), unit=unit,
                                tooltip_label=cfg["tooltip"], basis=basis, bounds=cfg["bounds"],
@@ -269,11 +269,10 @@ if view == SIM:
     with source_col:
         st.html(
             '<div class="jm-source"><h4>데이터 출처</h4><dl>'
-            "<dt>저장</dt><dd>MySQL drivers (배정 가능 기사)</dd>"
-            f"<dt>배분 기준</dt><dd>{escape(EXCEL_PATH.name)} · '계' 열</dd>"
+            "<dt>출처</dt><dd>국토교통부 통계누리 · 시군구별 영업용 화물차 등록현황</dd>"
+            "<dt>배분 기준</dt><dd>시군구별 영업용 화물차 등록대수 비율</dd>"
             f"<dt>기준월</dt><dd>{month}</dd>"
-            "<dt>차종</dt><dd>다마스 40% · 라보 30% · 1톤 30%</dd>"
-            "<dt>생성</dt><dd>scripts/seed_drivers_excel.py</dd></dl>"
+            "<dt>차종</dt><dd>다마스 40% · 라보 30% · 1톤 30%</dd></dl>"
             + points_note + "</div>"
         )
 else:
