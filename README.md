@@ -36,11 +36,7 @@
 1인 가구의 주거 이동과 개인 간 중고거래가 늘면서, 짐의 양과 조건에 맞춘 **맞춤형 용달 매칭** 수요가 생기고 있습니다.
 
 <p align="center">
-  <img src="docs/readme_market.svg" alt="개인 단위 소형 화물 운송 시장의 변화" width="1000" />
-</p>
-
-<p align="center">
-  <img src="docs/readme_problem.svg" alt="서비스 단계별 기존 불편과 짐니의 해결" width="1000" />
+  <img src="assets/readme_market.png" alt="소형 화물 운송 시장의 변화" width="1000" />
 </p>
 
 ### Target Users
