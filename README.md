@@ -13,7 +13,9 @@
   <sub>학습용 시연 프로젝트입니다. 기사 정보는 가상 데이터이며, 실제 운송·결제는 이루어지지 않습니다.</sub>
 </p>
 
----
+<p align="center">
+  <a href="https://jimni-delivery.streamlit.app/truck-map"><b>JIMNI 서비스 바로가기</b></a>
+</p>
 
    ## 🎬 Demo
 
@@ -346,6 +348,20 @@ SKN38-1st-1Team/
 </details>
 
 ---
+
+
+## Deployment
+
+짐니는 **Streamlit Community Cloud**에 배포했으며, 데이터베이스는 **TiDB Cloud**를 사용합니다.
+
+- **웹 서비스:** [짐니 바로가기](https://jimni-delivery.streamlit.app/truck-map)
+- **앱 배포:** Streamlit Community Cloud
+- **클라우드 DB:** TiDB Cloud (MySQL 호환)
+- **보안:** Streamlit Secrets로 환경변수 관리 및 SSL/TLS 암호화 연결
+
+로컬 MySQL 데이터를 TiDB Cloud로 이전하고, `DB_SSL` 설정을 통해 클라우드 DB에 안전하게 연결했습니다.
+
+
 
 <h2>👥 Meet the Team</h2>
 
